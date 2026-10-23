@@ -1,6 +1,7 @@
 # Separate git repos / third-party code (not part of this repo)
 pytorch_geometric/
-reference/          # authors' code: no license, read-only reference, never committed
+# authors' code: no license, read-only reference, never committed
+reference/
 
 # Environments and caches
 .venv/
