@@ -1,0 +1,155 @@
+\documentclass{article}
+% NeurIPS 2022 format, final (non-anonymous) mode as required by CS 224W.
+\PassOptionsToPackage{numbers}{natbib}
+\usepackage[preprint]{neurips_2022}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{enumitem}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+\setlength{\abovedisplayskip}{2pt}
+\setlength{\belowdisplayskip}{2pt}
+\setlist[enumerate]{leftmargin=1.6em, itemsep=1pt, topsep=1pt, parsep=0pt}
+\widowpenalty=0 \clubpenalty=0
+\makeatletter
+\renewcommand{\@toptitlebar}{\hrule height 4\p@ \vskip 0.18in \vskip -\parskip}
+\renewcommand{\@bottomtitlebar}{\vskip 0.18in \vskip -\parskip \hrule height 1\p@ \vskip 0.02in}
+\makeatother
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\E}{\mathbb{E}}
+\title{Learning the Graph for Relational Deep Learning}
+\author{%
+  Harshal Kulkarni \quad \texttt{hsk8171@stanford.edu} \\
+  Project 3 (cutting-edge research): PR to \texttt{torch\_geometric.contrib} + blog post
+}
+\begin{document}
+\widowpenalty=0 \clubpenalty=0 \displaywidowpenalty=0
+\maketitle
+\vspace{-2.4em}
+\section{Research paper}
+\vspace{-0.5em}
+\textbf{Paper.} \emph{What Makes a Desired Graph for Relational Deep Learning?}, Yao Cheng and Siqiang Luo, accepted at ICML 2026 (arXiv:2606.08491)~\cite{cheng2026desired}.
+\textbf{The problem it solves.} Relational deep learning (RDL)~\cite{fey2024rdl,rdlsurvey2025} turns a database into a heterogeneous graph mechanically: rows become nodes and primary--foreign-key links become edges. The paper shows this schema graph is often poor for message passing: irrelevant tables and columns add noise (\emph{information overload}), and task-relevant entities sit many hops apart or are unlinked (\emph{semantic fragmentation}). It learns the \emph{desired} graph for a task end to end, on an unchanged GNN.
+\textbf{The methods we will implement: what exists today, and what is inserted where.} Today's RDL model (RelBench's relational GraphSAGE, the paper's \emph{Base}) has three steps and a plain task loss $\mathcal L=\mathcal L_{\text{task}}$; here $T(v)$ is the table of row $v$, $\mathcal R$ the set of foreign-key relations and $N_r(v)$ the $r$-neighbours of $v$:
+\vspace{-0.1em}
+\begin{equation*}
+\textstyle
+h^{(0)}_v=\mathrm{Enc}(x_v),\quad
+h^{(l+1)}_v=\mathrm{Upd}\big(h^{(l)}_v,\ \sum_{r\in\mathcal R}\mathrm{Agg}_{u\in N_r(v)}\,\mathrm{Msg}_r(h^{(l)}_u)\big),\quad
+\hat y_v=\mathrm{MLP}(h^{(L)}_v).
+\end{equation*}
+% NOTE: the pasted draft had a bare `\vspace` here (no argument), which does
+% not compile. Replaced with an explicit length; adjust to taste.
+\vspace{-0.3em}
+
+The structural optimizer leaves these three steps unchanged and inserts four things (paper Eqs.~3--9, 14, 17--21):
+\begin{enumerate}
+\item[\textbf{A}] \textbf{Filtering, between the encoder and the GNN.} Each table $T$ gets a learned per-feature switch $g_T\in[0,1]^{d}$ and a whole-table switch $s_T\in[0,1]$; a variational bottleneck~\cite{alemi2017vib} then compresses what is left, and $z_v$ replaces $h^{(0)}_v$ in the GNN:
+\vspace{-0.35em}
+\begin{align*}
+\tilde h_v &= s_{T(v)}\,\big(g_{T(v)}\odot h^{(0)}_v\big), &
+z_v &= \mu(\tilde h_v)+\sigma(\tilde h_v)\odot\varepsilon,\ \ \varepsilon\sim\mathcal N(0,I)\ \text{(mean at test time)}.
+\end{align*}
+\vspace{-1.1em}
+Switches are Hard-Concrete variables~\cite{louizos2018l0} with logit $\theta$, temperature $t$ and stretch $\gamma<0<1<\zeta$:
+\vspace{-0.35em}
+\begin{align*}
+\text{training:}\ \ g &= \mathrm{clip}\Big(\sigma\big(\tfrac{\log u-\log(1-u)+\theta}{t}\big)(\zeta-\gamma)+\gamma,\,0,\,1\Big),\ \ u\sim U(0,1);\\[-2pt]
+\text{test:}\ \ g &= \mathbb I[\sigma(\theta)>\tau],
+\end{align*}
+\vspace{-1.1em}
+
+so the expected number of open switches $\E\|g\|_0$ is differentiable in training, and each switch is a hard 0/1 at test time.
+\item[\textbf{B}] \textbf{Injection, into the relation set.} New relation types $E_k$ are added, $\mathcal R\leftarrow\mathcal R\cup\{E_k\}$, from four templates:
+\vspace{-0.35em}
+\begin{align*}
+\text{KNN:}&\ u\to v \text{ if } u \text{ is among the } n \text{ rows of } T(v) \text{ most cosine-similar to } v \text{ on } h^{(0)};\\[-2pt]
+\text{two-hop:}&\ A\to C \text{ whenever } A\to B\to C \text{ in the schema};\\[-2pt]
+\text{behavioural:}&\ u\to v \text{ if } \cos\!\big(\overline{h}_{N_B(u)},\overline{h}_{N_B(v)}\big)>\tau_{\text{sim}},\ \ \overline{h}_{N_B(\cdot)}=\text{mean } h^{(0)} \text{ of } B\text{-neighbours};\\[-2pt]
+\text{temporal:}&\ v_{t-1}\to v_t \text{ for consecutive records of one entity.}
+\end{align*}
+\vspace{-1.1em}
+
+\item[\textbf{C}] \textbf{Gating, inside the aggregation.} Each $E_k$ gets its own switch $g_k$; the sum over relations in the GNN step becomes
+\vspace{-0.35em}
+\begin{equation*}
+\textstyle\sum_{r\in\mathcal R}\mathrm{Agg}_r\;+\;\sum_k g_k\,\mathrm{Agg}_{E_k}\quad\text{(training)},\qquad E_k \text{ dropped at test time if } g_k\le\tau_k.
+\end{equation*}
+\vspace{-1.1em}
+\item[\textbf{D}] \textbf{Penalties, in the loss}, so the model pays for every open switch ($\overline{\mathrm{KL}}_T$: KL of $q(z\mid\tilde h)$ to $\mathcal N(0,I)$, averaged over rows of $T$):
+\vspace{-0.35em}
+\begin{equation*}
+\textstyle\mathcal L=\mathcal L_{\text{task}}+\beta_{\text{vib}}\sum_T\overline{\mathrm{KL}}_T+\lambda\sum_T\E\|g_T\|_0+\lambda_s\sum_T\E\|s_T\|_0+\lambda_k\sum_k\E\|g_k\|_0 .
+\end{equation*}
+\end{enumerate}
+\textbf{Why these methods matter for graph ML.} They make graph \emph{construction} a learnable, task-dependent part of the model rather than a fixed preprocessing step, on any heterogeneous graph. A is differentiable feature and node-type selection with a sparsity guarantee; B+C is learned graph rewiring that is cheap (schema-level templates, not per-edge scores) and interpretable. The paper finds the useful template depends on task type (KNN: classification; temporal: regression; behavioural: recommendation) and reports best or near-best accuracy on almost all RelBench tasks (e.g.\ \code{rel-f1} driver-top3 ROC-AUC 81.5$\to$86.8), often with lower inference cost because whole tables are dropped. PyG's explainers learn feature and edge masks only post hoc, per instance; no PyG component learns at training time which features, node types or relation types the model should keep.
+\vspace{-1.1em}
+\section{Implementation in PyG}
+\vspace{-0.5em}
+
+\textbf{Relation to the authors' code.} The authors' \href{https://github.com/cy623/Structural_Optimizer_RDL}{research code} (no license), which we read in full, is an experiment script \textbf{tied to RelBench, and its training path covers only part of the paper}: injected edges never reach a convolution (so step C is absent), only the KNN and two-hop templates are implemented, and the hard 0/1 switches are not applied at test time. \textbf{We implement A--D in full, as independent, tested PyG modules.} The paper, not the code, is the specification; no code is copied.
+
+\textbf{New classes, and what they build on.} We checked PyG 2.8: it has no Hard-Concrete/$L_0$ switch, variational bottleneck, temporal-chain transform or gated per-relation aggregation, so those are the new code below; the two-hop template needs none, since \code{transforms.AddMetaPaths} already adds $A\to B\to C$ as a new edge type.
+\\
+\begin{center}
+\vspace{-1.1em}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{0.7cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.9cm}@{}}
+\toprule
+\textbf{New class} & \textbf{Step} & \textbf{Existing PyG / PyTorch it builds on} & \textbf{What it does} \\
+\midrule
+\code{HardConcreteGate} & A, C & \code{torch.nn.Module} & Learnable on/off switch; soft in training, hard 0/1 in \code{eval()} \\
+\code{RelationalFilter} & A & \code{torch.nn.Module}; \code{HardConcreteGate}, \code{torch.nn.Linear} & Per-table feature and table switches plus the bottleneck \\
+\code{TemporalContinuity} & B & \code{transforms.BaseTransform}; \code{utils.sort\_edge\_index} & Adds $v_{t-1}\to v_t$ edges to the dataset once, before training \\
+\code{KNNEdges}, \code{BehavioralEdges} & B & \code{torch.nn.Module}; \code{nn.knn(cosine=True)}, \code{utils.scatter} & Adds edges per mini-batch from learned features, older$\to$newer rows only (no time leakage) \\
+\code{GatedHeteroConv} & C & \code{nn.HeteroConv} with any convolution (e.g.\ \code{SAGEConv}) & Existing per-relation convolutions; gated sum across relations \\
+\code{StructuralOptimizer} & A--D & \code{torch.nn.Module}; wraps a user's encoder, \code{GatedHeteroConv} layers, \code{nn.MLP} & Encoder $\to$ A $\to$ B $\to$ C $\to$ head; each step is a flag; \code{structural\_loss()} returns D \\
+\bottomrule
+\end{tabular}
+\vspace{-0.5em}
+\end{center}
+
+\textbf{What this lets PyG users do that they could not before.} Given \textbf{any heterogeneous GNN}, PyG users can now let the model learn, for each task, which node features, node types and added relation types to keep. Doing so takes three steps: wrap the GNN in \code{StructuralOptimizer}, add two transforms to the dataset, add one term to the loss. Nothing existing is modified, and every piece can be switched off by a flag to compare against the plain model.
+
+\textbf{Tests} (under \code{test/contrib/}, run in PyG's CI). Five checks, one per risk: (1)~the training penalty $\E\|g\|_0$ used in D agrees with the empirical open rate over many samples of the switch; (2)~each template adds exactly the expected edges on a tiny hand-made graph; (3)~\textbf{step C is checked analytically}, since the released code offers no reference for it: on a two-relation toy graph with hand-set gates, \code{GatedHeteroConv}'s output must equal the gated sum of the per-relation outputs, and in \code{eval()} a relation with $g_k\le\tau_k$ must contribute nothing; (4)~with all flags off, \code{StructuralOptimizer} matches the plain GNN exactly, so it cannot silently change a user's model; (5)~one training epoch on \code{rel-f1} runs end to end.
+
+\textbf{Evaluation} (for the blog). We follow the paper's protocol on RelBench~\cite{robinson2024relbench}: four tasks (two classification, two regression, from \code{rel-f1} and \code{rel-trial}), five seeds, mean$\pm$std, RelBench's evaluator. We train three models per task: \emph{Base} (relational GraphSAGE~\cite{hamilton2017sage}), Base + filtering (A), and Base + the full optimizer (A--D). \textbf{Risk:} the released code does not follow the paper's method in full (injected edges take no part in message passing and the gates are not applied at test time), so \textbf{the paper's numbers are hard to reproduce from it}, and ours may differ from the paper's. We therefore define success as reproducing the paper's \emph{ordering} (full $>$ filtering $>$ Base), report our numbers next to the paper's without adjustment, and also run the released code as-is on \code{rel-f1} as a third reference point. The trained gates also show which templates each task kept, to compare with the paper's finding (classification favours KNN, regression temporal continuity). If time allows: no-filtering and no-injection ablations, then \code{rel-event} and \code{rel-avito}.
+
+\vspace{-1.1em}
+\section{Timeline}
+\vspace{-0.5em}
+Weeks 1--2: A, \code{TemporalContinuity}, unit tests, \emph{Base} on \code{rel-f1}. Weeks 3--4 (milestone): B--D end-to-end on \code{rel-f1}, API docs, report draft. Weeks 5--7: \code{rel-trial}, ablations, PR polish, blog.
+\footnotesize
+\begin{thebibliography}{12}
+\setlength{\itemsep}{0pt}
+\bibitem{cheng2026desired} Y.~Cheng and S.~Luo. What makes a desired graph for relational deep learning? In \emph{ICML}, 2026. arXiv:2606.08491.
+\bibitem{fey2024rdl} M.~Fey, W.~Hu, K.~Huang, J.~E. Lenssen, R.~Ranjan, J.~Robinson, R.~Ying, J.~You, and J.~Leskovec. Position: Relational deep learning: Graph representation learning on relational databases. In \emph{ICML}, 2024.
+\bibitem{rdlsurvey2025} V.~P. Dwivedi, C.~Kanatsoulis, S.~Huang, and J.~Leskovec. Relational deep learning: Challenges, foundations and next-generation architectures. arXiv:2506.16654, 2025.
+\bibitem{louizos2018l0} C.~Louizos, M.~Welling, and D.~P. Kingma. Learning sparse neural networks through $L_0$ regularization. In \emph{ICLR}, 2018.
+\bibitem{alemi2017vib} A.~A. Alemi, I.~Fischer, J.~V. Dillon, and K.~Murphy. Deep variational information bottleneck. In \emph{ICLR}, 2017.
+\bibitem{robinson2024relbench} J.~Robinson, R.~Ranjan, W.~Hu, K.~Huang, J.~Han, A.~Dobles, M.~Fey, J.~E. Lenssen, Y.~Yuan, Z.~Zhang, X.~He, and J.~Leskovec. RelBench: A benchmark for deep learning on relational databases. In \emph{NeurIPS Datasets and Benchmarks}, 2024.
+\bibitem{hamilton2017sage} W.~L. Hamilton, R.~Ying, and J.~Leskovec. Inductive representation learning on large graphs. In \emph{NeurIPS}, 2017.
+\bibitem{ranjan2025rt} R.~Ranjan, V.~Hudovernik, M.~Znidar, C.~Kanatsoulis, R.~Upendra, M.~Mohammadi, J.~Meyer, T.~Palczewski, C.~Guestrin, and J.~Leskovec. Relational Transformer: Toward zero-shot foundation models for relational data. In \emph{ICLR}, 2026. arXiv:2510.06377.
+\bibitem{dwivedi2025relgt} V.~P. Dwivedi, S.~Jaladi, Y.~Shen, F.~L\'opez, C.~I. Kanatsoulis, R.~Puri, M.~Fey, and J.~Leskovec. Relational graph transformer. In \emph{ICLR}, 2026. arXiv:2505.10960.
+\bibitem{chen2025relgnn} T.~Chen, C.~Kanatsoulis, and J.~Leskovec. RelGNN: Composite message passing for relational deep learning. In \emph{ICML}, 2025. arXiv:2502.06784.
+\bibitem{park2022ginex} Y.~Park et al. Ginex: SSD-enabled billion-scale graph neural network training on a single machine via provably optimal in-memory caching. \emph{PVLDB}, 2022.
+\bibitem{waleffe2023mariusgnn} R.~Waleffe, J.~Mohoney, T.~Rekatsinas, and S.~Venkataraman. MariusGNN: Resource-efficient out-of-core training of graph neural networks. In \emph{EuroSys}, 2023.
+\end{thebibliography}
+
+\normalsize
+\appendix
+\section{Prior exploration (not part of the proposed work)}
+\vspace{-0.5em}
+We first studied the course's suggested topic, \emph{scalable GNN infrastructure for large databases}: we read the Relational Transformer (RT)~\cite{ranjan2025rt} \href{https://github.com/stanford-star/relational-transformer}{repository}'s sampler, RelGT~\cite{dwivedi2025relgt}, RelGNN~\cite{chen2025relgnn}, the RDL survey~\cite{rdlsurvey2025}, and out-of-core and distributed GNN systems (Ginex~\cite{park2022ginex}, MariusGNN~\cite{waleffe2023mariusgnn}, PaGraph, GNNLab, BGL, DistDGL). The gap we found: \textbf{RT needs the whole preprocessed database, text embeddings included, resident in one machine's memory}, and its sampler differs from a standard GNN sampler in four ways that existing out-of-core systems do not model: a cell-level (not node-level) budget; all parent rows followed but child rows sampled; only a time-ordered prefix of each child list eligible; and random-walk seeding that reads up to 200{,}000 rows per context. \textbf{Using RT on realistic databases therefore needs an RT-specific out-of-core sampler.} We sketched one (an in-memory index of links and timestamps, cell payloads and text embeddings on disk, one batched read per context, bit-identical contexts to today's sampler) but did not build it. It is \textbf{not} the graded deliverable, because it is a change to RT's Rust sampler rather than a PyG contribution; we intend to pursue it after the course as a pull request to the RT repository. This proposal takes up the complementary question for the same data: once a database fits, \emph{which} graph should the GNN see?
+\end{document}

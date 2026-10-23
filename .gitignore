@@ -1,0 +1,25 @@
+# Separate git repos / third-party code (not part of this repo)
+pytorch_geometric/
+reference/          # authors' code: no license, read-only reference, never committed
+
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Data, checkpoints, logs (large; results/ CSVs ARE committed)
+data/
+checkpoints/
+runs/
+*.pt
+*.ckpt
+
+# LaTeX build output
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz
