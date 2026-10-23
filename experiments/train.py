@@ -245,7 +245,7 @@ def main() -> None:
             # 'filter' / 'full': loss = loss + model.structural_loss()  (step D)
             loss.backward()
             optimizer.step()
-            total_loss += float(loss) * pred.numel()
+            total_loss += loss.item() * pred.numel()
             total_count += pred.numel()
         return total_loss / max(total_count, 1)
 
