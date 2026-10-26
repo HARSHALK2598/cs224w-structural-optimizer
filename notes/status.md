@@ -1,6 +1,6 @@
 # Project status / handoff
 
-_Last updated: 2026-10-23 (end of day 1)_
+_Last updated: 2026-10-26 (end of day 2)_
 
 ## How we work (agreed)
 This is a learning project: for every component we go **understand → check yourself
@@ -14,6 +14,24 @@ can't explain. Slow down rather than rush through tasks.
    ideas?
 3. Check the CS224W guidelines doc for the AI-use / disclosure policy (the Google Doc
    could not be opened from the container; only the rubric PDF was shared).
+
+## Day 2 summary (start here tomorrow)
+- **Workflow agreed:** small commits with unit tests. For each one: a short plan in
+  `plans/` reviewed as a GitHub PR → implementation → review → merge. Plans hold only
+  the implementation spec; learning happens in chat and the walkthrough notebooks.
+- **Baseline first:** Base-RelBench (RelBench's official
+  `examples/gnn_entity.py` settings) on rel-f1 driver-top3 / driver-dnf /
+  driver-position, 5 seeds. Compare with the paper's Base (81.48 / 74.53 / MAE 3.88),
+  then decide whether to re-create the paper's tuned Base.
+- **Plan 00 under review:** PR #1 (`plan/00-baseline`), all review comments so far
+  addressed. Open questions: one plan per milestone or per commit? Add trivial
+  baselines?
+- **Walkthrough 1 done** (`walkthroughs/01_data_graph_sampling.ipynb`): data, graph,
+  sampling. Findings: 3 tables are 3 hops from drivers and never reach a 2-layer
+  model; 55/1353 train seeds have no history.
+- **Next:** finish the plan 00 review → commit 1 of the plan; walkthrough 2 (encoders,
+  one GraphSAGE layer by hand, loss, one optimiser step).
+- The paper PDF is at arxiv.org/pdf/2606.08491 (arxiv.org is now allowed).
 
 ## Where everything lives
 | What | Where |
