@@ -12,7 +12,7 @@ against, so it stays valid if RelBench changes the file later.
 Later models are compared against these numbers.
 
 **Scope:** `driver-top3`, `driver-dnf` (ROC-AUC ↑) and `driver-position` (MAE ↓,
-NMAE also logged). 5 seeds (0–4), CPU in the dev container.
+NMAE also logged). 5 seeds (0–4).
 
 ## Settings (from the official example)
 
