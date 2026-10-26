@@ -5,8 +5,10 @@
 
 ## Goal
 
-Measure the paper's **Base** model on `rel-f1`, reproducing RelBench's official example
-(`examples/gnn_entity.py` in `snap-stanford/relbench`, commit `91c1f64`) exactly.
+Measure the paper's **Base** model on `rel-f1`, reproducing exactly RelBench's official
+training script for entity tasks, [`examples/gnn_entity.py`](https://github.com/snap-stanford/relbench/blob/91c1f6420a03feb61c279aaeb194d7268435f278/examples/gnn_entity.py), which is the
+**source of truth** for this plan. The link is pinned to the version we compared
+against, so it stays valid if RelBench changes the file later.
 Later models are compared against these numbers.
 
 **Scope:** `driver-top3`, `driver-dnf` (ROC-AUC ↑) and `driver-position` (MAE ↓,
@@ -22,14 +24,18 @@ NMAE also logged). 5 seeds (0–4), CPU in the dev container.
 | Loss | `BCEWithLogitsLoss` (binary), `L1Loss` (regression) |
 | Optimisation | Adam, lr 0.005, 10 epochs, ≤ 2,000 steps per epoch |
 | Selection | best val epoch on ROC-AUC (`>=`) / NMAE (`<=`), then a single test evaluation |
-| Regression output | clamp predictions to the [P2, P98] of the train labels |
+| Regression output | clip predictions to lie between the 2nd and 98th percentiles of the training labels |
 
-## Changes to `experiments/train.py`
+## Changes to our training script
 
-| # | Gap vs. official example | Fix |
+`experiments/train.py` is our own training script (written on day 1). It will train
+all our models (Base now, the structural optimizer later), so it must first match the
+[official example](https://github.com/snap-stanford/relbench/blob/91c1f6420a03feb61c279aaeb194d7268435f278/examples/gnn_entity.py) exactly. These are the differences found:
+
+| # | Gap vs. the [official example](https://github.com/snap-stanford/relbench/blob/91c1f6420a03feb61c279aaeb194d7268435f278/examples/gnn_entity.py) | Fix |
 |---|---|---|
 | 1 | `remove_columns=task.hidden_columns()` not passed | pass it |
-| 2 | Regression predictions not clamped | clamp to train-label P2/P98 at inference |
+| 2 | Regression predictions not clipped | clip to the 2nd–98th percentile range of the training labels at inference |
 | 3 | Tune metric is `task.metrics[0]`; ties keep the earlier epoch | explicit `roc_auc` / `nmae`; `>=` / `<=` |
 | 4 | Regression logs only NMAE | also log MAE (val and test) |
 | 5 | GloVe embedder fails on missing text | map `None`/NaN to `""` |
