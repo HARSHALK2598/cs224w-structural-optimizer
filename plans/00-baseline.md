@@ -270,19 +270,37 @@ the paper's as they are, with no adjustment:
 
 | Task | Metric | Ours: Base (mean ± std, 5 seeds) | Paper: Base |
 |---|---|---|---|
-| driver-top3 | ROC-AUC | — | 81.5 |
-| driver-dnf | ROC-AUC | — | *(fill in from the paper's table)* |
-| driver-position | MAE (NMAE) | — | *(fill in from the paper's table)* |
+| driver-top3 | ROC-AUC ↑ | — | 81.48 ± 1.06 |
+| driver-dnf | ROC-AUC ↑ | — | 74.53 ± 0.27 |
+| driver-position | MAE ↓ (NMAE) | — | 3.88 ± 0.02 |
+
+Paper numbers: Tables 1–3 of arXiv:2606.08491, mean ± std over 5 seeds. The paper's
+train/val/test row counts (Table 7) match ours exactly.
 
 Run time is not known yet. It will be measured in commit 4 with one seed and
 reported before launching all 15 runs.
 
-## 12. Questions for you
+## 12. How this baseline relates to the paper's Base
 
-1. **Tasks:** are `driver-top3`, `driver-dnf` and `driver-position` the right three,
-   or do you want to match the exact `rel-f1` tasks in the paper's table?
-2. **Paper numbers:** can you share the Base rows for these tasks from the paper's
-   results table? I only have 81.5 for driver-top3, from your proposal.
+This plan builds **Base-RelBench**: RelBench's official example with its fixed
+defaults. The paper's Base is the same architecture (Appendix B: "relational
+GraphSAGE … on the original heterogeneous graph"), but trained differently:
+
+| | Base-RelBench (this plan) | Paper's Base |
+|---|---|---|
+| lr / hidden size | 0.005 / 128, fixed | grid search on val: lr ∈ {1e-4, 1e-3, 1e-2} × hidden ∈ {64, 128, 256} (Table 8, App. C) |
+| epochs / batch / weight decay | 10 / 512 / 0 | not stated in the paper; authors' code uses 30 / 256 / 5e-4 |
+| regression metric | tuned on NMAE, MAE also logged | MAE |
+| encoder | RelBench ResNet `HeteroEncoder` | "same heterogeneous encoder" (Eq. 1 writes it as linear; authors' code uses the RelBench ResNet) |
+
+**Decision rule (agreed):** run Base-RelBench first and compare it with the paper's
+Base. Only if the gap matters for our comparison do we write a separate plan to
+re-create the paper's tuned version (**Base-paper**).
+
+## 13. Questions for you
+
+1. ~~Tasks~~: resolved. The paper uses exactly these three `rel-f1` tasks.
+2. ~~Paper numbers~~: resolved, see §11.
 3. **Review granularity:** is one plan for the whole baseline milestone, with a
    review per commit (§10), OK? Or do you want a separate plan file per commit?
 4. **Extra floor (optional):** RelBench also has trivial baselines (majority class or

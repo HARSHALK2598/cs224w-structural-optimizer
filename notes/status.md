@@ -55,8 +55,10 @@ Network hosts the environment must allow (already added): `download.pytorch.org`
 - [ ] Fix 9 flake8 line-length warnings (train.py, download_data.py, relational_filter.py)
 
 ## Findings to remember
-- Authors' code uses **Gumbel-softmax** gates (hard 0/1 at `logit > 0` in eval), not
-  Hard-Concrete as in the paper: one more code-vs-paper mismatch.
+- Authors' gates: the training path (`model.py`) uses a Hard-Concrete `L0Gate`
+  (γ=-0.1, ζ=1.1, init logit 2.0), but in eval it returns the *soft* stretched
+  `sigmoid(logit/τ)`, not a hard 0/1. (`gates.py` has a separate Gumbel-softmax
+  `StructureGate`; the day-1 note wrongly said the code uses Gumbel-softmax gates.)
 - Authors gate **raw table columns**; our proposal gates **encoder embedding dims**
   of h⁽⁰⁾. Check against the paper before implementing `RelationalFilter`.
 - Authors' defaults: channels 128, 2 layers, 128 neighbours, lr 0.005, 30 epochs,
