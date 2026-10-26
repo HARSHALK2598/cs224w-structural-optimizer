@@ -47,7 +47,8 @@ TORCH_VERSION="2.12.0"
 uv pip install -q "torch==${TORCH_VERSION}" --index-url https://download.pytorch.org/whl/cpu
 uv pip install -q pyg_lib -f "https://data.pyg.org/whl/torch-${TORCH_VERSION}+cpu.html"
 uv pip install -q -e "./pytorch_geometric[test]" \
-  relbench pytorch-frame pytest flake8 matplotlib pandas nbformat
+  relbench pytorch-frame pytest flake8 matplotlib pandas nbformat \
+  nbconvert ipykernel networkx
 python -c "import torch, torch_geometric, relbench; \
 print('torch', torch.__version__, '| pyg', torch_geometric.__version__, \
 '| relbench', relbench.__version__)"
