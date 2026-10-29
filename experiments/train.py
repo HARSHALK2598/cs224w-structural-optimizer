@@ -38,6 +38,7 @@ from relbench.modeling.graph import (  # noqa: E402
     make_pkey_fkey_graph,
 )
 from relbench.modeling.nn import (  # noqa: E402
+    _DEFAULT_STYPE_ENCODER_CLS_KWARGS,
     HeteroEncoder,
     HeteroGraphSAGE,
     HeteroTemporalEncoder,
@@ -81,6 +82,9 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     for key, value in DEFAULTS.items():
         parser.add_argument(f'--{key.replace("_", "-")}', type=type(value),
                             default=None)
+    parser.add_argument('--nan-safe-numerical', action='store_true',
+                        help='Keep numerical columns with missing values '
+                        'trainable (issue #6).')
     parser.add_argument('--smoke', action='store_true',
                         help='Run one train and one val batch, write nothing.')
     parser.add_argument('--results', type=str,
@@ -228,6 +232,29 @@ def make_loaders(data, task, args) -> Dict[str, NeighborLoader]:
     return loaders
 
 
+class NaNSafeLinearEncoder(torch_frame.nn.LinearEncoder):
+    r"""PyTorch Frame's numerical encoder with finite gradients for missing
+    values (issue #6).
+
+    The original computes :math:`x = \frac{v - \mu}{\sigma} w + b` with the
+    NaN still in :math:`v`, and :class:`StypeEncoder` later replaces the NaN
+    output with 0. The forward pass is fine, but the weight gradient
+    :math:`v \cdot \partial L / \partial x` is :math:`\mathrm{NaN} \times 0
+    = \mathrm{NaN}`, so Adam writes NaN into the column's weights and the
+    column encodes to 0 for every row from then on.
+
+    Here a missing value is replaced by 0 *before* the multiplication and its
+    output is masked to 0 afterwards: the same forward output, but a finite
+    gradient (zero from the missing rows), so the column keeps learning.
+    """
+    def encode_forward(self, feat: Tensor, col_names=None) -> Tensor:
+        missing = torch.isnan(feat)  # [batch_size, num_cols]
+        feat = (feat - self.mean) / self.std
+        feat = feat.masked_fill(missing, 0.0)
+        x = torch.einsum('ij,jk->ijk', feat, self.weight) + self.bias
+        return x.masked_fill(missing.unsqueeze(-1), 0.0)
+
+
 class BaseModel(torch.nn.Module):
     r"""RelBench's relational GraphSAGE: encoder -> hetero GNN -> MLP head.
 
@@ -236,8 +263,11 @@ class BaseModel(torch.nn.Module):
     (A) will gate.
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
-                 num_layers: int, aggr: str):
+                 num_layers: int, aggr: str, nan_safe_numerical: bool = False):
         super().__init__()
+        stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
+        if nan_safe_numerical:
+            stype_encoders[torch_frame.numerical] = (NaNSafeLinearEncoder, {})
         self.encoder = HeteroEncoder(
             channels=channels,
             node_to_col_names_dict={
@@ -245,6 +275,7 @@ class BaseModel(torch.nn.Module):
                 for node_type in data.node_types
             },
             node_to_col_stats=col_stats_dict,
+            default_stype_encoder_cls_kwargs=stype_encoders,
         )
         self.temporal_encoder = HeteroTemporalEncoder(
             node_types=[nt for nt in data.node_types if 'time' in data[nt]],
@@ -279,7 +310,7 @@ class BaseModel(torch.nn.Module):
 def build_model(args, data, col_stats_dict, out_channels: int):
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
-                         args.num_layers, args.aggr)
+                         args.num_layers, args.aggr, args.nan_safe_numerical)
     # 'filter' and 'full' wrap BaseModel's encoder in
     # torch_geometric.contrib.nn.StructuralOptimizer.
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
