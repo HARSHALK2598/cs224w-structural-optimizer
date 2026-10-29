@@ -102,4 +102,6 @@ On `driver-dnf`, 5 of the database's 22 numerical columns are affected, all in
 `position` (49%) after the first step, and `number` during the first epoch.
 
 This happens in the unmodified library, with or without deduplication, so the
-official RelBench runs are affected too. It is not changed here.
+official RelBench runs are affected too. It is not changed here; tracked in
+[issue #6](https://github.com/HARSHALK2598/cs224w-structural-optimizer/issues/6)
+(minimal reproduction, mechanism, fix options).
