@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 import torch
-from conftest import requires_rel_f1
+from conftest import requires_glove, requires_rel_f1
 
 import train
 
@@ -98,3 +98,18 @@ def test_regression_predictions_are_clipped(rel_f1, bias):
     low, high = spec.clip
     assert len(pred) == 64
     assert np.all(pred == (high if bias > 0 else low))
+
+
+def test_glove_clean_replaces_missing_text():
+    cleaned = train.GloveTextEmbedding.clean(
+        ['Hamilton', None, float('nan'), 44, r'\N'])
+    assert cleaned == ['Hamilton', '', '', '44', r'\N']
+
+
+@requires_glove
+def test_glove_embeds_text_with_missing_values():
+    embed = train.GloveTextEmbedding(torch.device('cpu'))
+    out = embed(['Lewis Hamilton', None, float('nan'), 'British'])
+    assert out.shape == (4, 300)
+    assert torch.isfinite(out).all()
+    assert out[0].abs().sum() > 0  # known words get a non-zero vector

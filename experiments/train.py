@@ -103,18 +103,29 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
 class GloveTextEmbedding:
     r"""Averaged 300-d GloVe word embeddings, RelBench's default text encoder.
 
-    RelBench 3 no longer ships this helper, so it is re-created here. Requires
-    `sentence-transformers`; the model (~480MB) is downloaded from the Hugging
-    Face Hub on first use.
+    Matches the official example's `text_embedder.py`. Requires
+    `sentence-transformers`; the model (~1GB on disk) is downloaded from the
+    Hugging Face Hub on first use. Missing values (None / NaN) become empty
+    strings, which the tokenizer expects.
     """
+    MODEL = 'sentence-transformers/average_word_embeddings_glove.6B.300d'
+
     def __init__(self, device: torch.device):
         from sentence_transformers import SentenceTransformer
-        self.model = SentenceTransformer(
-            'sentence-transformers/average_word_embeddings_glove.6B.300d',
-            device=device)
+        self.model = SentenceTransformer(self.MODEL, device=device)
+
+    @staticmethod
+    def clean(sentences) -> List[str]:
+        out = []
+        for s in sentences:
+            if s is None or (isinstance(s, float) and s != s):  # None / NaN
+                out.append('')
+            else:
+                out.append(s if isinstance(s, str) else str(s))
+        return out
 
     def __call__(self, sentences) -> Tensor:
-        return torch.from_numpy(self.model.encode(sentences))
+        return torch.from_numpy(self.model.encode(self.clean(sentences)))
 
 
 def text_embedder_cfg(name: str, device: torch.device):
