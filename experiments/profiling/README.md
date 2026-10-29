@@ -41,6 +41,9 @@ disjoint), so popular rows are encoded many times per batch:
 | standings | 22,597 | 10,691 | 2.1× |
 | **All tables** | **~71,000** | **~22,600** | **3.1×** |
 
+Per-table counts are from the first batch; the totals are averages over the epoch
+(71,181 sampled, 22,625 distinct).
+
 ## 3. Encoder deduplication (`--dedup-encoder`, off by default)
 
 `BaseModel.encode_rows` encodes each distinct row of a batch once and copies its
