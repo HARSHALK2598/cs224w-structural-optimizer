@@ -30,7 +30,9 @@ runs two GraphSAGE layers, and predicts from the target row's final embedding.
 
 The official script cannot host the structural optimizer, because its model and loss
 are fixed. Our own script, `experiments/train.py`, will train the optimizer, so it
-must first reproduce the official Base numbers (the fixes are in PR #2).
+must first reproduce the official Base numbers (the fixes are in PR #2). Its Base
+runs are a reproduction check here; they become the control for the optimizer
+comparison in a later plan (same pipeline, optimizer switched off).
 
 ## 3. How we check it
 
