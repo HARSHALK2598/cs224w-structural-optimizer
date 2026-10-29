@@ -7,9 +7,10 @@ the Base numbers reported in the paper.
 
 ## 1. What we run
 
-We reproduce RelBench's official training script for this kind of task,
+We run RelBench's official training script for this kind of task,
 [`examples/gnn_entity.py`](https://github.com/snap-stanford/relbench/blob/91c1f6420a03feb61c279aaeb194d7268435f278/examples/gnn_entity.py)
-(linked at the exact version we compared against). It is our source of truth.
+(linked at the exact version we use), **unmodified**. Its results are our Base
+numbers, so no code of ours sits between the benchmark and the reported baseline.
 
 The database is turned into a graph: one node type per table, one edge type per
 foreign key. For each prediction, the model samples a 2-hop neighbourhood that
@@ -25,17 +26,13 @@ runs two GraphSAGE layers, and predicts from the target row's final embedding.
 | Regression | predictions clipped to the 2nd–98th percentile range of the training labels |
 | Runs | 5 seeds per task, reported as mean ± std |
 
-## 2. What changes in our code
+## 2. Our training script
 
-Our training script, `experiments/train.py`, will train every model in this project,
-so it must first match the official script exactly. Comparing the two shows these gaps:
-
-1. **Correctness:** drop columns that RelBench marks as leaking the label; clip
-   regression predictions as above; select epochs on the official metrics (ROC-AUC,
-   NMAE).
-2. **Reporting:** also log raw MAE, which is what the paper reports; add a
-   `summarize.py` that turns the per-run results into mean ± std tables.
-3. **Text features:** install the GloVe text encoder and handle empty text values.
+The official script cannot host the structural optimizer, because its model and loss
+are fixed. Our own script, `experiments/train.py`, will train the optimizer, so it
+must first reproduce the official Base numbers (the fixes are in PR #2). Its Base
+runs are a reproduction check here; they become the control for the optimizer
+comparison in a later plan (same pipeline, optimizer switched off).
 
 ## 3. How we check it
 
@@ -45,21 +42,24 @@ Unit tests in `experiments/tests/` cover the parts most likely to go wrong silen
 - sampling never includes rows from after the prediction time;
 - regression predictions stay within the clipping range;
 - a one-batch run works for both task types, and results are written and summarised
-  correctly.
+  correctly;
+- **`train.py` reproduces the official script:** one seed per task falls within the
+  official 5-seed mean ± 2 std.
 
 ## 4. Steps
 
 Each step is one small commit, reviewed before it is merged:
 
-1. Correctness fixes, with their tests.
-2. Graph and sampling tests.
-3. Text features.
-4. Reporting (`summarize.py`), the end-to-end tests, and timing one run.
-5. Run all 3 tasks × 5 seeds and commit the results.
+1. Correctness fixes to `train.py`, with their tests.
+2. Text features.
+3. Run the official script for 3 tasks × 5 seeds and commit its results: these are
+   the Base numbers.
+4. Reporting (`summarize.py`), graph and sampling tests, and the check that
+   `train.py` reproduces step 3.
 
 ## 5. Outcome and next decision
 
-| Task | Metric | Ours | Paper's Base |
+| Task | Metric | Base (official script) | Paper's Base |
 |---|---|---|---|
 | driver-top3 | ROC-AUC ↑ | — | 81.48 ± 1.06 |
 | driver-dnf | ROC-AUC ↑ | — | 74.53 ± 0.27 |
