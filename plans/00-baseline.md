@@ -26,20 +26,11 @@ runs two GraphSAGE layers, and predicts from the target row's final embedding.
 | Regression | predictions clipped to the 2nd–98th percentile range of the training labels |
 | Runs | 5 seeds per task, reported as mean ± std |
 
-## 2. What changes in our code
+## 2. Our training script
 
-The official script cannot host the structural optimizer: its model and loss are
-fixed. Our own training script, `experiments/train.py`, will train the optimizer
-later, so it must first reproduce the official Base numbers. Comparing the two
-scripts shows these gaps:
-
-1. **Correctness:** drop columns that RelBench marks as leaking the label; clip
-   regression predictions as above; select epochs on the official metrics (ROC-AUC,
-   NMAE).
-2. **Reporting:** also log raw MAE, which is what the paper reports; add a
-   `summarize.py` that turns per-run results into mean ± std tables.
-3. **Text features:** install the GloVe text encoder (both scripts need it) and
-   handle empty text values.
+The official script cannot host the structural optimizer, because its model and loss
+are fixed. Our own script, `experiments/train.py`, will train the optimizer, so it
+must first reproduce the official Base numbers (the fixes are in PR #2).
 
 ## 3. How we check it
 
