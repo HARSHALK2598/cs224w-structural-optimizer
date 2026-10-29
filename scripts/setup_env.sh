@@ -4,7 +4,8 @@
 # Usage (from the project repo root):  bash scripts/setup_env.sh [--data]
 #
 #   1. clones the PyG fork (branch contrib/structural-optimizer) into ./pytorch_geometric
-#   2. clones the authors' reference code into ./reference (read-only, git-ignored)
+#   2. clones the authors' reference code and RelBench (pinned) into ./reference
+#      (read-only, git-ignored)
 #   3. creates ./.venv with CPU torch, PyG (editable), RelBench, test tools
 #   4. with --data: downloads only the rel-f1 database (via scripts/download_data.py)
 #
@@ -19,6 +20,9 @@ PYG_FORK="https://github.com/HARSHALK2598/pytorch_geometric"
 PYG_UPSTREAM="https://github.com/pyg-team/pytorch_geometric.git"
 PYG_BRANCH="contrib/structural-optimizer"
 AUTHORS_REPO="https://github.com/cy623/Structural_Optimizer_RDL.git"
+RELBENCH_REPO="https://github.com/snap-stanford/relbench"
+# RelBench version used for the Base numbers (plans/00-baseline.md):
+RELBENCH_SHA="91c1f6420a03feb61c279aaeb194d7268435f278"
 
 # 1. PyG fork ---------------------------------------------------------------
 if [ ! -d pytorch_geometric/.git ]; then
@@ -36,6 +40,11 @@ fi
 [ -d reference/Structural_Optimizer_RDL ] || \
   git clone -q "$AUTHORS_REPO" reference/Structural_Optimizer_RDL
 
+# RelBench at a pinned commit: its examples/ (the official training script) are
+# not part of the pip package, and the library must match that script.
+[ -d reference/relbench/.git ] || git clone -q "$RELBENCH_REPO" reference/relbench
+git -C reference/relbench checkout -q "$RELBENCH_SHA"
+
 # 3. Python environment -----------------------------------------------------
 command -v uv >/dev/null || pip install -q uv
 [ -d .venv ] || uv venv -q .venv --python 3.12
@@ -46,8 +55,8 @@ source .venv/bin/activate
 TORCH_VERSION="2.12.0"
 uv pip install -q "torch==${TORCH_VERSION}" --index-url https://download.pytorch.org/whl/cpu
 uv pip install -q pyg_lib -f "https://data.pyg.org/whl/torch-${TORCH_VERSION}+cpu.html"
-uv pip install -q -e "./pytorch_geometric[test]" \
-  relbench pytorch-frame pytest flake8 matplotlib pandas nbformat \
+uv pip install -q -e "./pytorch_geometric[test]" -e ./reference/relbench \
+  pytorch-frame pytest flake8 matplotlib pandas nbformat \
   nbconvert ipykernel networkx sentence-transformers
 python -c "import torch, torch_geometric, relbench; \
 print('torch', torch.__version__, '| pyg', torch_geometric.__version__, \
