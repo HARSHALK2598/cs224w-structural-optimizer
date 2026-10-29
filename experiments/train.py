@@ -81,6 +81,9 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     for key, value in DEFAULTS.items():
         parser.add_argument(f'--{key.replace("_", "-")}', type=type(value),
                             default=None)
+    parser.add_argument('--dedup-encoder', action='store_true',
+                        help='Encode each distinct row once per batch '
+                        '(see experiments/profiling/README.md).')
     parser.add_argument('--smoke', action='store_true',
                         help='Run one train and one val batch, write nothing.')
     parser.add_argument('--results', type=str,
@@ -234,10 +237,16 @@ class BaseModel(torch.nn.Module):
     The encoder output (column encoder + relative-time encoding) is
     :math:`h^{(0)}`, the input that the structural optimizer's filtering step
     (A) will gate.
+
+    With :obj:`dedup_encoder=True`, a row sampled several times in one batch
+    is encoded once and its embedding copied to every position. Outputs are
+    identical in evaluation mode, and gradients are identical without
+    dropout; in training, all copies of a row share one dropout mask.
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
-                 num_layers: int, aggr: str):
+                 num_layers: int, aggr: str, dedup_encoder: bool = False):
         super().__init__()
+        self.dedup_encoder = dedup_encoder
         self.encoder = HeteroEncoder(
             channels=channels,
             node_to_col_names_dict={
@@ -260,9 +269,28 @@ class BaseModel(torch.nn.Module):
         self.head = MLP(channels, out_channels=out_channels, norm='batch_norm',
                         num_layers=1)
 
+    def encode_rows(self, batch) -> Dict[str, Tensor]:
+        r"""Runs the row encoder (one ResNet per table) on the batch."""
+        if not self.dedup_encoder:
+            return self.encoder(batch.tf_dict)
+        x_dict = {}
+        for node_type, tf in batch.tf_dict.items():
+            # `n_id` is the database row of every sampled node; `inverse`
+            # maps each node to its distinct row.
+            n_id = batch[node_type].n_id
+            unique, inverse = n_id.unique(return_inverse=True)
+            # One batch position per distinct row (any copy works):
+            first = torch.empty_like(unique).scatter_(
+                0, inverse, torch.arange(n_id.numel(), device=n_id.device))
+            x = self.encoder.encoders[node_type](tf[first])
+            # Indexing copies the embedding to every position; in backward,
+            # it sums the gradients of all copies into the encoded row.
+            x_dict[node_type] = x[inverse]
+        return x_dict
+
     def encode(self, batch, entity_table: str) -> Dict[str, Tensor]:
         seed_time = batch[entity_table].seed_time
-        x_dict = self.encoder(batch.tf_dict)
+        x_dict = self.encode_rows(batch)
         rel_time_dict = self.temporal_encoder(seed_time, batch.time_dict,
                                               batch.batch_dict)
         for node_type, rel_time in rel_time_dict.items():
@@ -279,7 +307,7 @@ class BaseModel(torch.nn.Module):
 def build_model(args, data, col_stats_dict, out_channels: int):
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
-                         args.num_layers, args.aggr)
+                         args.num_layers, args.aggr, args.dedup_encoder)
     # 'filter' and 'full' wrap BaseModel's encoder in
     # torch_geometric.contrib.nn.StructuralOptimizer.
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
