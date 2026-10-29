@@ -1,6 +1,6 @@
 # Project status / handoff
 
-_Last updated: 2026-10-29 (end of day 3)_
+_Last updated: 2026-10-29 (day 4)_
 
 ## How we work (agreed)
 This is a learning project: for every component we go **understand → check yourself
@@ -15,7 +15,30 @@ can't explain. Slow down rather than rush through tasks.
 3. Check the CS224W guidelines doc for the AI-use / disclosure policy (the Google Doc
    could not be opened from the container; only the rubric PDF was shared).
 
-## Day 3 summary (start here next)
+## Day 4 summary (start here next)
+- **Way of working (agreed):** `driver-top3` is the **development task**. All testing
+  and optimisation happens there first; `driver-position` and `driver-dnf` run only
+  once improvements show up. **Decisions use validation scores**; test is looked at
+  once per final setting. With 5 seeds and std ≈ 0.015–0.02, only changes of about
+  ≥ 2 ROC-AUC points are distinguishable from noise.
+- **Official baseline, driver-top3** (draft PR #7, unmodified `gnn_entity.py` @
+  91c1f64, 5 seeds, test ROC-AUC): 10 epochs 0.776 ± 0.017; 20 epochs
+  0.794 ± 0.021 (paper's Base 0.815 ± 0.011). 10 epochs is too short: curves still
+  rising. Runs are not bit-for-bit repeatable (seed 0: 0.788 then 0.801).
+- **`train.py` reproduces the official script** (arm A, 20 epochs): 0.780 ± 0.015,
+  all seeds within the official mean ± 2 std.
+- **NaN issue (#6):** 5 of 22 numerical columns get NaN weights after step 1 in
+  PyTorch Frame 0.3.0. Fix behind `--nan-safe-numerical` (PR #8): no measurable
+  effect on driver-top3 (0.783 ± 0.019). driver-dnf still to measure.
+- **Profiling (PR #5):** row encoder + backward ≈ 85% of an epoch; rows duplicated
+  3.1× per batch. `--dedup-encoder`: epoch 2.2× faster; accuracy check (arm C) in
+  progress.
+- **Open PRs to review/merge:** #5, #7 (draft), #8.
+- **Next:** arm C result → plan for the structural optimizer's first component
+  (`HardConcreteGate`), developed and measured on driver-top3 against the 20-epoch
+  `train.py` Base.
+
+## Day 3 summary
 - **Plan 00 revised (Option A, merged in PR #3):** Base numbers come from RelBench's
   official `examples/gnn_entity.py`, run **unmodified** (3 rel-f1 tasks × 5 seeds).
   `train.py` must reproduce them (one seed per task within mean ± 2 std); its Base
