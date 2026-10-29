@@ -1,6 +1,6 @@
 # Project status / handoff
 
-_Last updated: 2026-10-26 (end of day 2)_
+_Last updated: 2026-10-29 (end of day 3)_
 
 ## How we work (agreed)
 This is a learning project: for every component we go **understand → check yourself
@@ -15,7 +15,29 @@ can't explain. Slow down rather than rush through tasks.
 3. Check the CS224W guidelines doc for the AI-use / disclosure policy (the Google Doc
    could not be opened from the container; only the rubric PDF was shared).
 
-## Day 2 summary (start here tomorrow)
+## Day 3 summary (start here next)
+- **Plan 00 revised (Option A, merged in PR #3):** Base numbers come from RelBench's
+  official `examples/gnn_entity.py`, run **unmodified** (3 rel-f1 tasks × 5 seeds).
+  `train.py` must reproduce them (one seed per task within mean ± 2 std); its Base
+  runs later become the control for the optimizer.
+- **Step 1 merged (PR #2):** `train.py` split into functions (`load_graph`,
+  `task_spec`, `train_epoch`, `predict`, `evaluate`, `fit`), label-leak columns
+  dropped, regression clipping, explicit tune metric with ties to later epoch, MAE
+  logged; 9 unit tests in `experiments/tests/`.
+- **Step 2 open (PR #4):** GloVe text features (`sentence-transformers`, model ~1 GB
+  on disk in `data/hf`, already downloaded here). Harshal reviews, then merges.
+- **Walkthroughs:** Part 1 and Part 2 have Does/In/Out notes; Part 2 runs
+  `train.py`'s real functions.
+- **Next: step 3, the training.** Clone RelBench at `91c1f64` (examples/ is not in
+  the pip package), run `gnn_entity.py` unmodified, time one run, then 15 runs. The
+  official script prints only NMAE for regression: compute MAE from its saved
+  prediction CSV.
+- **Parked:** Colab setup (needs: install torch 2.12 + matching pyg-lib, clone the
+  private repo via a token in Colab Secrets or make it public).
+- **Merging:** this session cannot merge PRs that have no GitHub review; Harshal
+  merges on GitHub.
+
+## Day 2 summary
 - **Workflow agreed:** small commits with unit tests. For each one: a short plan in
   `plans/` reviewed as a GitHub PR → implementation → review → merge. Plans hold only
   the implementation spec; learning happens in chat and the walkthrough notebooks.
