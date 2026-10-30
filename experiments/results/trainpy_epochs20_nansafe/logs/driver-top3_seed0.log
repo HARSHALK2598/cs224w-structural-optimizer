@@ -1,0 +1,38 @@
+Fetching 24 files:   0%|          | 0/24 [00:00<?, ?it/s]Fetching 24 files: 100%|██████████| 24/24 [00:00<00:00, 1742.15it/s]
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/reference/relbench/relbench/modeling/graph.py:132: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  pkey_index = torch.from_numpy(pkey_index[mask].astype(int).values)
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+epoch 01  loss 0.6091  val roc_auc 0.6144
+epoch 02  loss 0.4518  val roc_auc 0.6470
+epoch 03  loss 0.4522  val roc_auc 0.6401
+epoch 04  loss 0.4425  val roc_auc 0.6398
+epoch 05  loss 0.4451  val roc_auc 0.6379
+epoch 06  loss 0.4428  val roc_auc 0.6440
+epoch 07  loss 0.4381  val roc_auc 0.6513
+epoch 08  loss 0.4331  val roc_auc 0.6531
+epoch 09  loss 0.4269  val roc_auc 0.6550
+epoch 10  loss 0.4153  val roc_auc 0.7018
+epoch 11  loss 0.3913  val roc_auc 0.7138
+epoch 12  loss 0.3671  val roc_auc 0.7410
+epoch 13  loss 0.3561  val roc_auc 0.7851
+epoch 14  loss 0.3256  val roc_auc 0.7863
+epoch 15  loss 0.3137  val roc_auc 0.7857
+epoch 16  loss 0.3073  val roc_auc 0.7843
+epoch 17  loss 0.2982  val roc_auc 0.7800
+epoch 18  loss 0.2923  val roc_auc 0.7806
+epoch 19  loss 0.2831  val roc_auc 0.7697
+epoch 20  loss 0.2790  val roc_auc 0.7599
+best epoch 14: val roc_auc 0.7863  test roc_auc 0.7858
