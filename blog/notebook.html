@@ -1,0 +1,704 @@
+<title>Learning the Graph</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a lab notebook. One wide column of sections; the pipeline stepper is the
+   centrepiece (stage + caption), results and findings follow as plain sections. */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #141820;
+  --muted: #5a6473;
+  --line: #d5dbe3;
+  --accent: #c2410c;        /* signal orange: highlights, gates */
+  --accent-soft: #fde5d8;
+  --cool: #1d4ed8;          /* selections, focus */
+  --cool-soft: #dbe5fb;
+  --good: #15803d;
+  --t-results: #c2410c;
+  --t-drivers: #1d4ed8;
+  --t-races: #7c3aed;
+  --t-qualifying: #0e7490;
+  --t-standings: #a16207;
+  --t-constructors: #be185d;
+  --t-cstand: #4d7c0f;
+  --t-cres: #475569;
+  --t-circuits: #0f766e;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1217; --surface: #171b22; --ink: #e6e9ee; --muted: #9aa4b2; --line: #2b323d;
+    --accent: #fb923c; --accent-soft: #3a2416; --cool: #7aa2f7; --cool-soft: #1c2740; --good: #4ade80;
+    --t-results: #fb923c; --t-drivers: #7aa2f7; --t-races: #b197fc; --t-qualifying: #22d3ee;
+    --t-standings: #facc15; --t-constructors: #f472b6; --t-cstand: #a3e635; --t-cres: #94a3b8; --t-circuits: #2dd4bf;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1217; --surface: #171b22; --ink: #e6e9ee; --muted: #9aa4b2; --line: #2b323d;
+  --accent: #fb923c; --accent-soft: #3a2416; --cool: #7aa2f7; --cool-soft: #1c2740; --good: #4ade80;
+  --t-results: #fb923c; --t-drivers: #7aa2f7; --t-races: #b197fc; --t-qualifying: #22d3ee;
+  --t-standings: #facc15; --t-constructors: #f472b6; --t-cstand: #a3e635; --t-cres: #94a3b8; --t-circuits: #2dd4bf;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.55;
+}
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+  display: grid; gap: 56px;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.01em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(40px, 7vw, 64px); line-height: 0.95; }
+h2 { font-size: 30px; line-height: 1.1; }
+h3 { font-size: 20px; line-height: 1.2; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--cool); }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+header { display: grid; gap: 14px; }
+header .lede { font-size: 17px; color: var(--muted); }
+nav.jump { display: flex; flex-wrap: wrap; gap: 8px; }
+nav.jump a {
+  font-family: var(--font-mono); font-size: 12px; text-decoration: none; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; background: var(--surface);
+}
+nav.jump a:hover { border-color: var(--cool); }
+
+section { display: grid; gap: 18px; }
+.section-head { display: grid; gap: 8px; }
+
+/* ---------- Pipeline stepper ---------- */
+.stepper { display: grid; gap: 14px; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.btn {
+  font: 500 13px var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 14px; cursor: pointer;
+}
+.btn:hover { border-color: var(--cool); }
+.btn:focus-visible, .pill:focus-visible, .seg button:focus-visible, .colhit:focus-visible { outline: 2px solid var(--cool); outline-offset: 2px; }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.counter { font-family: var(--font-mono); font-size: 13px; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  font: 500 12px var(--font-body); border: 1px solid var(--line); background: transparent; color: var(--muted);
+  border-radius: 999px; padding: 3px 10px; cursor: pointer;
+}
+.pill[aria-current="step"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.stage {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  overflow-x: auto;
+}
+.stage svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.caption { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; }
+.caption .text { display: grid; gap: 10px; min-width: 0; }
+.caption .facts { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.fact { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline; font-size: 13px; }
+.fact .k { color: var(--muted); }
+.fact .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+pre.code {
+  margin: 0; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5; background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; white-space: pre;
+}
+.gate-note { font-size: 13px; color: var(--accent); }
+@media (max-width: 720px) { .caption { grid-template-columns: 1fr; } }
+
+/* SVG text and shapes, all from tokens */
+.s-label { font-family: var(--font-body); font-size: 13px; fill: var(--ink); }
+.s-small { font-family: var(--font-body); font-size: 11.5px; fill: var(--muted); }
+.s-mono { font-family: var(--font-mono); font-size: 12px; fill: var(--ink); }
+.s-mono-muted { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
+.s-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; fill: var(--ink); }
+.s-shape { font-family: var(--font-mono); font-size: 13px; font-weight: 500; fill: var(--accent); }
+.s-box { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.s-panel { fill: var(--bg); stroke: var(--line); stroke-width: 1; }
+.s-line { stroke: var(--line); stroke-width: 1.2; fill: none; }
+.s-arrow { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.s-head { fill: var(--muted); }
+.s-cell { stroke: var(--surface); stroke-width: 1; }
+.s-faded { opacity: 0.22; }
+.s-gate { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.s-gate-text { font-family: var(--font-mono); font-size: 11px; fill: var(--accent); }
+.colhit { cursor: pointer; }
+.closed rect.s-cell { fill: var(--line) !important; }
+
+.appear { animation: appear 0.45s ease-out both; }
+@keyframes appear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .appear { animation: none; } }
+
+/* ---------- Results ---------- */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: 500 13px var(--font-body); background: var(--surface); color: var(--ink); border: 0; padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+.chart svg { display: block; width: 100%; min-width: 600px; height: auto; }
+.note { font-size: 13px; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 640px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- Findings ---------- */
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.finding .big { font-family: var(--font-display); font-size: 34px; font-weight: 600; line-height: 1; color: var(--accent); }
+.finding p { font-size: 14px; }
+.finding .src { font-size: 12px; color: var(--muted); }
+.bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; }
+.bar span { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+/* ---------- Log ---------- */
+ol.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+ol.log li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+ol.log time { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+ol.log li.next time { color: var(--accent); }
+@media (max-width: 520px) { ol.log li { grid-template-columns: 1fr; gap: 2px; } }
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">CS224W project · lab notebook · rel-f1 / driver-top3</div>
+    <h1>Learning the Graph</h1>
+    <p class="lede">How a relational database becomes a graph a GNN can learn from, followed through one real training batch, plus everything we have measured so far on the way to the paper's structural optimizer.</p>
+    <nav class="jump" aria-label="Sections">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#results">Results</a>
+      <a href="#findings">Findings</a>
+      <a href="#log">Log</a>
+    </nav>
+  </header>
+
+  <section id="pipeline" aria-labelledby="pipeline-h">
+    <div class="section-head">
+      <div class="eyebrow">One batch, start to finish</div>
+      <h2 id="pipeline-h">From database rows to a 128-number vector</h2>
+      <p>Every shape below was measured on <code>rel-f1</code> with one real mini-batch of 4 seed drivers (fan-out 4 then 2). The baseline uses 512 seeds and fan-out 128 then 64; the steps are the same.</p>
+    </div>
+    <div class="stepper">
+      <div class="controls">
+        <button class="btn" id="prev" type="button">Previous</button>
+        <button class="btn primary" id="next" type="button">Next</button>
+        <button class="btn" id="play" type="button" aria-pressed="false">Play</button>
+        <span class="counter" id="counter" aria-live="polite">1 / 8</span>
+      </div>
+      <div class="pills" id="pills" role="list"></div>
+      <div class="stage" id="stage"></div>
+      <div class="caption">
+        <div class="text">
+          <h3 id="cap-title"></h3>
+          <p id="cap-body"></p>
+          <p class="gate-note" id="cap-gate" hidden></p>
+        </div>
+        <div class="facts">
+          <div id="cap-facts"></div>
+          <pre class="code" id="cap-code"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" aria-labelledby="results-h">
+    <div class="section-head">
+      <div class="eyebrow">driver-top3 · ROC-AUC · 5 seeds per run</div>
+      <h2 id="results-h">Results so far</h2>
+      <p>Each dot is one seed; the bar is the mean ± one standard deviation. We choose between settings on <strong>validation</strong>; test is shown for reference and for the comparison with the paper.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Split">
+        <button type="button" id="split-val" aria-pressed="true">Validation</button>
+        <button type="button" id="split-test" aria-pressed="false">Test</button>
+      </div>
+    </div>
+    <div class="chart" id="chart"></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Run</th><th>What changed</th><th>Validation</th><th>Test</th><th>Time / run</th><th>Where</th></tr></thead>
+        <tbody id="runs-table"></tbody>
+      </table>
+    </div>
+    <p class="note">Runs are not bit-for-bit repeatable on this machine (seed 0 of the official script gave 0.788 and later 0.801 with the same command), so seeds are not paired across rows. With a spread of about 0.015–0.02, only differences of roughly 2 points stand out from noise.</p>
+  </section>
+
+  <section id="findings" aria-labelledby="findings-h">
+    <div class="section-head">
+      <div class="eyebrow">What the measurements showed</div>
+      <h2 id="findings-h">Findings</h2>
+    </div>
+    <div class="findings">
+      <article class="finding">
+        <div class="big">+1.8</div>
+        <h3>10 epochs is too short</h3>
+        <p>The official script stops while validation is still rising. With 20 epochs, test ROC-AUC goes from 0.776 to 0.794, and the gap to the paper's Base (0.815) shrinks from 3.9 to 2.1 points.</p>
+        <div class="src">Draft PR #7 · official script, unmodified</div>
+      </article>
+      <article class="finding">
+        <div class="big">85%</div>
+        <h3>Time goes into the row encoder</h3>
+        <div class="bar" aria-label="Share of an epoch: row encoder 53%, backward 33%, GNN 11%, other 3%">
+          <span style="width:53%;background:var(--accent)"></span><span style="width:33%;background:var(--t-races)"></span><span style="width:11%;background:var(--cool)"></span><span style="width:3%;background:var(--line)"></span>
+        </div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>row encoder 53%</span><span><i style="background:var(--t-races)"></i>backward 33%</span><span><i style="background:var(--cool)"></i>GNN 11%</span><span><i style="background:var(--line)"></i>sampling, other 3%</span></div>
+        <p>Sampling is only 1% of an epoch. The cost is dense matrix multiplication on ~71,000 sampled rows per batch.</p>
+        <div class="src">PR #5 · driver-dnf, one epoch, 4 CPU cores</div>
+      </article>
+      <article class="finding">
+        <div class="big">2.5×</div>
+        <h3>Encode each row once</h3>
+        <p>A batch holds ~71,000 sampled rows but only ~22,600 distinct ones (a race appears 33× on average). Encoding distinct rows once makes a run 2.5× faster with the same validation score (0.787 vs 0.782).</p>
+        <div class="src">PR #5 · <code>--dedup-encoder</code>, off by default</div>
+      </article>
+      <article class="finding">
+        <div class="big">5 / 22</div>
+        <h3>Columns with missing values stop learning</h3>
+        <p>In PyTorch Frame 0.3.0 a missing value gives its column's weights a NaN gradient; after the first step <code>results.position</code>, <code>rank</code>, <code>fastestLap</code>, <code>milliseconds</code> and <code>number</code> encode to 0. Fixing it changes nothing measurable on driver-top3 (0.783 vs 0.780).</p>
+        <div class="src">Issue #6 · PR #8 · <code>--nan-safe-numerical</code></div>
+      </article>
+      <article class="finding">
+        <div class="big">3 of 9</div>
+        <h3>Tables the model never sees</h3>
+        <p><code>circuits</code>, <code>constructor_results</code> and <code>constructor_standings</code> are 3 hops from <code>drivers</code>; a 2-layer GNN samples none of their rows. This is the paper's "semantic fragmentation" in miniature.</p>
+        <div class="src">Walkthrough 1</div>
+      </article>
+      <article class="finding">
+        <div class="big">~7%</div>
+        <h3>Sampling is mostly fixed</h3>
+        <p>Only 7–8% of targets have more eligible rows than the fan-out of 128, and hop 2 never needs sampling (every row has one race). Over 90% of targets see the same subgraph in every epoch.</p>
+        <div class="src">PR #5 · profiling README §4</div>
+      </article>
+    </div>
+  </section>
+
+  <section id="log" aria-labelledby="log-h">
+    <div class="section-head">
+      <div class="eyebrow">Updated as we go</div>
+      <h2 id="log-h">Log</h2>
+    </div>
+    <ol class="log">
+      <li><time datetime="2026-10-23">2026-10-23</time><div>Workspace, PyG fork and setup script; the authors' code read for reference (no license, never copied).</div></li>
+      <li><time datetime="2026-10-26">2026-10-26</time><div>Plan 00 (baseline) agreed. Walkthrough 1: database, graph, temporal sampling.</div></li>
+      <li><time datetime="2026-10-28">2026-10-28</time><div>Walkthrough 2: encoders, one GraphSAGE layer recomputed by hand, loss, one optimiser step. <code>train.py</code> aligned with RelBench's official example (PR #2).</div></li>
+      <li><time datetime="2026-10-29">2026-10-29</time><div>GloVe text features (PR #4). Official baseline on driver-top3, 10 and 20 epochs (draft PR #7). Profiling and encoder deduplication (PR #5). NaN-gradient issue found (#6) and fixed behind a flag (PR #8). <code>train.py</code> reproduces the official script within noise.</div></li>
+      <li><time datetime="2026-10-30">2026-10-30</time><div>Deduplication keeps accuracy (arm C). Plan 01 written: column and table gates (PR #9). Decision: driver-top3 is the development task; other tasks once improvements show.</div></li>
+      <li class="next"><time>next</time><div>Plan 01 review, then <code>HardConcreteGate</code> → column and table gates → the first comparison against Base.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <div>Data: RelBench <code>rel-f1</code>, task <code>driver-top3</code>. Paper: Cheng &amp; Luo, <em>What Makes a Desired Graph for Relational Deep Learning?</em>, ICML 2026 (arXiv:2606.08491).</div>
+    <div>Code and raw results: project repo <code>HARSHALK2598/cs224w-structural-optimizer</code>.</div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- tiny SVG helpers ----------
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function t(x, y, s, cls, anchor, extra) {
+    return '<text x="' + x + '" y="' + y + '" class="' + (cls || "s-label") + '"' +
+      (anchor ? ' text-anchor="' + anchor + '"' : "") + (extra || "") + ">" + esc(s) + "</text>";
+  }
+  function r(x, y, w, h, cls, extra) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" class="' + (cls || "s-box") + '"' + (extra || "") + "></rect>";
+  }
+  function arrow(x1, y1, x2, y2) {
+    var a = Math.atan2(y2 - y1, x2 - x1), s = 7;
+    var p1 = (x2 - s * Math.cos(a - 0.45)) + "," + (y2 - s * Math.sin(a - 0.45));
+    var p2 = (x2 - s * Math.cos(a + 0.45)) + "," + (y2 - s * Math.sin(a + 0.45));
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="s-arrow"></line>' +
+      '<polygon points="' + x2 + "," + y2 + " " + p1 + " " + p2 + '" class="s-head"></polygon>';
+  }
+  function grid(x, y, rows, cols, cw, ch, color, opts) {
+    opts = opts || {};
+    var out = "";
+    for (var i = 0; i < rows; i++) {
+      for (var j = 0; j < cols; j++) {
+        var faded = opts.fade && opts.fade(i, j);
+        var op = faded ? 0.18 : (opts.shade ? opts.shade(i, j) : 0.55);
+        out += '<rect x="' + (x + j * cw) + '" y="' + (y + i * ch) + '" width="' + cw + '" height="' + ch +
+          '" class="s-cell" style="fill:' + color + ";opacity:" + op + '"></rect>';
+      }
+    }
+    return out;
+  }
+  function g(inner, delay, cls) {
+    return '<g class="' + (reduce ? "" : "appear ") + (cls || "") + '" style="animation-delay:' + (delay || 0) + 'ms">' + inner + "</g>";
+  }
+  function svg(h, inner) {
+    return '<svg viewBox="0 0 960 ' + h + '" role="img" xmlns="' + NS + '">' + inner + "</svg>";
+  }
+  var TC = {
+    results: "var(--t-results)", drivers: "var(--t-drivers)", races: "var(--t-races)",
+    qualifying: "var(--t-qualifying)", standings: "var(--t-standings)", constructors: "var(--t-constructors)",
+    constructor_standings: "var(--t-cstand)", constructor_results: "var(--t-cres)", circuits: "var(--t-circuits)"
+  };
+
+  // ---------- the steps ----------
+  var TABLES = [
+    ["races", 820, 7], ["circuits", 77, 8], ["drivers", 857, 7], ["constructors", 211, 4],
+    ["results", 20323, 15], ["qualifying", 4082, 7], ["standings", 28115, 7],
+    ["constructor_results", 9408, 5], ["constructor_standings", 10170, 7]
+  ];
+  var RESULT_COLS = ["resultId", "raceId", "driverId", "constructorId", "number", "grid", "position",
+    "positionOrder", "points", "laps", "milliseconds", "fastestLap", "rank", "statusId", "date"];
+  var ROLE = { resultId: "pk", raceId: "fk", driverId: "fk", constructorId: "fk", date: "time" };
+  var ROWS = [
+    ["0", "0", "660", "152", "18", "21", "11", "11", "0.0", "64", "NaN", "NaN", "NaN", "16", "1950-05-13"],
+    ["1", "0", "790", "149", "8", "12", "NaN", "21", "0.0", "2", "NaN", "NaN", "NaN", "126", "1950-05-13"],
+    ["2", "0", "579", "49", "1", "3", "NaN", "12", "0.0", "62", "NaN", "NaN", "NaN", "44", "1950-05-13"]
+  ];
+  var FEAT_COLS = ["fastestLap", "grid", "laps", "milliseconds", "number", "points", "position", "positionOrder", "rank", "statusId", "date"];
+
+  var closed = {}; // column gates toggled off in step 7 (illustration only)
+
+  var STEPS = [
+    {
+      name: "Database",
+      title: "1 · Nine tables",
+      body: "rel-f1 is a Formula 1 database: races, drivers, qualifying sessions, results and championship standings. Each table is a pandas DataFrame with a primary key, foreign keys to other tables and, for event tables, a date. We follow the results table, the biggest one the model actually reads.",
+      facts: [["tables", "9"], ["foreign keys", "13"], ["results rows", "20,323"], ["results columns", "15"]],
+      code: "db = load_dataset('rel-f1').get_db()\ndb.table_dict['results'].df.shape   # (20323, 15)",
+      draw: function () {
+        var out = "", x0 = 24, y0 = 28, w = 210, h = 58, gap = 14;
+        TABLES.forEach(function (tb, i) {
+          var col = i % 3, row = Math.floor(i / 3);
+          var x = x0 + col * (w + gap), y = y0 + row * (h + gap);
+          var hl = tb[0] === "results";
+          out += g(r(x, y, w, h, "s-box", hl ? ' style="stroke:var(--accent);stroke-width:2"' : "") +
+            '<rect x="' + x + '" y="' + y + '" width="6" height="' + h + '" rx="3" style="fill:' + TC[tb[0]] + '"></rect>' +
+            t(x + 16, y + 24, tb[0], "s-label") +
+            t(x + 16, y + 44, tb[1].toLocaleString("en-US") + " rows · " + tb[2] + " cols", "s-mono-muted"), i * 40);
+        });
+        // a peek at results
+        var px = 690, py = 28;
+        out += g(t(px, py + 12, "results, first rows", "s-small") +
+          r(px, py + 20, 252, 190, "s-panel") +
+          ["resultId", "raceId", "driverId", "grid", "position", "points", "date"].map(function (c, k) {
+            return t(px + 12, py + 44 + k * 24, c, "s-mono-muted") +
+              t(px + 104, py + 44 + k * 24, ROWS[0][RESULT_COLS.indexOf(c)], "s-mono") +
+              t(px + 172, py + 44 + k * 24, ROWS[1][RESULT_COLS.indexOf(c)], "s-mono");
+          }).join(""), 400);
+        out += g(t(24, 262, "results = one row per driver per race. NaN means missing (here: did not finish).", "s-small"), 500);
+        return svg(280, out);
+      }
+    },
+    {
+      name: "Keys",
+      title: "2 · Keys become structure, the rest becomes features",
+      body: "make_pkey_fkey_graph() reads each column's role. The primary key becomes the node index: row i of results is node i. Each foreign key becomes an edge to the row it points at. The date is kept separately as the row's time. What is left are 11 feature columns.",
+      facts: [["primary key", "→ node index"], ["3 foreign keys", "→ 3 edge types (+3 reverse)"], ["date", "→ time + 1 feature"], ["features", "15 → 11 columns"]],
+      code: "data, col_stats = make_pkey_fkey_graph(db, col_to_stype_dict, ...)\n# row i of a table == node i of that node type",
+      draw: function () {
+        var out = "", x0 = 24, y0 = 36, cw = 60;
+        RESULT_COLS.forEach(function (c, k) {
+          var x = x0 + k * cw, role = ROLE[c] || "feat";
+          var col = role === "pk" ? "var(--ink)" : role === "fk" ? "var(--cool)" : "var(--t-results)";
+          out += g('<rect x="' + x + '" y="' + y0 + '" width="' + (cw - 4) + '" height="120" rx="4" style="fill:' + col + ';opacity:' + (role === "feat" || role === "time" ? 0.5 : 0.85) + '"></rect>' +
+            '<text transform="translate(' + (x + cw / 2 - 2) + ',' + (y0 + 112) + ') rotate(-90)" class="s-mono" style="fill:var(--surface)">' + esc(c) + "</text>", k * 25);
+        });
+        out += g(t(24, 196, "primary key", "s-label") + arrow(70, 202, 70, 232) + t(24, 252, "node id 0 … 20,322", "s-mono-muted"), 450);
+        out += g(t(110, 196, "foreign keys", "s-label") + arrow(160, 202, 160, 232) + t(110, 252, "edges to races, drivers, constructors", "s-mono-muted"), 550);
+        out += g(t(470, 196, "11 feature columns (numbers + date)", "s-label") + arrow(560, 202, 560, 232) + t(470, 252, "the TensorFrame (next step)", "s-mono-muted"), 650);
+        out += g(t(830, 196, "date", "s-label") + arrow(870, 202, 870, 232) + t(800, 252, "also time (Unix s)", "s-mono-muted"), 750);
+        return svg(280, out);
+      }
+    },
+    {
+      name: "TensorFrame",
+      title: "3 · The TensorFrame: typed input values, not embeddings",
+      body: "PyTorch Frame groups the feature columns by type and stores them as tensors, one row per database row, in table order. Numbers are kept raw (normalised later inside the model), dates are split into 7 parts, and text is turned into frozen 300-number GloVe vectors once. Nothing here is learned.",
+      facts: [["results numerical", "[20323, 10]"], ["results timestamp", "[20323, 1, 7]"], ["drivers timestamp", "[857, 1, 7]"], ["drivers text (GloVe)", "[857, 5 × 300]"]],
+      code: "tf = data['results'].tf\ntf.feat_dict[stype.numerical].shape   # (20323, 10)\ntf.feat_dict[stype.timestamp].shape   # (20323, 1, 7)",
+      draw: function () {
+        var out = "";
+        out += g(t(24, 30, "data['results'].tf", "s-title") +
+          grid(24, 48, 12, 10, 22, 14, TC.results) + t(24, 236, "numerical", "s-small") + t(24, 254, "[20323, 10]", "s-shape") +
+          grid(270, 48, 12, 7, 14, 14, "var(--t-races)") + t(270, 236, "timestamp: y m d wd h min s", "s-small") + t(270, 254, "[20323, 1, 7]", "s-shape"), 0);
+        out += g(t(24, 214, "… 20,323 rows, same order as the table", "s-mono-muted"), 200);
+        out += g(t(500, 30, "data['drivers'].tf", "s-title") +
+          grid(500, 48, 12, 7, 14, 14, "var(--t-races)") + t(500, 236, "timestamp (dob)", "s-small") + t(500, 254, "[857, 1, 7]", "s-shape") +
+          grid(620, 48, 12, 15, 20, 14, TC.drivers, { shade: function (i, j) { return 0.35 + 0.25 * ((j % 3) / 2); } }) +
+          t(620, 236, "text: code, driverRef, forename, nationality, surname", "s-small") + t(620, 254, "[857, 5 × 300]  (GloVe, frozen)", "s-shape"), 300);
+        return svg(280, out);
+      }
+    },
+    {
+      name: "Graph",
+      title: "4 · The graph: 9 node types, 26 edge types",
+      body: "Every table is a node type and every foreign key gives two edge types, the link (f2p, row → referenced row) and its reverse (rev_f2p). Message passing follows these edges. drivers, our prediction target, is directly linked to results, qualifying and standings; races and constructors are 2 hops away; three tables are 3 hops away and never reach a 2-layer model.",
+      facts: [["node types", "9"], ["edge types", "26 (13 × 2)"], ["hops from drivers", "1: results, qualifying, standings"], ["", "2: races, constructors · 3: the rest"]],
+      code: "data.node_types     # 9\nlen(data.edge_types)   # 26\ndata['results', 'f2p_driverId', 'drivers'].edge_index.shape   # (2, 20323)",
+      draw: function () {
+        var P = {
+          drivers: [480, 150], results: [320, 70], qualifying: [320, 150], standings: [320, 230],
+          races: [150, 110], constructors: [640, 110], circuits: [40, 200],
+          constructor_results: [800, 60], constructor_standings: [800, 200]
+        };
+        var E = [["results", "drivers"], ["qualifying", "drivers"], ["standings", "drivers"], ["results", "races"], ["qualifying", "races"],
+          ["standings", "races"], ["results", "constructors"], ["qualifying", "constructors"], ["races", "circuits"],
+          ["constructor_results", "constructors"], ["constructor_standings", "constructors"], ["constructor_results", "races"], ["constructor_standings", "races"]];
+        var hop = { drivers: 0, results: 1, qualifying: 1, standings: 1, races: 2, constructors: 2, circuits: 3, constructor_results: 3, constructor_standings: 3 };
+        var out = "";
+        E.forEach(function (e, i) {
+          var a = P[e[0]], b = P[e[1]];
+          var far = hop[e[0]] === 3 || hop[e[1]] === 3;
+          out += g('<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '" class="s-line"' + (far ? ' style="stroke-dasharray:4 4"' : "") + "></line>", i * 30);
+        });
+        Object.keys(P).forEach(function (k, i) {
+          var p = P[k], far = hop[k] === 3;
+          out += g('<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + (k === "drivers" ? 26 : 20) + '" style="fill:' + TC[k] + ';opacity:' + (far ? 0.3 : 0.9) + '"></circle>' +
+            t(p[0], p[1] + (k === "drivers" ? 44 : 36), k, "s-small", "middle") +
+            t(p[0], p[1] + 4, hop[k] === 0 ? "target" : "hop " + hop[k], "s-mono", "middle", ' style="fill:var(--surface);font-size:10.5px"'), 300 + i * 40);
+        });
+        return svg(280, out);
+      }
+    },
+    {
+      name: "Sampling",
+      title: "5 · Sampling a batch: only rows from before the prediction time",
+      body: "A training example is a (driver, time) pair, a seed. For each seed the NeighborLoader picks up to 4 rows per relation whose date is before the seed's time (hop 1), then the rows those link to (hop 2). Later rows are never eligible, so the model cannot see the future. The loader works only on indices and times; no embedding exists yet.",
+      facts: [["seeds (driverId)", "29, 78, 73, 87"], ["fan-out", "4 then 2 (baseline: 128, 64)"], ["rows sampled", "races 38 · results 16 · standings 16"], ["", "qualifying 12 · constructors 6 · drivers 4"]],
+      code: "loader = NeighborLoader(data, num_neighbors=[4, 2], time_attr='time',\n                        input_nodes=('drivers', ids), input_time=times)\nbatch = next(iter(loader))",
+      draw: function () {
+        var out = "", axisY = 230, x0 = 60, x1 = 920, seedX = 640;
+        out += g('<line x1="' + x0 + '" y1="' + axisY + '" x2="' + x1 + '" y2="' + axisY + '" class="s-line"></line>' +
+          t(x0, axisY + 22, "earlier", "s-small") + t(x1, axisY + 22, "later", "s-small", "end") +
+          '<line x1="' + seedX + '" y1="40" x2="' + seedX + '" y2="' + axisY + '" style="stroke:var(--accent);stroke-width:2;stroke-dasharray:5 4"></line>' +
+          t(seedX + 8, 52, "seed time t", "s-shape") +
+          '<rect x="' + (seedX + 2) + '" y="40" width="' + (x1 - seedX - 2) + '" height="' + (axisY - 40) + '" style="fill:var(--line);opacity:0.35"></rect>' +
+          t(seedX + 140, 140, "future: never sampled", "s-small", "middle") +
+          t(x1, 262, "schematic: one seed, one relation; real counts on the right", "s-small", "end"), 0);
+        out += g('<circle cx="' + (seedX - 30) + '" cy="70" r="16" style="fill:var(--t-drivers)"></circle>' + t(seedX - 30, 74, "29", "s-mono", "middle", ' style="fill:var(--surface)"') + t(seedX - 52, 74, "seed driver", "s-small", "end"), 150);
+        var xs = [130, 230, 330, 430, 520, 580, 700, 780, 860];
+        xs.forEach(function (x, i) {
+          var future = x > seedX, picked = !future && i % 2 === 0;
+          var y = 150;
+          out += g('<rect x="' + (x - 12) + '" y="' + (y - 12) + '" width="24" height="24" rx="4" style="fill:var(--t-results);opacity:' + (future ? 0.15 : picked ? 0.9 : 0.35) + '"></rect>' +
+            (picked ? '<line x1="' + x + '" y1="' + (y - 12) + '" x2="' + (seedX - 30) + '" y2="86" style="stroke:var(--t-results);stroke-width:1.5"></line>' : ""), 400 + i * 90);
+          if (picked) {
+            out += g('<circle cx="' + x + '" cy="205" r="8" style="fill:var(--t-races);opacity:0.9"></circle>' +
+              '<line x1="' + x + '" y1="197" x2="' + x + '" y2="' + (y + 12) + '" style="stroke:var(--t-races);stroke-width:1.2"></line>', 1400 + i * 60);
+          }
+        });
+        out += g('<rect x="70" y="40" width="12" height="12" rx="2" style="fill:var(--t-results);opacity:0.9"></rect>' + t(88, 50, "results row picked (hop 1)", "s-small") +
+          '<rect x="70" y="60" width="12" height="12" rx="2" style="fill:var(--t-results);opacity:0.35"></rect>' + t(88, 70, "eligible, not picked (fan-out limit)", "s-small") +
+          '<circle cx="76" cy="86" r="6" style="fill:var(--t-races)"></circle>' + t(88, 90, "its race (hop 2)", "s-small"), 1900);
+        return svg(270, out);
+      }
+    },
+    {
+      name: "Slicing",
+      title: "6 · Slicing the TensorFrame by n_id",
+      body: "The sampler returns n_id, the global row ids it picked for each table. PyG's loader then slices every per-node attribute with them, the TensorFrame included: batch['results'].tf is exactly data['results'].tf[n_id] (checked). Inside the batch, rows get local positions 0…15, edge_index is renumbered to those positions, and batch says which seed each row belongs to.",
+      facts: [["n_id (results)", "14290, 14594, 13849, 14993, …"], ["batch tf", "16 rows × 11 cols"], ["local edge_index", "[[0,1,2,3],[0,0,0,0]]"], ["batch vector", "0,0,0,0,1,1, …"]],
+      code: "r = batch['results']\nr.n_id          # global row ids, shape (16,)\nr.tf            # == data['results'].tf[r.n_id]\nr.batch         # which seed each row belongs to",
+      draw: function () {
+        var out = "", picked = [3, 8, 11];
+        out += g(t(24, 28, "data['results'].tf   20,323 rows", "s-small") +
+          grid(24, 40, 14, 11, 16, 13, TC.results, { fade: function (i) { return picked.indexOf(i) < 0; } }) +
+          t(24, 240, "row 13849 · row 14290 · row 14594 …", "s-mono-muted"), 0);
+        out += g(arrow(230, 130, 380, 130) + t(305, 118, "index_select(n_id)", "s-mono", "middle"), 300);
+        out += g(t(400, 28, "batch['results'].tf   16 rows", "s-small") +
+          grid(400, 40, 16, 11, 16, 11, TC.results) +
+          t(400, 240, "[16, 11]", "s-shape"), 600);
+        var lx = 640;
+        out += g(t(lx, 28, "local ids inside the batch", "s-small") +
+          [0, 1, 2, 3].map(function (k) {
+            return '<rect x="' + lx + '" y="' + (44 + k * 28) + '" width="22" height="20" rx="3" style="fill:var(--t-results);opacity:0.8"></rect>' +
+              t(lx + 11, 58 + k * 28, k, "s-mono", "middle", ' style="fill:var(--surface)"') +
+              '<line x1="' + (lx + 24) + '" y1="' + (54 + k * 28) + '" x2="' + (lx + 140) + '" y2="98" class="s-line"></line>';
+          }).join("") +
+          '<circle cx="' + (lx + 156) + '" cy="98" r="16" style="fill:var(--t-drivers)"></circle>' + t(lx + 156, 102, "0", "s-mono", "middle", ' style="fill:var(--surface)"') +
+          t(lx + 180, 102, "seed 0 (driver 29)", "s-small") +
+          t(lx, 190, "edge_index [[0,1,2,3],[0,0,0,0]]", "s-mono") +
+          t(lx, 212, "n_id maps local → global row", "s-mono-muted"), 900);
+        return svg(260, out);
+      }
+    },
+    {
+      name: "Column encoders",
+      title: "7 · Per-column encoders: one 128-number vector per column",
+      body: "Now the model starts. Each table's encoder turns every column of every sampled row into a vector of 128 numbers, according to the column's type: a number is standardised and scaled, (x − mean)/std · w + b; a date goes through a positional encoding; a text vector goes through a 300 → 128 linear layer. Click a column to switch its gate off.",
+      gate: "Plan 01 · column gates sit here: one learned switch per column multiplies its 128-vector. A closed column contributes zeros, like a missing value.",
+      facts: [["results", "[16, 11, 128]"], ["drivers", "[4, 6, 128]"], ["numerical", "(x − μ)/σ · w + b"], ["text", "Linear(300 → 128)"]],
+      code: "x_cols, names = model.encoder.encoders['results'].encoder(batch['results'].tf)\nx_cols.shape   # (16, 11, 128)",
+      draw: function () {
+        var out = "", x0 = 24, cw = 74;
+        out += g(t(x0, 24, "batch['results'] · 16 rows", "s-small"), 0);
+        FEAT_COLS.forEach(function (c, k) {
+          var x = x0 + k * cw, off = !!closed[c];
+          out += '<g class="colhit' + (off ? " closed" : "") + '" data-col="' + c + '" tabindex="0" role="button" aria-pressed="' + (!off) + '" aria-label="Column ' + c + ' gate ' + (off ? "closed" : "open") + '">' +
+            g(r(x, 36, cw - 8, 26, off ? "s-panel" : "s-box") + t(x + (cw - 8) / 2, 53, c.length > 9 ? c.slice(0, 8) + "…" : c, "s-mono", "middle", ' style="font-size:10.5px"') +
+              grid(x + 6, 72, 10, 4, (cw - 20) / 4, 13, c === "date" ? "var(--t-races)" : TC.results) +
+              '<rect x="' + (x + 2) + '" y="210" width="' + (cw - 12) + '" height="18" rx="9" class="s-gate"></rect>' +
+              t(x + (cw - 8) / 2, 223, off ? "g = 0" : "g = 1", "s-gate-text", "middle"), 100 + k * 50) + "</g>";
+        });
+        out += g(t(x0, 252, "each column → [16 rows, 128]   ·   stacked: [16, 11, 128]", "s-shape"), 800);
+        return svg(270, out);
+      }
+    },
+    {
+      name: "Row encoder",
+      title: "8 · Row encoder and time: h⁽⁰⁾, one vector per row",
+      body: "The 11 column vectors of a row are concatenated (11 × 128 = 1408 numbers) and passed through a ResNet: 4 residual blocks (the first maps 1408 → 128) and a small decoder. Then a time encoding is added: how many days before the seed's time the row happened, as sinusoids through a linear layer. The result is h⁽⁰⁾, the input to message passing.",
+      gate: "Plan 01 · the table gate sits here: one learned switch per table multiplies the whole row vector (after the time encoding, so a closed table sends nothing).",
+      facts: [["flatten", "[16, 1408]"], ["ResNet block 0", "Linear(1408 → 128) + shortcut"], ["after 4 blocks + decoder", "[16, 128]"], ["+ time encoding", "h⁽⁰⁾ [16, 128]"]],
+      code: "flat = x_cols.reshape(16, -1)        # (16, 1408)\nh = enc.decoder(enc.backbone(flat))  # (16, 128)\nh0 = h + temporal_encoder(...)      # (16, 128)",
+      draw: function () {
+        var out = "";
+        out += g(t(24, 30, "[16, 11, 128]", "s-shape") + grid(24, 44, 8, 11, 9, 16, TC.results), 0);
+        out += g(arrow(130, 108, 176, 108) + t(153, 96, "flatten", "s-small", "middle"), 200);
+        out += g(t(186, 30, "[16, 1408]", "s-shape") + grid(186, 44, 8, 1, 120, 16, TC.results, { shade: function () { return 0.45; } }), 350);
+        var bx = 340;
+        for (var b = 0; b < 4; b++) {
+          out += g(r(bx + b * 92, 76, 80, 64, "s-box") + t(bx + b * 92 + 40, 102, "block " + b, "s-label", "middle") +
+            t(bx + b * 92 + 40, 122, b === 0 ? "1408 → 128" : "128 → 128", "s-mono-muted", "middle") +
+            (b < 3 ? arrow(bx + b * 92 + 80, 108, bx + b * 92 + 92, 108) : ""), 500 + b * 120);
+        }
+        out += g(arrow(316, 108, 338, 108) + arrow(704, 108, 724, 108) + r(726, 80, 70, 56, "s-box") + t(761, 104, "decoder", "s-label", "middle") + t(761, 122, "LN·ReLU·Lin", "s-mono-muted", "middle"), 1000);
+        out += g(arrow(796, 108, 816, 108) + t(818, 30, "[16, 128]", "s-shape") + grid(818, 44, 8, 1, 46, 16, TC.results), 1150);
+        out += g('<circle cx="842" cy="200" r="13" class="s-box"></circle>' + t(842, 205, "+", "s-label", "middle") +
+          '<line x1="842" y1="174" x2="842" y2="187" class="s-arrow"></line>' +
+          t(560, 205, "time encoding: days before seed → sinusoids → Linear", "s-small") + arrow(760, 200, 827, 200), 1300);
+        out += g('<rect x="868" y="188" width="74" height="24" rx="12" class="s-gate"></rect>' + t(905, 204, "× s_T", "s-gate-text", "middle") +
+          t(842, 244, "h⁽⁰⁾ [16, 128] → GraphSAGE", "s-shape", "middle"), 1500);
+        return svg(270, out);
+      }
+    }
+  ];
+
+  // ---------- stepper wiring ----------
+  var stage = document.getElementById("stage");
+  var pills = document.getElementById("pills");
+  var cur = 0, timer = null;
+  var playBtn = document.getElementById("play");
+
+  STEPS.forEach(function (s, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "pill"; b.textContent = (i + 1) + " " + s.name; b.setAttribute("role", "listitem");
+    b.addEventListener("click", function () { stop(); show(i); });
+    pills.appendChild(b);
+  });
+
+  function show(i) {
+    cur = (i + STEPS.length) % STEPS.length;
+    var s = STEPS[cur];
+    stage.innerHTML = s.draw();
+    document.getElementById("cap-title").textContent = s.title;
+    document.getElementById("cap-body").textContent = s.body;
+    var gate = document.getElementById("cap-gate");
+    if (s.gate) { gate.textContent = s.gate; gate.hidden = false; } else { gate.hidden = true; }
+    document.getElementById("cap-facts").innerHTML = s.facts.map(function (f) {
+      return '<div class="fact"><span class="k">' + esc(f[0]) + '</span><span class="v">' + esc(f[1]) + "</span></div>";
+    }).join("");
+    document.getElementById("cap-code").textContent = s.code;
+    document.getElementById("counter").textContent = (cur + 1) + " / " + STEPS.length;
+    Array.prototype.forEach.call(pills.children, function (p, k) {
+      if (k === cur) p.setAttribute("aria-current", "step"); else p.removeAttribute("aria-current");
+    });
+    wireColumns();
+  }
+  function wireColumns() {
+    Array.prototype.forEach.call(stage.querySelectorAll(".colhit"), function (el) {
+      function toggle() { var c = el.getAttribute("data-col"); closed[c] = !closed[c]; show(cur); }
+      el.addEventListener("click", toggle);
+      el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    });
+  }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } playBtn.textContent = "Play"; playBtn.setAttribute("aria-pressed", "false"); }
+  function play() {
+    if (timer) { stop(); return; }
+    playBtn.textContent = "Pause"; playBtn.setAttribute("aria-pressed", "true");
+    timer = setInterval(function () { if (cur === STEPS.length - 1) { stop(); return; } show(cur + 1); }, 5200);
+  }
+  document.getElementById("next").addEventListener("click", function () { stop(); show(cur + 1); });
+  document.getElementById("prev").addEventListener("click", function () { stop(); show(cur - 1); });
+  playBtn.addEventListener("click", play);
+  document.addEventListener("keydown", function (e) {
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    var inStepper = e.target === document.body || (e.target.closest && e.target.closest(".stepper"));
+    if (!inStepper) return;
+    if (e.key === "ArrowRight") { stop(); show(cur + 1); }
+    if (e.key === "ArrowLeft") { stop(); show(cur - 1); }
+  });
+  show(0);
+
+  // ---------- results ----------
+  var RUNS = [
+    { id: "Official, 10 ep", what: "RelBench gnn_entity.py, unmodified (the Base reference)", time: "105 s", where: "PR #7",
+      val: [0.7480, 0.7862, 0.7767, 0.7773, 0.7084], test: [0.8007, 0.7871, 0.7662, 0.7722, 0.7532] },
+    { id: "Official, 20 ep", what: "same script, --epochs 20", time: "190 s", where: "PR #7",
+      val: [0.8036, 0.8012, 0.7834, 0.7782, 0.7875], test: [0.8125, 0.8217, 0.7698, 0.7729, 0.7929] },
+    { id: "A · train.py", what: "our script, 20 epochs, no flags", time: "185 s", where: "PR #7",
+      val: [0.7828, 0.7873, 0.7744, 0.7896, 0.7775], test: [0.7613, 0.7923, 0.7688, 0.7769, 0.8025] },
+    { id: "B · NaN fix", what: "A + --nan-safe-numerical", time: "180 s", where: "PR #8",
+      val: [0.7863, 0.7860, 0.7716, 0.7958, 0.7771], test: [0.7858, 0.7905, 0.7684, 0.7571, 0.8110] },
+    { id: "C · dedup", what: "A + --dedup-encoder", time: "74 s", where: "PR #5",
+      val: [0.7934, 0.7749, 0.7856, 0.7895, 0.7889], test: [0.8225, 0.7998, 0.7723, 0.7799, 0.7867] }
+  ];
+  var PAPER = { mean: 0.8148, std: 0.0106 };
+  function mean(a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; }
+  function std(a) { var m = mean(a); return Math.sqrt(a.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / a.length); }
+  function fmt(a) { return mean(a).toFixed(3) + " ± " + std(a).toFixed(3); }
+
+  document.getElementById("runs-table").innerHTML = RUNS.map(function (rn) {
+    return "<tr><td>" + esc(rn.id) + "</td><td>" + esc(rn.what) + '</td><td class="num">' + fmt(rn.val) + '</td><td class="num">' + fmt(rn.test) +
+      '</td><td class="num">' + esc(rn.time) + "</td><td>" + esc(rn.where) + "</td></tr>";
+  }).join("") + '<tr><td>Paper\'s Base</td><td>Table 2, tuned learning rate and hidden size</td><td class="num">–</td><td class="num">0.815 ± 0.011</td><td class="num">–</td><td>arXiv:2606.08491</td></tr>';
+
+  var split = "val";
+  function drawChart() {
+    var W = 960, rowH = 46, top = 30, left = 170, right = 150, lo = 0.70, hi = 0.84;
+    var H = top + RUNS.length * rowH + 50;
+    function X(v) { return left + (v - lo) / (hi - lo) * (W - left - right); }
+    var out = "";
+    for (var v = 0.70; v <= 0.8401; v += 0.02) {
+      out += '<line x1="' + X(v) + '" y1="' + top + '" x2="' + X(v) + '" y2="' + (H - 40) + '" style="stroke:var(--line);stroke-width:1"></line>' +
+        t(X(v), H - 20, v.toFixed(2), "s-mono-muted", "middle");
+    }
+    if (split === "test") {
+      out += '<rect x="' + X(PAPER.mean - PAPER.std) + '" y="' + top + '" width="' + (X(PAPER.mean + PAPER.std) - X(PAPER.mean - PAPER.std)) +
+        '" height="' + (H - 40 - top) + '" style="fill:var(--accent-soft)"></rect>' +
+        '<line x1="' + X(PAPER.mean) + '" y1="' + top + '" x2="' + X(PAPER.mean) + '" y2="' + (H - 40) + '" style="stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4"></line>' +
+        t(X(PAPER.mean) + 6, top - 10, "paper's Base 0.815", "s-gate-text");
+    }
+    RUNS.forEach(function (rn, i) {
+      var a = split === "val" ? rn.val : rn.test, y = top + i * rowH + rowH / 2, m = mean(a), s = std(a);
+      out += t(16, y + 4, rn.id, "s-label");
+      out += '<line x1="' + X(m - s) + '" y1="' + y + '" x2="' + X(m + s) + '" y2="' + y + '" style="stroke:var(--cool);stroke-width:5;stroke-linecap:round;opacity:0.35"></line>';
+      a.forEach(function (v) { out += '<circle cx="' + X(v) + '" cy="' + y + '" r="4.5" style="fill:var(--ink);opacity:0.7"></circle>'; });
+      out += '<line x1="' + X(m) + '" y1="' + (y - 11) + '" x2="' + X(m) + '" y2="' + (y + 11) + '" style="stroke:var(--cool);stroke-width:2.5"></line>';
+      out += t(W - right + 14, y + 4, m.toFixed(3) + " ± " + s.toFixed(3), "s-mono");
+    });
+    document.getElementById("chart").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="ROC-AUC per run, ' + (split === "val" ? "validation" : "test") + '">' + out + "</svg>";
+  }
+  function setSplit(s) {
+    split = s;
+    document.getElementById("split-val").setAttribute("aria-pressed", s === "val");
+    document.getElementById("split-test").setAttribute("aria-pressed", s === "test");
+    drawChart();
+  }
+  document.getElementById("split-val").addEventListener("click", function () { setSplit("val"); });
+  document.getElementById("split-test").addEventListener("click", function () { setSplit("test"); });
+  drawChart();
+})();
+</script>
