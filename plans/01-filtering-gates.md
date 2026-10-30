@@ -40,16 +40,121 @@ batch.tf_dict[T]                         raw columns of table T            [N_T 
   └ 2 GraphSAGE layers → head            unchanged
 ```
 
-- **Column gates sit inside the row encoder**, between the per-column encoders and the
-  ResNet, because that is the only place where columns still exist separately. A closed
-  column contributes a zero vector, exactly like a missing value.
-- **The table gate multiplies the whole row vector, after the time encoding.** Applied
-  before it, a "closed" table would still send its time encoding to its neighbours.
-  When $s_T = 0$, every row of T sends zero vectors into message passing.
-- **The target table (`drivers` here) has no table gate:** closing it would remove the
-  very rows being predicted. Its columns are still gated.
-- `rel-f1` has 45 columns in 9 tables, so this adds **45 column gates + 8 table gates =
-  53 learnable logits** (the model has 4.15 M parameters).
+### 2.1 One real row, from DataFrame to $h^{(0)}$
+
+The first row of `results` (the 1950 British Grand Prix, a driver who started 21st and
+finished 11th), followed through each stage of the Base model, without gates.
+
+**Stage 0: DataFrame row** (`db.table_dict['results'].df.iloc[0]`):
+
+| resultId | raceId | driverId | constructorId | number | grid | position | positionOrder | points | laps | milliseconds | fastestLap | rank | statusId | date |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 0 | 660 | 152 | 18 | 21 | 11 | 11 | 0 | 64 | NaN | NaN | NaN | 16 | 1950-05-13 |
+
+**Stage 1: TensorFrame row** (`data['results'].tf`; materialisation, nothing learned).
+The primary key becomes the node id and the 3 foreign keys become edges (both leave
+the table), so $C_\text{results} = 11$ feature columns remain, grouped by stype:
+
+| stype | columns | stored values for row 0 |
+|---|---|---|
+| numerical, `[N, 10]` | fastestLap, grid, laps, milliseconds, number, points, position, positionOrder, rank, statusId | `[NaN, 21, 64, NaN, 18, 0, 11, 11, NaN, 16]` |
+| timestamp, `[N, 1, 7]` | date | `[1950, 4, 12, 5, 0, 0, 0]` (year, month−1, day−1, weekday, h, m, s) |
+
+Other tables also have categorical columns (an integer index per value) and text
+columns (a 300-d GloVe vector each, stored, not learned).
+
+**Stage 2: column encoders** (learned; one small encoder per column $c$). Each column
+value becomes one 128-d vector $e_{v,c}$:
+
+$$
+e_{v,c} =
+\begin{cases}
+\dfrac{x_{v,c} - \mu_c}{\sigma_c}\, w_c + b_c & \text{numerical } (w_c, b_c \in \mathbb{R}^{128})\\[4pt]
+E_c[\,x_{v,c}\,] & \text{categorical (embedding row)}\\[2pt]
+A_c\, \text{GloVe}(x_{v,c}) + b_c & \text{text } (A_c \in \mathbb{R}^{128 \times 300})\\[2pt]
+\textstyle\sum_{k=1}^{7} W_{c,k}\, \text{PE}(x_{v,c,k}) + b_c & \text{timestamp (7 parts)}\\[2pt]
+\mathbf{0} & \text{if } x_{v,c} \text{ is missing (NaN)}
+\end{cases}
+$$
+
+(A missing text value is embedded as the empty string, so it is not $\mathbf{0}$.)
+For row 0, using the training statistics: grid → $\frac{21 - 11.22}{7.48} = 1.31$,
+so $e_{v,\text{grid}} = 1.31\, w_\text{grid} + b_\text{grid}$; points →
+$\frac{0 - 1.09}{2.34} = -0.47$; milliseconds, fastestLap and rank are missing →
+$\mathbf{0}$. Stacking the 11 vectors gives the row's matrix
+
+$$X_v = [\,e_{v,1};\ \dots;\ e_{v,11}\,] \in \mathbb{R}^{11 \times 128}, \qquad \text{batch: } [N, 11, 128].$$
+
+**Stage 3: flatten and the first ResNet layer.** $X_v$ is flattened to
+$\text{vec}(X_v) \in \mathbb{R}^{1408}$ ($11 \times 128$). The first block's linear layer
+$W^{(0)} \in \mathbb{R}^{128 \times 1408}$ splits into one $128 \times 128$ slice per column, so
+
+$$W^{(0)} \text{vec}(X_v) = \sum_{c=1}^{11} W^{(0)}_c\, e_{v,c}.$$
+
+This is the first point where columns are mixed. After it, no part of the vector
+belongs to one column.
+
+**Stage 4: rest of the ResNet, then time.** Three more residual blocks and the decoder
+give one vector $r_v \in \mathbb{R}^{128}$. The time encoder adds how old the row is,
+relative to the seed's prediction time $t_\text{seed}$:
+
+$$h^{(0)}_v = r_v + \text{Lin}_T\big(\text{PE}(\Delta t_v)\big), \qquad \Delta t_v = \frac{t_\text{seed} - t_v}{86400} \text{ days}.$$
+
+**Stage 5: message passing** (simplified; one GraphSAGE layer, sum aggregation, summed
+over relations $R$). A node $v$ receives the sum of its neighbours' vectors:
+
+$$h^{(1)}_v = \text{ReLU}\Big(\text{LN}\Big(\sum_{R} \big[ W^\text{nbr}_R \sum_{u \in \mathcal{N}_R(v)} h^{(0)}_u + W^\text{self}_R\, h^{(0)}_v \big]\Big)\Big).$$
+
+### 2.2 The two gates in this notation
+
+$$\tilde e_{v,c} = g_{T,c}\; e_{v,c} \quad \text{(column gate, between stages 2 and 3)}$$
+$$\tilde h^{(0)}_u = s_T\; h^{(0)}_u \quad \text{(table gate, after stage 4)}$$
+
+Substituting into stages 3 and 5:
+
+$$W^{(0)} \text{vec}(\tilde X_v) = \sum_{c} g_{T,c}\, W^{(0)}_c\, e_{v,c}, \qquad \sum_{u \in \mathcal{N}_R(v),\ u \in T} \tilde h^{(0)}_u = s_T \sum_{u \in \mathcal{N}_R(v),\ u \in T} h^{(0)}_u.$$
+
+So $g_{T,c} = 0$ deletes exactly column $c$'s term, for every row of $T$, and
+$s_T = 0$ deletes exactly table $T$'s first-layer messages. The gates multiply, so
+$\partial \mathcal{L}/\partial g$ exists and the logits $\theta$ get a gradient.
+
+### 2.3 Why these places, and not others
+
+**Column gate: between the column encoders and the ResNet.**
+
+- *Not on the raw values (stages 0–1).* Multiplying a value by 0 does not remove it, it
+  changes it. For row 0, grid = 0 would mean "started from the pit lane", and the
+  encoder would still output $\frac{0 - 11.22}{7.48}\, w_\text{grid} + b_\text{grid} \neq \mathbf{0}$.
+  A categorical index 0 is a real category. The only "absent" value is NaN, and
+  switching to NaN is a hard on/off choice, which gives no gradient.
+- *Not after the first ResNet layer (stage 3 onwards).* The sum above has already
+  mixed all 11 columns, so there is nothing per-column left to switch off. Gating the
+  128 numbers of $r_v$ or $h^{(0)}_v$ is option (a) in §3: it gates mixtures of columns.
+- *Between stages 2 and 3, $g_{T,c} = 0$ gives $\tilde e_{v,c} = \mathbf{0}$*, the same
+  vector a missing numerical, categorical or timestamp value gets. The bias $b_c$ is removed too. A closed column then
+  looks to the model exactly like a column that is always empty, which the model has
+  already learned to handle.
+
+**Table gate: on $h^{(0)}$, after the time encoding.**
+
+- *Not before the time encoding* (on $r_v$). Then
+  $h^{(0)}_u = s_T\, r_u + \text{Lin}_T(\text{PE}(\Delta t_u))$, and with $s_T = 0$
+  each neighbour still receives $\sum_u \text{Lin}_T(\text{PE}(\Delta t_u))$: how many
+  rows of $T$ it has and how recent they are. The table would not be closed.
+- *On $h^{(0)}$*, the paper's Eq. 5 position ($\tilde h_v = s_{T}\, \hat h_v$, applied
+  to the column-filtered output). We read $\hat h_v$ as including the time encoding,
+  for the reason above.
+- **What a closed table still does:** it stays in the graph as a path. In layer 1 its
+  own nodes still receive messages from their neighbours, and in layer 2 they pass
+  those on. For example, with `results` closed, `drivers` still learns about `races`
+  through `results` rows, but nothing from the `results` columns or dates. Removing
+  the table as a path too would mean gating its messages in every layer, which is
+  closer to relation gating (step C). Question 2 in §11.
+- **No gate on the target table** (`drivers`): with $s = 0$ the seed's own vector
+  $h^{(0)}_v$ would be zero. Its columns are still gated.
+
+`rel-f1` has 45 columns in 9 tables, so this adds **45 column gates + 8 table gates =
+53 learnable logits** (the model has 4.15 M parameters).
 
 ## 3. Decision for you: what a "column" gate gates
 
@@ -162,6 +267,7 @@ temperature annealing, other tasks.
 
 1. Gate target: (b) table columns as the main method plus (a) as one arm (recommended),
    or follow the paper's equations, (a) only?
-2. Table gate after the time encoding, and no table gate on the target table: OK?
+2. Table gate after the time encoding, and no table gate on the target table: OK? And
+   is "closed table = no own content, but still a path" (§2.3) what we want for now?
 3. Penalty as sums over gates, as in the paper: OK, or averages, so λ means the same
    for tables with few or many columns?
