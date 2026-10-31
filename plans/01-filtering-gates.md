@@ -252,7 +252,7 @@ so the loss has a gradient with respect to them, and the logits $`\theta`$ are t
   $`h^{(0)}_v`$ would be zero. Its columns are still gated.
 
 `rel-f1` has 45 columns in 9 tables, so this adds **45 column gates + 8 table gates =
-53 learnable logits** (the model has 4.15 M parameters).
+53 learnable logits** (the Base model has 5.08 M parameters; see `notes/notation.md`).
 
 ## 3. Decision for you: what a "column" gate gates
 
