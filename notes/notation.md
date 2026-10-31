@@ -70,6 +70,23 @@ sampled node $`u`$, $`b(u) = i`$ records which example it belongs to, and its ag
 The batch holds, per table, the sliced stored values $`x_{u,c}`$, the edges, $`t_u`$
 and $`b(u)`$.
 
+**The running example:** the first training batch of `driver-top3` (RelBench defaults:
+$`B = 512`$, fan-out [128, 64], $`d = 128`$). Measured:
+
+| Table | Rows in batch $`N_T`$ | Distinct rows | $`C_T`$ | Flattened $`C_T \cdot d`$ |
+|---|---|---|---|---|
+| drivers (the 512 seeds) | 512 | 82 | 6 | 768 |
+| results | 28,230 | 5,051 | 11 | 1,408 |
+| standings | 28,229 | 5,079 | 4 | 512 |
+| qualifying | 11,422 | 1,820 | 3 | 384 |
+| races | 31,548 | 392 | 5 | 640 |
+| constructors | 1,268 | 39 | 3 | 384 |
+| circuits, constructor_results, constructor_standings | 0 (3 hops away) | 0 | | |
+| **Total** | **101,209** | | | |
+
+Edges: 243,256 in 11 of the 26 relations; for example, results → drivers has 28,230
+edges (about 55 `results` rows per seed).
+
 ---
 
 ## 4. Trainable parameters
@@ -82,6 +99,8 @@ and $`b(u)`$.
 | categorical | embedding table $`E_c \in \mathbb{R}^{(K_c + 1) \times d}`$; row 0 (missing) is fixed at zero | $`(K_c + 1)\, d`$ |
 | text | $`A_c \in \mathbb{R}^{d \times 300}`$, $`\mathbf{b}_c \in \mathbb{R}^{d}`$ | $`301\, d`$ |
 | timestamp | $`W_{c,k} \in \mathbb{R}^{d \times 8}`$ for each part $`k = 1..7`$, $`\mathbf{b}_c \in \mathbb{R}^{d}`$ | $`57\, d`$ |
+
+↳ *Example:* `results` (10 numerical + 1 timestamp): 10 × 256 + 7 × 8 × 128 + 128 = 9,856 parameters.
 
 ### 4b. Row encoder $`\Theta_\mathrm{row}`$ (one ResNet per table $`T`$)
 
@@ -104,6 +123,8 @@ The decoder is a LayerNorm and one more linear layer:
 D \in \mathbb{R}^{d \times d}
 ```
 
+↳ *Example:* `results`: $`U^{(1)}_1, P`$ are 128 × 1408; the other 7 $`U`$'s and $`D`$ are 128 × 128; 495,104 parameters in all.
+
 (Each linear layer also has a bias; each LayerNorm has a scale and a shift in
 $`\mathbb{R}^d`$.)
 
@@ -112,6 +133,8 @@ $`\mathbb{R}^d`$.)
 ```math
 M_T \in \mathbb{R}^{d \times d}, \qquad \mathbf{m}_T \in \mathbb{R}^{d}
 ```
+
+↳ *Example:* 128 × 128 + 128 = 16,512 per table; × 6 tables = 99,072.
 
 The positional encoding $`\mathrm{PE}`$ itself is fixed sines and cosines, not learned.
 
@@ -123,6 +146,8 @@ For each layer $`\ell = 1, 2`$ and each relation $`R`$ (one GraphSAGE convolutio
 W^{\mathrm{nbr}}_{\ell,R} \in \mathbb{R}^{d \times d}, \qquad \boldsymbol{\beta}_{\ell,R} \in \mathbb{R}^{d}, \qquad W^{\mathrm{self}}_{\ell,R} \in \mathbb{R}^{d \times d}
 ```
 
+↳ *Example:* (128 × 128 + 128 + 128 × 128) = 32,896 per relation; × 26 relations × 2 layers = 1,710,592.
+
 For each layer and each table: a LayerNorm with scale and shift in $`\mathbb{R}^d`$.
 
 ### 4e. Head $`\Theta_\mathrm{head}`$
@@ -132,6 +157,8 @@ One linear layer:
 ```math
 \mathbf{w}_\mathrm{out} \in \mathbb{R}^{d}, \qquad b_\mathrm{out} \in \mathbb{R}
 ```
+
+↳ *Example:* 128 + 1 = 129 parameters.
 
 ### Parameter count (measured on the model)
 
@@ -162,17 +189,23 @@ Numerical:
 \mathbf{e}_{u,c} = \frac{x_{u,c} - \mu_c}{\sigma_c}\, \mathbf{w}_c + \mathbf{b}_c
 ```
 
+↳ *Example:* `results.grid`: $`x`$ is `[28230]`, $`\mathbf{w}_c, \mathbf{b}_c`$ are `[128]` → $`\mathbf{e}`$ is `[28230, 128]`; all 10 numerical columns → `[28230, 10, 128]`.
+
 Categorical:
 
 ```math
 \mathbf{e}_{u,c} = E_c[\,x_{u,c} + 1\,]
 ```
 
+↳ *Example:* `races.year` ($`K_c = 60`$): $`E_c`$ is `[61, 128]`, $`x`$ is `[31548]` → $`\mathbf{e}`$ is `[31548, 128]`.
+
 Text:
 
 ```math
 \mathbf{e}_{u,c} = A_c\, \mathbf{q}_{u,c} + \mathbf{b}_c
 ```
+
+↳ *Example:* `drivers.surname`: $`\mathbf{q}`$ is `[512, 300]`, $`A_c`$ is `[128, 300]` → `[512, 128]`; all 5 text columns (stored as `[512, 1500]`) → `[512, 5, 128]`.
 
 Timestamp (part $`k`$ of the date is $`x_{u,c,k}`$; the year uses a positional
 encoding of $`x_{u,c,1} - Y_c`$, the other parts a cyclic encoding):
@@ -181,17 +214,23 @@ encoding of $`x_{u,c,1} - Y_c`$, the other parts a cyclic encoding):
 \mathbf{e}_{u,c} = \sum_{k=1}^{7} W_{c,k}\, \mathrm{enc}_k(x_{u,c,k}) + \mathbf{b}_c
 ```
 
+↳ *Example:* `results.date`: $`x`$ is `[28230, 7]`, encodings are `[28230, 7, 8]`, each $`W_{c,k}`$ is `[128, 8]`, summed over 7 parts → `[28230, 128]`.
+
 Missing value (numerical, categorical or timestamp):
 
 ```math
 \mathbf{e}_{u,c} = \mathbf{0}
 ```
 
+↳ *Example:* row 0 of `results` has NaN `milliseconds`, so its vector is 128 zeros.
+
 **Step 2: stack and flatten.**
 
 ```math
 X_u = [\,\mathbf{e}_{u,1};\ \dots;\ \mathbf{e}_{u,C_T}\,] \in \mathbb{R}^{C_T \times d}, \qquad \mathbf{a}^{(0)}_u = \mathrm{vec}(X_u) \in \mathbb{R}^{C_T d}
 ```
+
+↳ *Example:* `results`: 11 vectors of `[28230, 128]` → $`X`$ is `[28230, 11, 128]` → $`\mathbf{a}^{(0)}`$ is `[28230, 1408]`.
 
 **Step 3: ResNet.** Each block, for $`\ell = 1..4`$ (with dropout 0.2 after each
 ReLU during training):
@@ -200,9 +239,13 @@ ReLU during training):
 \mathbf{z} = \mathrm{ReLU}\big(\mathrm{LN}(U^{(\ell)}_1 \mathbf{a}^{(\ell-1)}_u)\big)
 ```
 
+↳ *Example:* block 1, `results`: `[28230, 1408]` × $`U^{(1)\top}_1`$ `[1408, 128]` → $`\mathbf{z}`$ is `[28230, 128]`.
+
 ```math
 \mathbf{a}^{(\ell)}_u = \mathrm{ReLU}\big(\mathrm{LN}(U^{(\ell)}_2 \mathbf{z})\big) + S_\ell(\mathbf{a}^{(\ell-1)}_u)
 ```
+
+↳ *Example:* block 1: `[28230, 128]` × `[128, 128]` plus shortcut `[28230, 1408]` × `[1408, 128]` → `[28230, 128]`; blocks 2–4 keep `[28230, 128]`.
 
 The shortcut is $`S_1(\mathbf{a}) = P\mathbf{a}`$ for block 1 and the identity
 $`S_\ell(\mathbf{a}) = \mathbf{a}`$ for blocks 2–4. Then the decoder:
@@ -211,17 +254,23 @@ $`S_\ell(\mathbf{a}) = \mathbf{a}`$ for blocks 2–4. Then the decoder:
 \mathbf{r}_u = D\, \mathrm{ReLU}\big(\mathrm{LN}(\mathbf{a}^{(4)}_u)\big)
 ```
 
+↳ *Example:* `[28230, 128]` × $`D^\top`$ `[128, 128]` → $`\mathbf{r}`$ is `[28230, 128]`. With `--dedup-encoder`, steps 1–3 run on the 5,051 distinct rows (`[5051, 1408]` → `[5051, 128]`), then copy back to `[28230, 128]`.
+
 **Step 4: add the time encoding.** For tables with a time column:
 
 ```math
 \mathbf{h}^{(0)}_u = \mathbf{r}_u + M_{\phi(u)}\, \mathrm{PE}(\Delta t_u) + \mathbf{m}_{\phi(u)}
 ```
 
+↳ *Example:* `results`: $`\Delta t`$ is `[28230]` → PE `[28230, 128]` → × $`M^\top`$ `[128, 128]` → `[28230, 128]`, added to $`\mathbf{r}`$ → $`\mathbf{h}^{(0)}`$ is `[28230, 128]`.
+
 For tables without one (drivers, constructors, circuits):
 
 ```math
 \mathbf{h}^{(0)}_u = \mathbf{r}_u
 ```
+
+↳ *Example:* `drivers`: $`\mathbf{h}^{(0)} = \mathbf{r}`$ is `[512, 128]`. All tables together: 101,209 rows of 128.
 
 **Step 5: two GraphSAGE layers.** For $`\ell = 1, 2`$, every node $`v`$ sums its
 neighbours along each incoming relation:
@@ -230,15 +279,21 @@ neighbours along each incoming relation:
 \mathbf{m}_{v,R} = \sum_{u \in \mathcal{N}_R(v)} \mathbf{h}^{(\ell-1)}_u
 ```
 
+↳ *Example:* layer 1, results → drivers: 28,230 edges sum `[28230, 128]` into `[512, 128]` (as a matrix: `[512, 28230]` × `[28230, 128]`).
+
 The relations are combined by summing, each with its own weights:
 
 ```math
 \mathbf{s}_v = \sum_{R \,:\, T_\mathrm{dst} = \phi(v)} \Big( W^{\mathrm{nbr}}_{\ell,R}\, \mathbf{m}_{v,R} + \boldsymbol{\beta}_{\ell,R} + W^{\mathrm{self}}_{\ell,R}\, \mathbf{h}^{(\ell-1)}_v \Big)
 ```
 
+↳ *Example:* drivers have 3 incoming relations (results, standings, qualifying): 3 × (`[512, 128]` × `[128, 128]` twice) summed → `[512, 128]`.
+
 ```math
 \mathbf{h}^{(\ell)}_v = \mathrm{ReLU}\big(\mathrm{LN}_{\ell,\phi(v)}(\mathbf{s}_v)\big)
 ```
+
+↳ *Example:* $`\mathbf{h}^{(1)}`$: drivers `[512, 128]`, results `[28230, 128]`, … (every table); layer 2 repeats this → $`\mathbf{h}^{(2)}`$ drivers `[512, 128]`.
 
 **Step 6: head and loss.** Only the seed nodes are read out:
 
@@ -246,9 +301,13 @@ The relations are combined by summing, each with its own weights:
 \hat{y}_i = \sigma\big(\mathbf{w}_\mathrm{out}^\top \mathbf{h}^{(2)}_{v^\ast_i} + b_\mathrm{out}\big)
 ```
 
+↳ *Example:* `[512, 128]` × $`\mathbf{w}_\mathrm{out}`$ `[128]` + $`b_\mathrm{out}`$ → `[512]` (the code returns `[512, 1]`), one probability per seed.
+
 ```math
 \mathcal{L}_\mathrm{task} = -\frac{1}{B} \sum_{i=1}^{B} \Big[ y_i \log \hat{y}_i + (1 - y_i) \log (1 - \hat{y}_i) \Big]
 ```
+
+↳ *Example:* 512 predictions and 512 labels → one number. 1,353 training examples → 3 steps per epoch (512, 512, 329 seeds).
 
 Backpropagation computes the gradient of $`\mathcal{L}_\mathrm{task}`$ for all of
 $`\Theta_\mathrm{col}, \Theta_\mathrm{row}, \Theta_\mathrm{time}, \Theta_\mathrm{gnn}, \Theta_\mathrm{head}`$,
