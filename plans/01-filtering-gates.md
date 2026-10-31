@@ -335,7 +335,7 @@ Settings: `train.py`, 20 epochs, `--dedup-encoder`, 5 seeds, about 74 s per run.
 
 | Arm | Gates | λ (columns), λ_s (tables) | Runs |
 |---|---|---|---|
-| Base | none | – | done: validation 0.787 ± 0.006 (arm C) |
+| Base | none | – | done: validation 0.786 ± 0.006 (arm C) |
 | F0 | (b) columns + tables | 0, 0 | 5 |
 | F1 | (b) | 1e-4, 1e-4 | 5 |
 | F2 | (b) | 1e-3, 1e-3 | 5 |
@@ -345,7 +345,7 @@ Settings: `train.py`, 20 epochs, `--dedup-encoder`, 5 seeds, about 74 s per run.
 25 runs ≈ 30 minutes, in background batches of 5.
 
 **Success:** at least one filtered arm is no worse than Base within noise (validation
-≥ 0.781, i.e. Base minus one std), preferably better; and the gates close a non-trivial,
+≥ 0.780, i.e. Base minus one std), preferably better; and the gates close a non-trivial,
 sensible set of columns or tables. We report validation for all arms and test only for
 the λ chosen on validation.
 
