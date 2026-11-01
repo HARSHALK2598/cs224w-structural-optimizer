@@ -254,7 +254,7 @@ so the loss has a gradient with respect to them, and the logits $`\theta`$ are t
 `rel-f1` has 45 columns in 9 tables, so this adds **45 column gates + 8 table gates =
 53 learnable logits** (the Base model has 5.08 M parameters; see `notes/notation.md`).
 
-## 3. Decision for you: what a "column" gate gates
+## 3. What a "column" gate gates (decided: table columns)
 
 The paper is ambiguous here. Eq. 3 defines $g_T \in [0,1]^{d_T}$ on "the dimensionality
 of the feature vector" $h^{(0)}_v$ and §4.1 says the gates "suppress noisy feature
@@ -268,10 +268,10 @@ dimensions", i.e. the 128 numbers of the encoded row. But it calls them
 | Interpretable? | no: dimensions have no meaning | yes: "the model dropped `results.rank`" |
 | Placement | after the encoder | inside the encoder (§2) |
 
-**Recommendation: (b) as the main method, (a) as one extra arm.** (b) gives the
-interpretable result the blog needs ("which columns does the task need?"). The library
-module is written once for both: it gates axis 1 of whatever it receives, `[N, C, 128]`
-for (b) or `[N, 128]` for (a). The PR and blog will state the ambiguity.
+**Decision: (b) only, for now.** It gives the interpretable result the blog needs
+("which columns does the task need?"). The library module gates axis 1 of whatever it
+receives, so (a) stays possible later without changing it. The PR and blog will state
+the ambiguity.
 
 ## 4. The loss
 
@@ -310,7 +310,7 @@ $$\mathcal{L} = \mathcal{L}_\text{task} + \lambda \sum_T \sum_{c} \mathbb{E}\|g_
   `penalties()` returns both sums. Not tied to RelBench or PyTorch Frame.
 
 **Project repo** (integration and experiment):
-- `experiments/train.py`: `--model filter`, `--gate-target {columns,dims}`,
+- `experiments/train.py`: `--model filter`,
   `--lambda-col`, `--lambda-table`. A `FilterModel(BaseModel)` runs each table's
   torch-frame encoder in its two halves, with the column gate in between (§2), then
   the table gate; `structural_loss()`; gate statistics in the log and `results.csv`.
@@ -340,9 +340,8 @@ Settings: `train.py`, 20 epochs, `--dedup-encoder`, 5 seeds, about 74 s per run.
 | F1 | (b) | 1e-4, 1e-4 | 5 |
 | F2 | (b) | 1e-3, 1e-3 | 5 |
 | F3 | (b) | 1e-2, 1e-2 | 5 |
-| D2 | (a) dims + tables | 1e-3, 1e-3 | 5 |
 
-25 runs ≈ 30 minutes, in background batches of 5.
+20 runs ≈ 25 minutes, in background batches of 5.
 
 **Success:** at least one filtered arm is no worse than Base within noise (validation
 ≥ 0.780, i.e. Base minus one std), preferably better; and the gates close a non-trivial,
@@ -354,7 +353,7 @@ the λ chosen on validation.
 1. **PyG fork:** `HardConcreteGate`, with tests.
 2. **PyG fork:** `RelationalFilter` (column/dimension gates and table gates), with tests.
 3. **Project repo:** `FilterModel`, flags, loss, logging, with the "all open = Base" test.
-4. **Project repo:** run the 25 runs, commit results and a short analysis.
+4. **Project repo:** run the 20 runs, commit results and a short analysis.
 
 ## 10. Out of scope
 
@@ -363,8 +362,7 @@ temperature annealing, other tasks.
 
 ## 11. Questions for you
 
-1. Gate target: (b) table columns as the main method plus (a) as one arm (recommended),
-   or follow the paper's equations, (a) only?
+1. ~~Gate target~~ **Answered: (b) table columns only.**
 2. Table gate after the time encoding, and no table gate on the target table: OK? And
    is "closed table = no own content, but still a path" (§2.3) what we want for now?
 3. Penalty as sums over gates, as in the paper: OK, or averages, so λ means the same
