@@ -162,6 +162,25 @@ td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; whit
 .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 
+
+/* ---------- Gate dry runs ---------- */
+.story { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: ch; }
+.story > li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 8px; counter-increment: ch; min-width: 0; }
+.story h3 { margin: 0; font-family: var(--font-display); font-size: 21px; font-weight: 600; letter-spacing: 0.01em; }
+.story h3::before { content: counter(ch) "  "; color: var(--accent); }
+.story .runs { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.story dl { margin: 0; display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 6px 12px; font-size: 14px; }
+.story dt { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-top: 2px; }
+.story dd { margin: 0; }
+.story dd.change { color: var(--accent); font-weight: 500; }
+@media (max-width: 520px) { .story dl { grid-template-columns: 1fr; gap: 2px; } .story dt { padding-top: 6px; } }
+.gatestates { display: grid; gap: 8px; max-width: 560px; }
+.gatestates .row { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: center; font-family: var(--font-mono); font-size: 12px; }
+.gatestates .bar { height: 18px; }
+.deviation { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; display: grid; gap: 8px; font-size: 14px; }
+.deviation h3 { margin: 0; font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+.deviation ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
 /* ---------- Log ---------- */
 ol.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
 ol.log li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
@@ -235,6 +254,73 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
     <p class="note">Runs are not bit-for-bit repeatable on this machine (seed 0 of the official script gave 0.788 and later 0.801 with the same command), so seeds are not paired across rows. With a spread of about 0.015–0.02, only differences of roughly 2 points stand out from noise.</p>
   </section>
 
+  <section id="gates" aria-labelledby="gates-h">
+    <div class="section-head">
+      <div class="eyebrow">Plan 01 · dry runs on driver-top3 · one seed each</div>
+      <h2 id="gates-h">Making the gates work</h2>
+      <p>Before the real experiment, six short runs checked that training with gates works. Each gate is a learnable number θ: during training the gate is a random value between 0 and 1, redrawn every step, that multiplies its column; at evaluation it is 1 if θ &gt; 0 and 0 otherwise. The penalty λ pushes every θ down; the task pushes up the ones it needs. The reference is Base: validation <strong>0.786 ± 0.006</strong>.</p>
+    </div>
+    <ol class="story">
+      <li>
+        <h3>The plan's settings: the gates do not move</h3>
+        <div class="runs">run 1 · gates start at θ = 2 · shared learning rate 0.005 · λ = 1e-3 → val 0.766</div>
+        <dl>
+          <dt>Saw</dt><dd>After 20 epochs every gate is still open; their open probabilities barely changed (0.968–0.975 vs 0.973 at the start).</dd>
+          <dt>Why</dt><dd>The optimiser moves each number by at most about its learning rate per step. driver-top3 has only 3 steps per epoch, 60 in total, so θ can move about 0.3, but must go from 2 to below 0 to close. No λ can change that.</dd>
+          <dt>Change</dt><dd class="change">Give the gates their own learning rate (0.1).</dd>
+        </dl>
+      </li>
+      <li>
+        <h3>Gates close, but the score drops, even with no penalty</h3>
+        <div class="runs">run 2 · gate lr 0.1 · λ = 1e-3 → val 0.751, 9 of 45 columns open &nbsp;|&nbsp; run 3 · λ = 0 → val 0.752, all open</div>
+        <dl>
+          <dt>Saw</dt><dd>With the penalty, the gates close fast, and mostly names and IDs survive. Without it (run 3), every gate stays open, so at evaluation the model is exactly Base, yet the score is still low.</dd>
+          <dt>Why</dt><dd>The damage happens in training. At θ = 2 an "open" gate is exactly 1 in only 60% of steps; in the rest its column is randomly scaled down. It is heavy dropout on whole columns, and 60 steps are not enough to recover from it.</dd>
+        </dl>
+        <div class="gatestates" aria-label="How often a gate is exactly 1, in between, or exactly 0 during training">
+          <div class="row"><span>θ = 2</span><div class="bar"><span style="width:59.9%;background:var(--good)"></span><span style="width:37.4%;background:var(--t-standings)"></span><span style="width:2.7%;background:var(--accent)"></span></div></div>
+          <div class="row"><span>θ = 5</span><div class="bar"><span style="width:96.8%;background:var(--good)"></span><span style="width:3.1%;background:var(--t-standings)"></span><span style="width:0.1%;background:var(--accent)"></span></div></div>
+          <div class="legend"><span><i style="background:var(--good)"></i>exactly 1: 60% → 97%</span><span><i style="background:var(--t-standings)"></i>in between: 37% → 3%</span><span><i style="background:var(--accent)"></i>exactly 0: 3% → 0.1%</span></div>
+        </div>
+      </li>
+      <li>
+        <h3>Two ways to remove the noise</h3>
+        <div class="runs">λ = 0 · run 4 · gates start at θ = 5 → val 0.804 &nbsp;|&nbsp; run 5 · temperature 0.2 → val 0.757</div>
+        <dl>
+          <dt>Saw</dt><dd>Starting more open brings the score back to Base level. A lower temperature does not.</dd>
+          <dt>Why</dt><dd>At θ = 5 an open gate is exactly 1 in 97% of steps. A lower temperature pushes samples towards 0 or 1, but at θ = 2 it makes "exactly 0" more frequent (8% of steps instead of 3%), removing columns even more often.</dd>
+          <dt>Change</dt><dd class="change">Gates start at θ = 5. The temperature stays at 2/3.</dd>
+        </dl>
+      </li>
+      <li>
+        <h3>Both changes, with the penalty: a sensible set of columns</h3>
+        <div class="runs">run 6 · gate lr 0.1 · θ = 5 · λ = 1e-3 → val 0.785, 21 of 45 columns and 5 of 8 tables open</div>
+        <dl>
+          <dt>Saw</dt><dd>The score is within Base's range. Closed: the 3 tables a 2-layer model never reaches; in <code>results</code>, fastestLap, milliseconds, position and rank (the mostly-missing columns the NaN bug kills) plus laps and statusId. Kept: grid, points and positionOrder; standings points, position and wins; qualifying position; driver and constructor identity.</dd>
+          <dt>Why</dt><dd>Gates of columns that carry nothing get no push from the task, so the penalty closes them. The kept columns are what you would expect to predict a top-3 finish.</dd>
+          <dt>Next</dt><dd>The gates were still closing at epoch 20; a gate learning rate of 0.2 should let them settle by about epoch 9.</dd>
+        </dl>
+      </li>
+    </ol>
+    <div class="deviation">
+      <h3>Why we deviate from the paper's values</h3>
+      <p>The paper gives no gate start value, gate learning rate or temperature; it only tunes the overall learning rate. The plan took them from the authors' code (start at θ = 2, one shared learning rate) and from Louizos et al. (temperature 2/3). Those assume many more training steps than driver-top3 has, and fail here for two reasons:</p>
+      <ol>
+        <li><strong>Too few steps to move a gate</strong> → a separate gate learning rate.</li>
+        <li><strong>Too much noise from half-open gates</strong>, about 0.03 below Base even when no gate closes → start at θ = 5.</li>
+      </ol>
+      <p>Neither changes the method: the same gates, penalty and evaluation rule. They only let training reach the point the method describes.</p>
+    </div>
+    <div class="chart" id="gate-chart"></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Run</th><th>Gate lr</th><th>Gate start θ</th><th>Temp.</th><th>λ</th><th>Validation</th><th>Test</th><th>Open columns / tables</th></tr></thead>
+        <tbody id="gate-table"></tbody>
+      </table>
+    </div>
+    <p class="note">One seed per run, and runs are not exactly repeatable, so these numbers show direction only. Choices use validation; test is for reference. Logs, per-gate files and a longer write-up are in <code>experiments/results/dryrun_filter/</code> (PR #10).</p>
+  </section>
+
   <section id="findings" aria-labelledby="findings-h">
     <div class="section-head">
       <div class="eyebrow">What the measurements showed</div>
@@ -295,7 +381,9 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
       <li><time datetime="2026-10-28">2026-10-28</time><div>Walkthrough 2: encoders, one GraphSAGE layer recomputed by hand, loss, one optimiser step. <code>train.py</code> aligned with RelBench's official example (PR #2).</div></li>
       <li><time datetime="2026-10-29">2026-10-29</time><div>GloVe text features (PR #4). Official baseline on driver-top3, 10 and 20 epochs (draft PR #7). Profiling and encoder deduplication (PR #5). NaN-gradient issue found (#6) and fixed behind a flag (PR #8). <code>train.py</code> reproduces the official script within noise.</div></li>
       <li><time datetime="2026-10-30">2026-10-30</time><div>Deduplication keeps accuracy (arm C). Plan 01 written: column and table gates (PR #9). Decision: driver-top3 is the development task; other tasks once improvements show.</div></li>
-      <li class="next"><time>next</time><div>Plan 01 review, then <code>HardConcreteGate</code> → column and table gates → the first comparison against Base.</div></li>
+      <li><time datetime="2026-10-31">2026-10-31</time><div>Notation for the whole model, with real tensor shapes (<code>notes/notation.md</code>). Plan 01 extended with a worked example of the encoding and why the gates sit where they do; decisions: gate table columns, sum the penalties, a closed table stays a path.</div></li>
+      <li><time datetime="2026-11-01">2026-11-01</time><div>Steps 1–3 of Plan 01 as PRs: <code>HardConcreteGate</code>, <code>RelationalFilter</code> (fork #1, #2) and <code>--model filter</code> (PR #10). Six dry runs: the plan's gate settings cannot work on driver-top3; a separate gate learning rate and a start at θ = 5 fix it (see "Making the gates work").</div></li>
+      <li class="next"><time>next</time><div>Agree the new gate settings in Plan 01, then the 20 runs: λ ∈ {0, 1e-4, 1e-3, 1e-2} × 5 seeds, against Base.</div></li>
     </ol>
   </section>
 
@@ -664,6 +752,45 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
     return "<tr><td>" + esc(rn.id) + "</td><td>" + esc(rn.what) + '</td><td class="num">' + fmt(rn.val) + '</td><td class="num">' + fmt(rn.test) +
       '</td><td class="num">' + esc(rn.time) + "</td><td>" + esc(rn.where) + "</td></tr>";
   }).join("") + '<tr><td>Paper\'s Base</td><td>Table 2, tuned learning rate and hidden size</td><td class="num">–</td><td class="num">0.815 ± 0.011</td><td class="num">–</td><td>arXiv:2606.08491</td></tr>';
+
+
+  // ---------- gate dry runs ----------
+  var GATE_RUNS = [
+    { id: "1", lr: "0.005", init: "2", temp: "2/3", lam: "1e-3", val: 0.7662, test: 0.7502, open: "45 / 8" },
+    { id: "2", lr: "0.1", init: "2", temp: "2/3", lam: "1e-3", val: 0.7508, test: 0.6868, open: "9 / 5" },
+    { id: "3", lr: "0.1", init: "2", temp: "2/3", lam: "0", val: 0.7519, test: 0.7000, open: "45 / 8" },
+    { id: "4", lr: "0.1", init: "5", temp: "2/3", lam: "0", val: 0.8036, test: 0.7746, open: "45 / 8" },
+    { id: "5", lr: "0.1", init: "2", temp: "0.2", lam: "0", val: 0.7568, test: 0.7160, open: "45 / 8" },
+    { id: "6", lr: "0.1", init: "5", temp: "2/3", lam: "1e-3", val: 0.7851, test: 0.7777, open: "21 / 5" }
+  ];
+  var BASE_VAL = { mean: 0.786, std: 0.006 };
+  document.getElementById("gate-table").innerHTML = '<tr><td>Base</td><td>–</td><td>–</td><td>–</td><td>–</td><td class="num">0.786 ± 0.006</td><td class="num">0.792 ± 0.020</td><td>5 seeds</td></tr>' +
+    GATE_RUNS.map(function (r) {
+      return "<tr><td>" + esc(r.id) + '</td><td class="num">' + esc(r.lr) + '</td><td class="num">' + esc(r.init) + '</td><td class="num">' + esc(r.temp) +
+        '</td><td class="num">' + esc(r.lam) + '</td><td class="num">' + r.val.toFixed(3) + '</td><td class="num">' + r.test.toFixed(3) + "</td><td>" + esc(r.open) + "</td></tr>";
+    }).join("");
+  (function drawGateChart() {
+    var W = 960, rowH = 34, top = 34, left = 250, right = 90, lo = 0.74, hi = 0.82;
+    var H = top + GATE_RUNS.length * rowH + 44;
+    function X(v) { return left + (v - lo) / (hi - lo) * (W - left - right); }
+    var out = '<rect x="' + X(BASE_VAL.mean - BASE_VAL.std) + '" y="' + top + '" width="' + (X(BASE_VAL.mean + BASE_VAL.std) - X(BASE_VAL.mean - BASE_VAL.std)) +
+      '" height="' + (H - 40 - top) + '" style="fill:var(--cool-soft)"></rect>' +
+      '<line x1="' + X(BASE_VAL.mean) + '" y1="' + top + '" x2="' + X(BASE_VAL.mean) + '" y2="' + (H - 40) + '" style="stroke:var(--cool);stroke-width:1.5;stroke-dasharray:5 4"></line>' +
+      t(X(BASE_VAL.mean) + 6, top - 12, "Base 0.786 ± 0.006", "s-mono");
+    for (var v = lo; v <= hi + 1e-9; v += 0.02) {
+      out += '<line x1="' + X(v) + '" y1="' + top + '" x2="' + X(v) + '" y2="' + (H - 40) + '" style="stroke:var(--line);stroke-width:1"></line>' +
+        t(X(v), H - 20, v.toFixed(2), "s-mono-muted", "middle");
+    }
+    var labels = ["shared lr", "gate lr 0.1", "λ = 0", "λ = 0, θ = 5", "λ = 0, temp 0.2", "θ = 5, λ = 1e-3"];
+    GATE_RUNS.forEach(function (r, i) {
+      var y = top + i * rowH + rowH / 2, good = r.init === "5";
+      out += t(16, y + 4, "run " + r.id + " · " + labels[i], "s-label");
+      out += '<line x1="' + X(lo) + '" y1="' + y + '" x2="' + X(r.val) + '" y2="' + y + '" style="stroke:var(--line);stroke-width:2"></line>';
+      out += '<circle cx="' + X(r.val) + '" cy="' + y + '" r="6" style="fill:' + (good ? "var(--good)" : "var(--accent)") + '"></circle>';
+      out += t(X(r.val) + 12, y + 4, r.val.toFixed(3), "s-mono");
+    });
+    document.getElementById("gate-chart").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Validation ROC-AUC of the six gate dry runs against Base">' + out + "</svg>";
+  })();
 
   var split = "val";
   function drawChart() {
