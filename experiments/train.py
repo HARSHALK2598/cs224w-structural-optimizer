@@ -526,22 +526,49 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
                 history=history, gates=best_gates)
 
 
-def write_result(path: str, row: Dict[str, Any]) -> None:
+def write_result(path: str, row: Dict[str, Any],
+                 fields: Optional[List[str]] = None) -> None:
     r"""Appends one row to :obj:`path`, writing the header for a new file."""
+    fields = fields or RESULT_FIELDS
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     new_file = not path.exists()
     if not new_file:
         with open(path, newline='') as f:
             header = next(csv.reader(f), None)
-        if header != RESULT_FIELDS:
+        if header != fields:
             raise ValueError(f"'{path}' has different columns than "
-                             f"RESULT_FIELDS; write to a new file")
+                             f"expected; write to a new file")
     with open(path, 'a', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=RESULT_FIELDS, restval='')
+        writer = csv.DictWriter(f, fieldnames=fields, restval='')
         if new_file:
             writer.writeheader()
         writer.writerow(row)
+
+
+def result_row(args, spec: TaskSpec, out: Dict[str, Any],
+               minutes: float) -> Dict[str, Any]:
+    r"""One :obj:`results.csv` row for the output of :meth:`fit`."""
+    row = dict(dataset=args.dataset, task=args.task, model=args.model,
+               seed=args.seed, tune_metric=spec.tune_metric,
+               best_epoch=out['best_epoch'], epochs=args.epochs,
+               minutes=round(minutes, 2), text_embedder=args.text_embedder)
+    for split in ['val', 'test']:
+        for name, value in out[split].items():
+            row[f'{split}_{name}'] = value
+    if out['gates'] is not None:  # --model filter
+        row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
+                   gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
+                   gate_temperature=round(args.gate_temperature, 4),
+                   open_columns=out['gates']['open_columns'],
+                   open_tables=out['gates']['open_tables'])
+    return row
+
+
+def save_gates(path: Path, gates: Dict[str, Any]) -> None:
+    r"""Writes every gate's state (from :meth:`FilterModel.gate_summary`)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(gates, indent=2))
 
 
 def main() -> None:
@@ -570,27 +597,13 @@ def main() -> None:
 
     start = time.time()
     out = fit(model, loaders, task, spec, args, device)
-    row = dict(dataset=args.dataset, task=args.task, model=args.model,
-               seed=args.seed, tune_metric=spec.tune_metric,
-               best_epoch=out['best_epoch'], epochs=args.epochs,
-               minutes=round((time.time() - start) / 60, 2),
-               text_embedder=args.text_embedder)
-    for split in ['val', 'test']:
-        for name, value in out[split].items():
-            row[f'{split}_{name}'] = value
-    if out['gates'] is not None:  # --model filter
-        row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
-                   gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
-                   gate_temperature=round(args.gate_temperature, 4),
-                   open_columns=out['gates']['open_columns'],
-                   open_tables=out['gates']['open_tables'])
-        # Every gate's state at the best epoch, next to results.csv:
+    row = result_row(args, spec, out, minutes=(time.time() - start) / 60)
+    if out['gates'] is not None:  # Every gate's state, next to results.csv:
         path = Path(args.results).parent / 'gates' / (
             f'{args.task}_seed{args.seed}_lc{args.lambda_col:g}'
             f'_lt{args.lambda_table:g}_glr{args.gate_lr or args.lr:g}'
             f'_gi{args.gate_init:g}_gt{args.gate_temperature:.2g}.json')
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(out['gates'], indent=2))
+        save_gates(path, out['gates'])
     write_result(args.results, row)
 
 

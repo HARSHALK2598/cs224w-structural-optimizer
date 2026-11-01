@@ -1,0 +1,18 @@
+# Grid over the gate settings of --model filter on driver-top3 (Plan 01),
+# chosen on mean validation ROC-AUC over 3 seeds. Base runs alongside, on the
+# same machine, as the reference.
+#   3 gate lr x 4 gate init x 3 lambda = 36 settings, + Base; x 3 seeds = 111 runs.
+name: gates_driver-top3
+fixed:             # train.py arguments shared by every run
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 20
+  dedup_encoder: true
+seeds: [0, 1, 2]
+arms:
+  - model: base
+  - model: filter
+    grid:
+      gate_lr: [0.05, 0.1, 0.2]
+      gate_init: [3.0, 4.0, 5.0, 6.0]
+      lambda: [1.0e-4, 1.0e-3, 1.0e-2]   # sets lambda_col and lambda_table
