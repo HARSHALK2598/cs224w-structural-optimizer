@@ -75,6 +75,8 @@ DEFAULTS: Dict[str, Any] = dict(
     lambda_col=0.0,  # --model filter: weight of the column-gate penalty
     lambda_table=0.0,  # --model filter: weight of the table-gate penalty
     gate_lr=0.0,  # --model filter: learning rate of the gates (0: --lr)
+    gate_init=2.0,  # --model filter: initial gate logit
+    gate_temperature=2. / 3.,  # --model filter: Hard-Concrete temperature
 )
 
 # Columns of results.csv; metrics a task does not report are left empty.
@@ -82,7 +84,8 @@ RESULT_FIELDS = [
     'dataset', 'task', 'model', 'seed', 'tune_metric', 'best_epoch',
     'val_roc_auc', 'test_roc_auc', 'val_nmae', 'test_nmae', 'val_mae',
     'test_mae', 'epochs', 'minutes', 'text_embedder', 'lambda_col',
-    'lambda_table', 'gate_lr', 'open_columns', 'open_tables'
+    'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
+    'open_columns', 'open_tables'
 ]
 
 
@@ -336,7 +339,8 @@ class FilterModel(BaseModel):
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
                  num_layers: int, aggr: str, entity_table: str,
                  lambda_col: float = 0.0, lambda_table: float = 0.0,
-                 dedup_encoder: bool = False):
+                 dedup_encoder: bool = False, gate_init: float = 2.0,
+                 gate_temperature: float = 2. / 3.):
         super().__init__(data, col_stats_dict, channels, out_channels,
                          num_layers, aggr, dedup_encoder)
         self.lambda_col = lambda_col
@@ -356,6 +360,8 @@ class FilterModel(BaseModel):
                 for node_type, cols in self.col_names.items()
             },
             table_types=[nt for nt in data.node_types if nt != entity_table],
+            init_logit=gate_init,
+            temperature=gate_temperature,
         )
 
     def encode_table(self, node_type: str, tf) -> Tensor:
@@ -410,7 +416,8 @@ def build_model(args, data, col_stats_dict, out_channels: int,
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
-                           args.dedup_encoder)
+                           args.dedup_encoder, args.gate_init,
+                           args.gate_temperature)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -524,6 +531,12 @@ def write_result(path: str, row: Dict[str, Any]) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     new_file = not path.exists()
+    if not new_file:
+        with open(path, newline='') as f:
+            header = next(csv.reader(f), None)
+        if header != RESULT_FIELDS:
+            raise ValueError(f"'{path}' has different columns than "
+                             f"RESULT_FIELDS; write to a new file")
     with open(path, 'a', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=RESULT_FIELDS, restval='')
         if new_file:
@@ -567,13 +580,15 @@ def main() -> None:
             row[f'{split}_{name}'] = value
     if out['gates'] is not None:  # --model filter
         row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
-                   gate_lr=args.gate_lr or args.lr,
+                   gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
+                   gate_temperature=round(args.gate_temperature, 4),
                    open_columns=out['gates']['open_columns'],
                    open_tables=out['gates']['open_tables'])
         # Every gate's state at the best epoch, next to results.csv:
         path = Path(args.results).parent / 'gates' / (
             f'{args.task}_seed{args.seed}_lc{args.lambda_col:g}'
-            f'_lt{args.lambda_table:g}_glr{args.gate_lr or args.lr:g}.json')
+            f'_lt{args.lambda_table:g}_glr{args.gate_lr or args.lr:g}'
+            f'_gi{args.gate_init:g}_gt{args.gate_temperature:.2g}.json')
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(out['gates'], indent=2))
     write_result(args.results, row)

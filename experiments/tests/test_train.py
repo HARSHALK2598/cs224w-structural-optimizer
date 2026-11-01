@@ -113,3 +113,10 @@ def test_glove_embeds_text_with_missing_values():
     assert out.shape == (4, 300)
     assert torch.isfinite(out).all()
     assert out[0].abs().sum() > 0  # known words get a non-zero vector
+
+
+def test_write_result_rejects_other_columns(tmp_path):
+    path = tmp_path / 'results.csv'
+    path.write_text('dataset,task\nrel-f1,driver-top3\n')
+    with pytest.raises(ValueError, match='different columns'):
+        train.write_result(str(path), dict(dataset='rel-f1'))

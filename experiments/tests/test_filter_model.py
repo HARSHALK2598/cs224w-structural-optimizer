@@ -127,3 +127,11 @@ def test_make_optimizer(setup):
     assert not gates & {id(p) for p in rest['params']}
     assert len(rest['params']) + len(gate_group['params']) == len(
         list(model.parameters()))
+
+
+@requires_rel_f1
+def test_filter_model_gate_options(setup):
+    model = make(setup, gate_init=5.0, gate_temperature=0.2)
+    for gate in list(model.filter.column_gates.values()) + list(
+            model.filter.table_gates.values()):
+        assert (gate.logit == 5.0).all() and gate.temperature == 0.2
