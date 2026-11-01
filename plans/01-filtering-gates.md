@@ -21,7 +21,7 @@ Eq. 4, from Louizos et al. 2018):
 | Hyperparameter | Value | Source |
 |---|---|---|
 | stretch $\gamma$, $\zeta$ | −0.1, 1.1 | Louizos et al.; authors' code |
-| temperature $t$ | 2/3, fixed | Louizos et al. (the authors anneal 2.0 → 0.3; possible later) |
+| temperature $t$ | 2/3, fixed | Louizos et al. (the authors' code sets 2.0; its annealing to 0.3 is never called, so 2.0 throughout) |
 | initial logit $\theta_0$ | 2.0 (≈ 0.88 open) | authors' code: gates start open, so training starts close to Base |
 | eval threshold $\tau_g$ | 0.5 | paper Eq. 4 leaves it as a hyperparameter |
 
@@ -259,9 +259,16 @@ so the loss has a gradient with respect to them, and the logits $`\theta`$ are t
 The paper is ambiguous here. Eq. 3 defines $g_T \in [0,1]^{d_T}$ on "the dimensionality
 of the feature vector" $h^{(0)}_v$ and §4.1 says the gates "suppress noisy feature
 dimensions", i.e. the 128 numbers of the encoded row. But it calls them
-"column-level", and the authors' code gates **actual table columns**.
+"column-level".
 
-| | (a) Encoded dimensions (paper's equations) | (b) Table columns (authors' code) |
+*Correction (after reading the authors' code in full):* an earlier version of this plan
+said the authors' code gates actual table columns. It does not. It creates one logit per
+column, but then repeats that vector across the 128 channels of $h^{(0)}$ (channel $k$
+uses gate $k \bmod C_T$), after the time encoding. Closing "column $c$" zeros channels
+$c, c + C_T, c + 2C_T, \dots$, which mix all columns. That is neither (a) nor (b), and
+in their evaluation the column gates are not applied at all (§12).
+
+| | (a) Encoded dimensions (paper's equations) | (b) Table columns (our choice) |
 |---|---|---|
 | What is gated | the 128 dimensions of $h^{(0)}$, per table | each of the table's columns |
 | Number of gates | 9 × 128 = 1,152 | 45 |
@@ -368,3 +375,52 @@ temperature annealing, other tasks.
    is step C).
 3. **Answered:** sums over gates, as in the paper, with a separate $`\lambda_s`$ for
    tables.
+
+## 12. Comparison with the paper and the authors' code
+
+Checked line by line against the paper (arXiv:2606.08491, §3.1, §4.1, Eq. 3–5, 19 and
+Appendix C, Table 8) and the authors' repository (`cy623/Structural_Optimizer_RDL`, commit
+`68c9b57`, `model.py`, `train.py`, `main.py`; read only, nothing copied).
+
+### Gates and loss
+
+| Item | Paper | Authors' code | Ours |
+|---|---|---|---|
+| Training sample | Hard-Concrete, Eq. 4 | same formula | same formula |
+| Temperature | "τ controls the temperature", no value | 2.0; the annealing hook (`update_anneal`) is never defined, so it stays 2.0 | 2/3 (`--gate-temperature`) |
+| Start logit | not given | 2.0 | 2.0 default; dry runs suggest 5 (`--gate-init`) |
+| Column gate target | $g_{T} \in [0,1]^{d_T}$ on $h^{(0)}$, "feature dimensions" (Eq. 3) | one logit per column, tiled over the 128 channels of $h^{(0)}$ | one gate per table column, inside the encoder: decision (b) |
+| Table gate | $s_T$ for every node type on the filtered $h$ (Eq. 5) | every node type, target included, after the time encoding | every node type except the target, after the time encoding |
+| Evaluation gate | hard: $\mathbb{I}[\sigma(\theta) > \tau_g]$ | evaluation path (`apply_pruning=True`): column gates **not applied**; closed tables' edges removed; no soft scaling | hard, $\sigma(\theta) > 0.5$, for both kinds |
+| Penalty | $\lambda \sum \mathbb{E}\lVert g\rVert_0 + \lambda_s \sum \mathbb{E}\lVert s\rVert_0$ (Eq. 19) | same, `lambda_w` (columns) and `lambda_g` (tables); gates exist only if `lambda_g > 0` | same, `--lambda-col` and `--lambda-table` |
+| Bottleneck (VIB) | yes, $\beta_\text{vib}$ | training only; skipped in evaluation | not yet (later plan) |
+| Optimiser | Adam | Adam, one learning rate for all, weight decay 5e-4 (also on the gate logits) | Adam, no weight decay; separate gate learning rate (`--gate-lr`) |
+
+### Training and evaluation setup
+
+| Item | Paper | Authors' code | Ours |
+|---|---|---|---|
+| Learning rate | grid {1e-4, 1e-3, 1e-2} | 0.005 | 0.005 (RelBench example) |
+| Hidden size | grid {64, 128, 256} | 128 | 128 |
+| λ, λ_s | searched in [1e-4, 1e-2] | 1e-4 | sweep {1e-4, 1e-3, 1e-2} |
+| Selection | grid search on validation | best validation epoch | best validation epoch; settings on validation |
+| Seeds | 5 | 2 (`for seed in [0, 1]`) | 5 for reported results (3 in the sweep) |
+| Epochs, batch | not given | 30, 256 | 20, 512 (RelBench example; 20 from Plan 00) |
+| Neighbours | not given | 128, 64 | 128, 64 |
+| Hardware | one A30 GPU | – | CPU here; GPU on Colab |
+
+### What this means
+
+1. **We follow the paper's equations**, except for two deliberate choices: column gates on
+   table columns (decision (b), for interpretable results) and no table gate on the target
+   (closing it would zero the seeds' own vectors).
+2. **The authors' code does not implement the paper's filtering at evaluation time.** Their
+   column gates only act during training, and only on channel groups, not columns. So
+   neither our numbers nor theirs can be read as "the paper's column filtering, exactly
+   as published". We will state this in the PR and the blog.
+3. **Settings the paper leaves open** (temperature, start logit, gate learning rate,
+   epochs, batch size) are ours to choose on validation. The sweep does that for the gate
+   settings.
+4. **Not yet matched:** the paper's grid over learning rate and hidden size (for Base and
+   for the optimizer). Our Base uses RelBench's defaults, which partly explains Base 0.79
+   vs the paper's 0.815 (Plan 00).
