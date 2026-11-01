@@ -1,6 +1,6 @@
 # Dry runs: making the gates work (Plan 01, before step 4)
 
-Six short runs of `--model filter` on `driver-top3`, to check that training with gates
+Seven short runs of `--model filter` on `driver-top3`, to check that training with gates
 works before the 20 real runs. They changed two of the plan's settings. This page
 explains each run in order: what we saw, what it means, and what we changed.
 
@@ -98,8 +98,28 @@ Kept: grid, points and positionOrder in `results`; points, position and wins in
 columns. These are what you would expect to predict a top-3 finish.
 
 **One open point:** the gates were still closing at epoch 20. From θ = 5 at learning
-rate 0.1, a gate needs about 50 steps (17 epochs) to reach 0. A gate learning rate of
-0.2 should let them settle by about epoch 9 (not yet tested).
+rate 0.1, a gate needs about 50 steps (17 epochs) to reach 0. Run 7 tests a faster
+gate learning rate.
+
+## Run 7: checking the proposed gate learning rate of 0.2. It is too fast.
+
+Settings: as run 6, but gate learning rate 0.2. This run checked the proposal at the
+end of run 6 before it went into the plan.
+
+**Seen:** the gates start closing at epoch 8 and settle at about epoch 12, but they
+close too much. Only 11 of 45 columns and 4 of 8 tables stay open, including losing
+useful ones (the `qualifying` table, `standings` position and wins, `results`
+positionOrder). Validation is **0.738**, below Base (0.786 ± 0.006), and was still
+rising at epoch 20. (Test is 0.806, but we do not choose on test.)
+
+**Why:** with the faster rate, the penalty closes gates at epoch 8, when the model is
+still early in training (validation 0.675). At that point the task has not yet learned
+which columns matter, so it cannot defend them. With rate 0.1 (run 6), closing starts
+around epoch 14, when the model is already good (validation about 0.76), and it keeps
+the useful columns.
+
+**Conclusion:** the proposal was wrong. A gate learning rate of 0.1 (run 6) is the
+setting that works. When the gates close matters as much as whether they can close.
 
 ## Why we deviate from the paper's values
 
@@ -129,6 +149,7 @@ evaluation rule). They only make training reach the point the method describes.
 | 4 | 0.1 | 5 | 2/3 | 0 | 18 | 0.804 | 0.775 | 45 / 8 |
 | 5 | 0.1 | 2 | 0.2 | 0 | 13 | 0.757 | 0.716 | 45 / 8 |
 | 6 | 0.1 | 5 | 2/3 | 1e-3 | 19 | 0.785 | 0.778 | 21 / 5 |
+| 7 | 0.2 | 5 | 2/3 | 1e-3 | 20 | 0.738 | 0.806 | 11 / 4 |
 
 Files: `results.csv` (one row per run), `logs/` (per-epoch scores and open gates),
 `gates/` (every gate's state at the best epoch, by column name).
