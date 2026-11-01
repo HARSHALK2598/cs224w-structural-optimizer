@@ -360,10 +360,11 @@ the λ chosen on validation.
 The variational bottleneck (VIB), edge injection and relation gating (steps B–D),
 temperature annealing, other tasks.
 
-## 11. Questions for you
+## 11. Decisions
 
 1. ~~Gate target~~ **Answered: (b) table columns only.**
-2. Table gate after the time encoding, and no table gate on the target table: OK? And
-   is "closed table = no own content, but still a path" (§2.3) what we want for now?
-3. Penalty as sums over gates, as in the paper: OK, or averages, so λ means the same
-   for tables with few or many columns?
+2. **Answered:** table gate after the time encoding; no table gate on the target table;
+   a closed table loses its own content but stays a path (paper Eq. 5; removing paths
+   is step C).
+3. **Answered:** sums over gates, as in the paper, with a separate $`\lambda_s`$ for
+   tables.
