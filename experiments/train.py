@@ -18,7 +18,7 @@ Examples:
 
     # with column and table gates
     python experiments/train.py --task driver-top3 --model filter \
-        --lambda-col 1e-3 --lambda-table 1e-3 --dedup-encoder
+        --lambda-col 1e-3 --lambda-table 1e-3 --gate-lr 0.1 --dedup-encoder
 """
 import argparse
 import copy
@@ -74,6 +74,7 @@ DEFAULTS: Dict[str, Any] = dict(
     num_workers=0,
     lambda_col=0.0,  # --model filter: weight of the column-gate penalty
     lambda_table=0.0,  # --model filter: weight of the table-gate penalty
+    gate_lr=0.0,  # --model filter: learning rate of the gates (0: --lr)
 )
 
 # Columns of results.csv; metrics a task does not report are left empty.
@@ -81,7 +82,7 @@ RESULT_FIELDS = [
     'dataset', 'task', 'model', 'seed', 'tune_metric', 'best_epoch',
     'val_roc_auc', 'test_roc_auc', 'val_nmae', 'test_nmae', 'val_mae',
     'test_mae', 'epochs', 'minutes', 'text_embedder', 'lambda_col',
-    'lambda_table', 'open_columns', 'open_tables'
+    'lambda_table', 'gate_lr', 'open_columns', 'open_tables'
 ]
 
 
@@ -464,11 +465,26 @@ def evaluate(task, spec: TaskSpec, pred, split: str) -> Dict[str, float]:
     return task.evaluate(pred, table, metrics=spec.metrics)
 
 
+def make_optimizer(model, args) -> torch.optim.Optimizer:
+    r"""Adam over all parameters. With :obj:`args.gate_lr > 0`, the gate
+    logits of :class:`FilterModel` get their own learning rate: Adam moves a
+    logit by at most about the learning rate per step, so with few steps per
+    epoch the gates could not close otherwise."""
+    if getattr(model, 'filter', None) is None or args.gate_lr <= 0:
+        return torch.optim.Adam(model.parameters(), lr=args.lr)
+    gate_ids = {id(p) for p in model.filter.parameters()}
+    rest = [p for p in model.parameters() if id(p) not in gate_ids]
+    return torch.optim.Adam([
+        dict(params=rest),
+        dict(params=list(model.filter.parameters()), lr=args.gate_lr),
+    ], lr=args.lr)
+
+
 def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         log: Callable[[str], None] = print) -> Dict[str, Any]:
     r"""Trains for :obj:`args.epochs` epochs, keeps the epoch with the best
     validation score, and evaluates it once on the test split."""
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = make_optimizer(model, args)
     entity_table = task.entity_table
     best, best_state, best_epoch, history = None, None, None, []
     best_gates = None
@@ -551,12 +567,13 @@ def main() -> None:
             row[f'{split}_{name}'] = value
     if out['gates'] is not None:  # --model filter
         row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
+                   gate_lr=args.gate_lr or args.lr,
                    open_columns=out['gates']['open_columns'],
                    open_tables=out['gates']['open_tables'])
         # Every gate's state at the best epoch, next to results.csv:
         path = Path(args.results).parent / 'gates' / (
             f'{args.task}_seed{args.seed}_lc{args.lambda_col:g}'
-            f'_lt{args.lambda_table:g}.json')
+            f'_lt{args.lambda_table:g}_glr{args.gate_lr or args.lr:g}.json')
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(out['gates'], indent=2))
     write_result(args.results, row)

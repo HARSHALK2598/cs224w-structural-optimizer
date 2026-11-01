@@ -108,3 +108,22 @@ def test_filter_model_gate_summary(setup):
     assert set(summary['columns']['results']) == set(
         model.col_names['results'])
     assert 0.9 < summary['tables']['races']['prob_open'] < 1.0
+
+
+@requires_rel_f1
+def test_make_optimizer(setup):
+    model = make(setup)
+    gates = {id(p) for p in model.filter.parameters()}
+
+    args = train.parse_args(['--lr', '0.005'])  # gate_lr = 0: one group.
+    optimizer = train.make_optimizer(model, args)
+    assert len(optimizer.param_groups) == 1
+
+    args = train.parse_args(['--lr', '0.005', '--gate-lr', '0.1'])
+    optimizer = train.make_optimizer(model, args)
+    rest, gate_group = optimizer.param_groups
+    assert rest['lr'] == 0.005 and gate_group['lr'] == 0.1
+    assert {id(p) for p in gate_group['params']} == gates
+    assert not gates & {id(p) for p in rest['params']}
+    assert len(rest['params']) + len(gate_group['params']) == len(
+        list(model.parameters()))
