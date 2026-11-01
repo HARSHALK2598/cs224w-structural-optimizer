@@ -5,8 +5,9 @@ commit 91c1f64) for the Base model; see plans/00-baseline.md.
 
 Models:
     base    RelBench's relational GraphSAGE (the paper's *Base*).
-    filter  Base + filtering (step A).          [needs RelationalFilter]
-    full    Base + the full optimizer (A-D).    [needs StructuralOptimizer]
+    filter  Base + column and table gates (step A without the bottleneck;
+            plans/01-filtering-gates.md).
+    full    Base + the full optimizer (A-D).    [not implemented yet]
 
 Examples:
     # one train batch + one val batch, nothing written to results/
@@ -14,10 +15,16 @@ Examples:
 
     # a full run, appends one row to experiments/results/results.csv
     python experiments/train.py --task driver-top3 --model base --seed 0
+
+    # with column and table gates
+    python experiments/train.py --task driver-top3 --model filter \
+        --lambda-col 1e-3 --lambda-table 1e-3 --dedup-encoder
 """
 import argparse
 import copy
 import csv
+import json
+import math
 import os
 import time
 from pathlib import Path
@@ -45,6 +52,7 @@ from relbench.modeling.nn import (  # noqa: E402
 from relbench.modeling.utils import get_stype_proposal  # noqa: E402
 from torch import Tensor  # noqa: E402
 
+from torch_geometric.contrib.nn.models import RelationalFilter  # noqa: E402
 from torch_geometric.loader import NeighborLoader  # noqa: E402
 from torch_geometric.nn import MLP  # noqa: E402
 from torch_geometric.seed import seed_everything  # noqa: E402
@@ -64,13 +72,16 @@ DEFAULTS: Dict[str, Any] = dict(
     max_steps_per_epoch=2000,
     text_embedder='glove',  # 'glove' (RelBench default) or 'none'
     num_workers=0,
+    lambda_col=0.0,  # --model filter: weight of the column-gate penalty
+    lambda_table=0.0,  # --model filter: weight of the table-gate penalty
 )
 
 # Columns of results.csv; metrics a task does not report are left empty.
 RESULT_FIELDS = [
     'dataset', 'task', 'model', 'seed', 'tune_metric', 'best_epoch',
     'val_roc_auc', 'test_roc_auc', 'val_nmae', 'test_nmae', 'val_mae',
-    'test_mae', 'epochs', 'minutes', 'text_embedder'
+    'test_mae', 'epochs', 'minutes', 'text_embedder', 'lambda_col',
+    'lambda_table', 'open_columns', 'open_tables'
 ]
 
 
@@ -269,10 +280,18 @@ class BaseModel(torch.nn.Module):
         self.head = MLP(channels, out_channels=out_channels, norm='batch_norm',
                         num_layers=1)
 
+    def encode_table(self, node_type: str, tf) -> Tensor:
+        r"""Encodes the rows :obj:`tf` of one table into
+        :obj:`[num_rows, channels]`."""
+        return self.encoder.encoders[node_type](tf)
+
     def encode_rows(self, batch) -> Dict[str, Tensor]:
         r"""Runs the row encoder (one ResNet per table) on the batch."""
         if not self.dedup_encoder:
-            return self.encoder(batch.tf_dict)
+            return {
+                node_type: self.encode_table(node_type, tf)
+                for node_type, tf in batch.tf_dict.items()
+            }
         x_dict = {}
         for node_type, tf in batch.tf_dict.items():
             # `n_id` is the database row of every sampled node; `inverse`
@@ -282,7 +301,7 @@ class BaseModel(torch.nn.Module):
             # One batch position per distinct row (any copy works):
             first = torch.empty_like(unique).scatter_(
                 0, inverse, torch.arange(n_id.numel(), device=n_id.device))
-            x = self.encoder.encoders[node_type](tf[first])
+            x = self.encode_table(node_type, tf[first])
             # Indexing copies the embedding to every position; in backward,
             # it sums the gradients of all copies into the encoded row.
             x_dict[node_type] = x[inverse]
@@ -304,19 +323,100 @@ class BaseModel(torch.nn.Module):
         return self.head(x_dict[entity_table][:num_seeds])
 
 
-def build_model(args, data, col_stats_dict, out_channels: int):
+class FilterModel(BaseModel):
+    r"""Base with column and table gates (plans/01-filtering-gates.md).
+
+    Each table's row encoder runs in two halves, with the column gates in
+    between: the column encoders give :obj:`[N, C, channels]`, the gates
+    scale each column, then the ResNet mixes the columns. The table gates
+    scale :math:`h^{(0)}` (after the time encoding) of every table except
+    :obj:`entity_table`. With every gate open, the model is Base.
+    """
+    def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
+                 num_layers: int, aggr: str, entity_table: str,
+                 lambda_col: float = 0.0, lambda_table: float = 0.0,
+                 dedup_encoder: bool = False):
+        super().__init__(data, col_stats_dict, channels, out_channels,
+                         num_layers, aggr, dedup_encoder)
+        self.lambda_col = lambda_col
+        self.lambda_table = lambda_table
+        # Gate c of a table belongs to its c-th encoded column; PyTorch Frame
+        # orders the columns by stype:
+        self.col_names = {
+            node_type: [
+                col for stype in data[node_type].tf.stypes
+                for col in data[node_type].tf.col_names_dict[stype]
+            ]
+            for node_type in data.node_types
+        }
+        self.filter = RelationalFilter(
+            num_columns={
+                node_type: len(cols)
+                for node_type, cols in self.col_names.items()
+            },
+            table_types=[nt for nt in data.node_types if nt != entity_table],
+        )
+
+    def encode_table(self, node_type: str, tf) -> Tensor:
+        resnet = self.encoder.encoders[node_type]
+        x, _ = resnet.encoder(tf)  # [N, C, channels]
+        x = self.filter.gate_columns(node_type, x)
+        # As in ResNet.forward (`math.prod` also handles empty tables):
+        x = x.view(x.size(0), math.prod(x.shape[1:]))
+        return resnet.decoder(resnet.backbone(x))
+
+    def encode(self, batch, entity_table: str) -> Dict[str, Tensor]:
+        return self.filter.gate_tables(super().encode(batch, entity_table))
+
+    def structural_loss(self) -> Tensor:
+        r"""The penalty term :math:`\lambda \sum \mathbb{E}\|g\|_0 +
+        \lambda_s \sum \mathbb{E}\|s\|_0` of the loss."""
+        col_penalty, table_penalty = self.filter.l0_penalties()
+        return (self.lambda_col * col_penalty +
+                self.lambda_table * table_penalty)
+
+    def gate_summary(self) -> Dict[str, Any]:
+        r"""Each gate's open probability and evaluation-mode state."""
+        def threshold(gate) -> Tensor:  # The evaluation-mode 0/1 state.
+            return gate.logit.sigmoid() > gate.threshold
+
+        columns, tables = {}, {}
+        with torch.no_grad():
+            for node_type, gate in self.filter.column_gates.items():
+                prob, is_open = gate.prob_open(), threshold(gate)
+                columns[node_type] = {
+                    col: dict(prob_open=round(float(p), 4), open=bool(o))
+                    for col, p, o in zip(self.col_names[node_type], prob,
+                                         is_open)
+                }
+            for node_type, gate in self.filter.table_gates.items():
+                tables[node_type] = dict(
+                    prob_open=round(float(gate.prob_open()[0]), 4),
+                    open=bool(threshold(gate)[0]))
+        return dict(
+            open_columns=sum(c['open'] for cols in columns.values()
+                             for c in cols.values()),
+            open_tables=sum(t['open'] for t in tables.values()),
+            columns=columns, tables=tables)
+
+
+def build_model(args, data, col_stats_dict, out_channels: int,
+                entity_table: Optional[str] = None):
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
                          args.num_layers, args.aggr, args.dedup_encoder)
-    # 'filter' and 'full' wrap BaseModel's encoder in
-    # torch_geometric.contrib.nn.StructuralOptimizer.
+    if args.model == 'filter':
+        return FilterModel(data, col_stats_dict, args.channels, out_channels,
+                           args.num_layers, args.aggr, entity_table,
+                           args.lambda_col, args.lambda_table,
+                           args.dedup_encoder)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
 def train_epoch(model, loader, optimizer, spec: TaskSpec, entity_table: str,
                 device: torch.device, max_steps: int) -> float:
     r"""Runs one epoch (at most :obj:`max_steps` batches) and returns the
-    mean training loss per seed."""
+    mean task loss per seed (without any structural penalty)."""
     model.train()
     total_loss = total_count = 0
     for step, batch in enumerate(loader):
@@ -326,9 +426,12 @@ def train_epoch(model, loader, optimizer, spec: TaskSpec, entity_table: str,
         optimizer.zero_grad()
         pred = model(batch, entity_table).view(-1)
         loss = spec.loss_fn(pred, batch[entity_table].y.float())
-        # 'filter' / 'full': loss = loss + model.structural_loss()  (step D)
-        loss.backward()
+        if hasattr(model, 'structural_loss'):  # The gates' L0 penalty.
+            (loss + model.structural_loss()).backward()
+        else:
+            loss.backward()
         optimizer.step()
+        # Reports the task loss only, comparable across models:
         total_loss += loss.item() * pred.numel()
         total_count += pred.numel()
     return total_loss / max(total_count, 1)
@@ -368,18 +471,26 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     entity_table = task.entity_table
     best, best_state, best_epoch, history = None, None, None, []
+    best_gates = None
     for epoch in range(1, args.epochs + 1):
         loss = train_epoch(model, loaders['train'], optimizer, spec,
                            entity_table, device, args.max_steps_per_epoch)
         val = evaluate(
             task, spec,
             predict(model, loaders['val'], spec, entity_table, device), 'val')
+        gates = model.gate_summary() if hasattr(model,
+                                                'gate_summary') else None
         history.append(dict(epoch=epoch, loss=loss, **val))
         log(f'epoch {epoch:02d}  loss {loss:.4f}  ' +
-            '  '.join(f'val {k} {v:.4f}' for k, v in val.items()))
+            '  '.join(f'val {k} {v:.4f}' for k, v in val.items()) +
+            ('' if gates is None else
+             f'  penalty {model.structural_loss().item():.4f}'
+             f'  open columns {gates["open_columns"]}'
+             f'  open tables {gates["open_tables"]}'))
         if is_better(val[spec.tune_metric], best, spec.higher_is_better):
             best, best_epoch = val[spec.tune_metric], epoch
             best_state, best_val = copy.deepcopy(model.state_dict()), val
+            best_gates = gates
 
     model.load_state_dict(best_state)
     test = evaluate(
@@ -389,7 +500,7 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         '  '.join(f'val {k} {v:.4f}' for k, v in best_val.items()) + '  ' +
         '  '.join(f'test {k} {v:.4f}' for k, v in test.items()))
     return dict(best_epoch=best_epoch, val=best_val, test=test,
-                history=history)
+                history=history, gates=best_gates)
 
 
 def write_result(path: str, row: Dict[str, Any]) -> None:
@@ -415,8 +526,8 @@ def main() -> None:
                                       device)
     spec = task_spec(task)
     loaders = make_loaders(data, task, args)
-    model = build_model(args, data, col_stats_dict,
-                        spec.out_channels).to(device)
+    model = build_model(args, data, col_stats_dict, spec.out_channels,
+                        task.entity_table).to(device)
 
     if args.smoke:
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -438,6 +549,16 @@ def main() -> None:
     for split in ['val', 'test']:
         for name, value in out[split].items():
             row[f'{split}_{name}'] = value
+    if out['gates'] is not None:  # --model filter
+        row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
+                   open_columns=out['gates']['open_columns'],
+                   open_tables=out['gates']['open_tables'])
+        # Every gate's state at the best epoch, next to results.csv:
+        path = Path(args.results).parent / 'gates' / (
+            f'{args.task}_seed{args.seed}_lc{args.lambda_col:g}'
+            f'_lt{args.lambda_table:g}.json')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(out['gates'], indent=2))
     write_result(args.results, row)
 
 
