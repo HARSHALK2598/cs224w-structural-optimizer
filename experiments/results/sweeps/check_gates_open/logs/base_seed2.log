@@ -9,3 +9,14 @@ epoch 07  loss 0.3568  val roc_auc 0.7598
 epoch 08  loss 0.3231  val roc_auc 0.7747
 epoch 09  loss 0.3147  val roc_auc 0.7728
 epoch 10  loss 0.3011  val roc_auc 0.7778
+epoch 11  loss 0.2918  val roc_auc 0.7769
+epoch 12  loss 0.2805  val roc_auc 0.7803
+epoch 13  loss 0.2767  val roc_auc 0.7875
+epoch 14  loss 0.2676  val roc_auc 0.7903
+epoch 15  loss 0.2732  val roc_auc 0.7867
+epoch 16  loss 0.2704  val roc_auc 0.7879
+epoch 17  loss 0.2631  val roc_auc 0.7889
+epoch 18  loss 0.2526  val roc_auc 0.7816
+epoch 19  loss 0.2511  val roc_auc 0.7818
+epoch 20  loss 0.2471  val roc_auc 0.7814
+best epoch 14: val roc_auc 0.7903  test roc_auc 0.8238

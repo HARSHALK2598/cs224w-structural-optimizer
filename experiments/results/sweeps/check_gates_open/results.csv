@@ -3,3 +3,9 @@ base_seed0,cpu,rel-f1,driver-top3,base,0,roc_auc,19,0.766049703463475,0.77344403
 filter_gates_open1_seed0,cpu,rel-f1,driver-top3,filter,0,roc_auc,19,0.756248768163982,0.7889383883779264,,,,,20,1.07,glove,0.0,0.0,0.005,2.0,0.6667,45,8
 base_seed1,cpu,rel-f1,driver-top3,base,1,roc_auc,11,0.7953629212879182,0.7777030204849498,,,,,20,1.09,glove,,,,,,,
 filter_gates_open1_seed1,cpu,rel-f1,driver-top3,filter,1,roc_auc,18,0.7966350719392234,0.8028911475752507,,,,,20,0.99,glove,0.0,0.0,0.005,2.0,0.6667,45,8
+base_seed2,cpu,rel-f1,driver-top3,base,2,roc_auc,14,0.7903280715271183,0.8238072219899666,,,,,20,0.91,glove,,,,,,,
+filter_gates_open1_seed2,cpu,rel-f1,driver-top3,filter,2,roc_auc,13,0.7937145007256634,0.8111086433946488,,,,,20,0.87,glove,0.0,0.0,0.005,2.0,0.6667,45,8
+base_seed3,cpu,rel-f1,driver-top3,base,3,roc_auc,14,0.802852484277293,0.7995923913043479,,,,,20,0.9,glove,,,,,,,
+filter_gates_open1_seed3,cpu,rel-f1,driver-top3,filter,3,roc_auc,17,0.79901811470857,0.7908980455685619,,,,,20,0.9,glove,0.0,0.0,0.005,2.0,0.6667,45,8
+base_seed4,cpu,rel-f1,driver-top3,base,4,roc_auc,12,0.7701349196394975,0.7693810096153846,,,,,20,0.95,glove,,,,,,,
+filter_gates_open1_seed4,cpu,rel-f1,driver-top3,filter,4,roc_auc,15,0.7810288294422246,0.7687408549331104,,,,,20,0.86,glove,0.0,0.0,0.005,2.0,0.6667,45,8
