@@ -13,6 +13,8 @@
 \usepackage{microtype}
 \usepackage{xcolor}
 \usepackage{enumitem}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize, columns=fullflexible, keepspaces=true, aboveskip=2pt, belowskip=2pt, xleftmargin=1em}
 
 \hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
 \setlength{\abovedisplayskip}{3pt}
@@ -35,15 +37,20 @@
 \maketitle
 \vspace{-2.6em}
 
-\section{Goal}
+\section{Problem and paper summary}
 \vspace{-0.4em}
-We implement the structural optimizer of \emph{What Makes a Desired Graph for Relational Deep
-Learning?} (Cheng \& Luo, ICML 2026) as PyG modules and test its claims on RelBench. Relational
-deep learning turns a database into a graph (rows $\to$ nodes, foreign keys $\to$ edges). The
-paper argues that this schema graph carries irrelevant columns and tables, and learns which ones
-to keep (\textbf{A}, filtering), which edges to add (\textbf{B}, injection), how much to trust
-each added relation (\textbf{C}, gated aggregation), with a sparsity penalty (\textbf{D}). This
-milestone covers \textbf{A} end to end: code, tests and a full experiment.
+Relational deep learning~\cite{fey2024rdl} turns a database into a graph mechanically: rows
+become nodes and foreign keys become edges. \emph{What Makes a Desired Graph for Relational Deep
+Learning?}~\cite{cheng2026desired} argues that this schema graph is often poor for message
+passing: irrelevant columns and tables add noise (\emph{information overload}), and related
+entities sit many hops apart (\emph{semantic fragmentation}). Its structural optimizer learns the
+graph together with the model, in four parts: \textbf{A}~filtering (learned switches on columns
+and tables, plus a variational bottleneck), \textbf{B}~injection (new edges from KNN, two-hop,
+behavioural and temporal templates), \textbf{C}~gated aggregation (a learned switch per added
+relation), and \textbf{D}~an $L_0$ sparsity penalty. On RelBench~\cite{robinson2024relbench} it
+reports, e.g., \code{driver-top3} ROC-AUC 81.5 (Base) $\to$ 84.7 (filtering only) $\to$ 86.8 (full).
+We implement it as PyG \code{contrib} modules and test these claims. This milestone covers
+\textbf{A} (switches and penalty) end to end: code, tests and a full experiment.
 
 \section{Method: filtering (paper Eq.~3--5, 11)}
 \vspace{-0.4em}
@@ -51,8 +58,8 @@ milestone covers \textbf{A} end to end: code, tests and a full experiment.
 $h^{(0)}_v$; two GraphSAGE layers and a linear head give the prediction $\hat y_v$.
 
 \textbf{Gates.} Every column $c$ of table $T$ gets a gate $g_{T,c}$ and every table a gate $s_T$,
-each with one learned logit $\theta$. In training a gate is a Hard-Concrete sample; at test time it
-is a hard 0/1 switch (Eq.~4):
+each with one learned logit $\theta$. In training a gate is a Hard-Concrete
+sample~\cite{louizos2018l0}; at test time it is a hard 0/1 switch (Eq.~4):
 \begin{align*}
 \text{train: } g &= \min\!\Big(1, \max\!\big(0,\ \sigma\big(\tfrac{\log u - \log(1-u) + \theta}{t}\big)(\zeta-\gamma)+\gamma\big)\Big),\quad u \sim U(0,1);\\
 \text{test: } g &= \mathbb{I}[\sigma(\theta) > \tau].
@@ -73,7 +80,14 @@ Settings: $\gamma=-0.1$, $\zeta=1.1$, $t=2/3$, $\tau=0.5$.
 \vspace{-0.4em}
 \begin{itemize}
 \item \textbf{PyG fork} (\code{contrib}, merged after review): \code{HardConcreteGate} and
-  \code{RelationalFilter}, PyG-style docstrings, 13 unit tests.
+  \code{RelationalFilter}, with PyG-style API docstrings (equations, arguments, shapes, examples)
+  and 13 unit tests. Usage, independent of RelBench:
+\begin{lstlisting}[language=Python]
+filt = RelationalFilter(num_columns={'results': 11, ...}, table_types=[...])
+e = filt.gate_columns('results', e)      # [N, C, 128]: column c scaled by g_c
+h_dict = filt.gate_tables(h_dict)        # each table's [N, 128] scaled by s_T
+col_pen, tab_pen = filt.l0_penalties()   # loss += lambda*col_pen + lambda_s*tab_pen
+\end{lstlisting}
 \item \textbf{Experiment code}: one training script that reproduces RelBench's official example within
   seed noise; \code{--model filter}; a resumable sweep runner; a Colab notebook for GPU runs.
 \item \textbf{Correctness checks.} With every gate fixed at 1 the gated model trains \emph{exactly}
@@ -134,6 +148,17 @@ Difference & $+0.005$ ($p=0.50$) & $+0.006$ ($p=0.81$) & $+0.032$ \\
 \textbf{(2)} Injection (KNN, two-hop, behavioural, temporal edges) with gated aggregation (B, C) and
 the bottleneck (D), then the full optimizer against the paper's 0.868. \textbf{(3)} More tasks
 (\code{driver-dnf}, \code{driver-position}, \code{rel-trial}). \textbf{(4)} PR polish and the blog post.
-Code, results and a lab notebook of every run are in the project repository.
+Code: \href{https://github.com/HARSHALK2598/pytorch_geometric/tree/contrib/structural-optimizer}{PyG fork,
+branch \code{contrib/structural-optimizer}}; experiments, results and a run-by-run lab notebook:
+\href{https://github.com/HARSHALK2598/cs224w-structural-optimizer}{project repository}.
+
+\footnotesize
+\begin{thebibliography}{9}
+\setlength{\itemsep}{0pt}
+\bibitem{cheng2026desired} Y.~Cheng and S.~Luo. What makes a desired graph for relational deep learning? In \emph{ICML}, 2026. arXiv:2606.08491.
+\bibitem{fey2024rdl} M.~Fey, W.~Hu, K.~Huang, J.~E. Lenssen, R.~Ranjan, J.~Robinson, R.~Ying, J.~You, and J.~Leskovec. Position: Relational deep learning: Graph representation learning on relational databases. In \emph{ICML}, 2024.
+\bibitem{robinson2024relbench} J.~Robinson, R.~Ranjan, W.~Hu, K.~Huang, J.~Han, A.~Dobles, M.~Fey, J.~E. Lenssen, Y.~Yuan, Z.~Zhang, X.~He, and J.~Leskovec. RelBench: A benchmark for deep learning on relational databases. In \emph{NeurIPS Datasets and Benchmarks}, 2024.
+\bibitem{louizos2018l0} C.~Louizos, M.~Welling, and D.~P. Kingma. Learning sparse neural networks through $L_0$ regularization. In \emph{ICLR}, 2018.
+\end{thebibliography}
 
 \end{document}
