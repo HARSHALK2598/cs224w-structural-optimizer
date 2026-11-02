@@ -424,3 +424,44 @@ Appendix C, Table 8) and the authors' repository (`cy623/Structural_Optimizer_RD
 4. **Not yet matched:** the paper's grid over learning rate and hidden size (for Base and
    for the optimizer). Our Base uses RelBench's defaults, which partly explains Base 0.79
    vs the paper's 0.815 (Plan 00).
+
+## 13. What the paper's theory requires, and how the code guarantees it
+
+The paper's theory (§3.4, Def. 3.1, Thm. 3.2, Prop. H.1, App. G) is stated for gates in
+general, not for one gate target. Each claim needs certain properties from the code;
+this lists them for our column version (b), with the test that checks each one.
+
+| # | Paper | What the code must do | Ours (b) | Checked by |
+|---|---|---|---|---|
+| 1 | Thm. 3.2: gates are keep/drop variables $M_j$ with $\pi_j = P(M_j = 1)$ | each gate defines a keep/drop event with a computable probability | $M_j = \mathbb{I}[g_j > 0]$, $\pi_j = \sigma(\theta_j - t\log(-\gamma/\zeta))$ (`prob_open`) | closed form = empirical rate over 100k samples (`test_hard_concrete_gate_prob_open`) |
+| 2 | Eq. 11, Thm. 3.2: the penalty is $\mu = \sum_j \pi_j = \mathbb{E}\lVert M\rVert_0$ | penalty = sum of open probabilities, differentiable | `l0_penalties()` = $\sum$ `prob_open`; loss adds $\lambda \sum + \lambda_s \sum$ | `test_relational_filter_l0_penalties`, `test_filter_model_penalty` |
+| 3 | App. G: $\ell_0$, not $\ell_1$: discrete keep/drop | gates can be exactly 0 or 1 | stretched and clipped samples; hard 0/1 in evaluation | `test_hard_concrete_gate_training_samples`, `test_hard_concrete_gate_eval` |
+| 4 | Prop. H.1 (filtering analogue): the gated family contains Base, so gates cannot make the best task risk worse | all gates open ⇒ exactly Base | yes | `test_filter_model_all_open_is_base` (one batch), `test_filter_model_open_trains_like_base` (training, exact), test (b) (5 seeds × 20 epochs) |
+| 5 | Def. 3.1: a gate setting $\phi$ selects a graph view | a closed gate removes exactly its component | closed column ⇒ the prediction does not depend on that column's values; closed table ⇒ it does not depend on the table's columns or timestamps | `test_filter_model_closed_column_removes_its_information`, `test_filter_model_closed_table_removes_its_information` |
+| 6 | Eq. 4: one deterministic structure at test time | evaluation uses hard 0/1 gates | yes, $\sigma(\theta) > 0.5$ | `test_hard_concrete_gate_eval`, `test_filter_model_closed_gates` |
+| 7 | Def. 3.1: gates $\phi$ and weights $\theta$ optimised together | one loss, one optimiser for both | yes (Adam, with a separate gate learning rate) | `test_make_optimizer`, `test_filter_model_penalty` |
+
+**Not guaranteed by code, to check in experiments:**
+
+- **λ controls sparsity** (the knob behind Thm. 3.2 and the inverted-U of §3.3, App. D.1).
+  At a stationary point a larger λ means fewer open gates. But Adam scales every update
+  to about the learning rate, and `driver-top3` has only 60 steps, so training may never
+  reach that point. The sweep must show the number of open gates falling as λ rises.
+- **Thm. 3.2 is a bound, not a guarantee of better scores.** It says fewer expected open
+  gates means a smaller space of structures, not that the chosen structure predicts
+  better. The inverted-U is empirical.
+
+**Where our deviations change the meaning, but not the guarantees:**
+
+- **Gate target (b).** The theorem holds for any set of $J$ gates. Ours has $J = 45 + 8 =
+  53$ (one per column or table), against $9 \times 128 + 9 = 1{,}161$ for the paper's
+  equations. The paper's own wording for the gates in Thm. 3.2 is "attribute-, type- and
+  template-level selection", which matches columns (attributes) and tables (types).
+- **A closed `date` column** removes the date as a feature only. The row's timestamp still
+  reaches the model through the time encoding, and through temporal sampling. Removing it
+  needs the table gate (row 5).
+- **A closed table stays a path**: its rows still pass on what they receive from
+  neighbours (§2.3, decision 2). Row 5 checks that its own content is removed.
+- **No table gate on the target table:** the theorem does not depend on it.
+- **Gate settings** (temperature, start logit, gate learning rate) do not appear in the
+  theory. They change only how training reaches a solution.
