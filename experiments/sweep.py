@@ -131,7 +131,7 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
     (out / 'env.json').write_text(json.dumps(env, indent=2))
     print(f"device {env['device']} {env['gpu'] or ''} | torch "
           f"{env['torch']} | project {env['project_commit'][:8]} | "
-          f"pyg {env['pyg_commit'][:8]}")
+          f"pyg {env['pyg_commit'][:8]}", flush=True)
 
     fixed = dict(cfg.get('fixed', {}))
     if epochs is not None:
@@ -142,7 +142,7 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
     if max_runs is not None:
         todo = todo[:max_runs]
     print(f'{len(runs)} runs in the sweep, {len(done)} already finished, '
-          f'{len(todo)} to run now')
+          f'{len(todo)} to run now', flush=True)
     if not todo:
         return
 
@@ -181,7 +181,7 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
                 with open(out / 'failures.log', 'a') as f:
                     f.write(f"== {run['run_id']}\n{trace}\n")
                 print(f"[{i}/{len(todo)}] {run['run_id']}: FAILED "
-                      f"(see failures.log)")
+                      f"(see failures.log)", flush=True)
                 continue
 
         row = train.result_row(args, spec, result, minutes)
@@ -199,7 +199,7 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
               f"{result['val'][spec.tune_metric]:.4f}  test "
               f"{result['test'][spec.tune_metric]:.4f}  best epoch "
               f"{result['best_epoch']}{gates}  ({minutes:.1f} min, "
-              f"~{eta:.0f} min left)")
+              f"~{eta:.0f} min left)", flush=True)
         del model, loaders
         if device.type == 'cuda':
             torch.cuda.empty_cache()
@@ -246,7 +246,7 @@ def main() -> None:
                                            'results' / 'sweeps' / cfg['name'])
     run_sweep(cfg, out, args.max_runs, args.epochs)
     if (out / 'results.csv').exists():
-        print(summarize(out).round(4).to_string(index=False))
+        print(summarize(out).round(4).to_string(index=False), flush=True)
 
 
 if __name__ == '__main__':
