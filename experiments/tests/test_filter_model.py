@@ -277,3 +277,18 @@ def test_filter_model_closed_table_removes_its_information(setup):
         model.filter.table_gates['standings'].logit.fill_(-10.0)
         assert torch.equal(model(batch, task.entity_table),
                            model(other, task.entity_table))  # Closed.
+
+
+@requires_rel_f1
+def test_filter_model_nan_safe_numerical(setup):
+    r"""--nan-safe-numerical reaches the gated model's encoder: no weight
+    turns NaN after a training step (issue #6)."""
+    task, _, _, batch = setup
+    model = make(setup, nan_safe_numerical=True)
+    encoder = model.encoder.encoders['results'].encoder.encoder_dict
+    assert isinstance(encoder['numerical'], train.NaNSafeLinearEncoder)
+    optimizer = train.make_optimizer(model, train.parse_args([]))
+    train.train_epoch(model, [batch], optimizer, train.task_spec(task),
+                      task.entity_table, torch.device('cpu'), max_steps=1)
+    for name, param in model.named_parameters():
+        assert not torch.isnan(param).any(), name

@@ -45,6 +45,7 @@ from relbench.modeling.graph import (  # noqa: E402
     make_pkey_fkey_graph,
 )
 from relbench.modeling.nn import (  # noqa: E402
+    _DEFAULT_STYPE_ENCODER_CLS_KWARGS,
     HeteroEncoder,
     HeteroGraphSAGE,
     HeteroTemporalEncoder,
@@ -103,6 +104,9 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument('--dedup-encoder', action='store_true',
                         help='Encode each distinct row once per batch '
                         '(see experiments/profiling/README.md).')
+    parser.add_argument('--nan-safe-numerical', action='store_true',
+                        help='Keep numerical columns with missing values '
+                        'trainable (issue #6).')
     parser.add_argument('--smoke', action='store_true',
                         help='Run one train and one val batch, write nothing.')
     parser.add_argument('--results', type=str,
@@ -250,6 +254,29 @@ def make_loaders(data, task, args) -> Dict[str, NeighborLoader]:
     return loaders
 
 
+class NaNSafeLinearEncoder(torch_frame.nn.LinearEncoder):
+    r"""PyTorch Frame's numerical encoder with finite gradients for missing
+    values (issue #6).
+
+    The original computes :math:`x = \frac{v - \mu}{\sigma} w + b` with the
+    NaN still in :math:`v`, and :class:`StypeEncoder` later replaces the NaN
+    output with 0. The forward pass is fine, but the weight gradient
+    :math:`v \cdot \partial L / \partial x` is :math:`\mathrm{NaN} \times 0
+    = \mathrm{NaN}`, so Adam writes NaN into the column's weights and the
+    column encodes to 0 for every row from then on.
+
+    Here a missing value is replaced by 0 *before* the multiplication and its
+    output is masked to 0 afterwards: the same forward output, but a finite
+    gradient (zero from the missing rows), so the column keeps learning.
+    """
+    def encode_forward(self, feat: Tensor, col_names=None) -> Tensor:
+        missing = torch.isnan(feat)  # [batch_size, num_cols]
+        feat = (feat - self.mean) / self.std
+        feat = feat.masked_fill(missing, 0.0)
+        x = torch.einsum('ij,jk->ijk', feat, self.weight) + self.bias
+        return x.masked_fill(missing.unsqueeze(-1), 0.0)
+
+
 class BaseModel(torch.nn.Module):
     r"""RelBench's relational GraphSAGE: encoder -> hetero GNN -> MLP head.
 
@@ -263,9 +290,13 @@ class BaseModel(torch.nn.Module):
     dropout; in training, all copies of a row share one dropout mask.
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
-                 num_layers: int, aggr: str, dedup_encoder: bool = False):
+                 num_layers: int, aggr: str, dedup_encoder: bool = False,
+                 nan_safe_numerical: bool = False):
         super().__init__()
         self.dedup_encoder = dedup_encoder
+        stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
+        if nan_safe_numerical:
+            stype_encoders[torch_frame.numerical] = (NaNSafeLinearEncoder, {})
         self.encoder = HeteroEncoder(
             channels=channels,
             node_to_col_names_dict={
@@ -273,6 +304,7 @@ class BaseModel(torch.nn.Module):
                 for node_type in data.node_types
             },
             node_to_col_stats=col_stats_dict,
+            default_stype_encoder_cls_kwargs=stype_encoders,
         )
         self.temporal_encoder = HeteroTemporalEncoder(
             node_types=[nt for nt in data.node_types if 'time' in data[nt]],
@@ -344,9 +376,10 @@ class FilterModel(BaseModel):
                  num_layers: int, aggr: str, entity_table: str,
                  lambda_col: float = 0.0, lambda_table: float = 0.0,
                  dedup_encoder: bool = False, gate_init: float = 2.0,
-                 gate_temperature: float = 2. / 3., gates_open: bool = False):
+                 gate_temperature: float = 2. / 3., gates_open: bool = False,
+                 nan_safe_numerical: bool = False):
         super().__init__(data, col_stats_dict, channels, out_channels,
-                         num_layers, aggr, dedup_encoder)
+                         num_layers, aggr, dedup_encoder, nan_safe_numerical)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
         # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
@@ -420,13 +453,15 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                 entity_table: Optional[str] = None):
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
-                         args.num_layers, args.aggr, args.dedup_encoder)
+                         args.num_layers, args.aggr, args.dedup_encoder,
+                         args.nan_safe_numerical)
     if args.model == 'filter':
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
                            args.dedup_encoder, args.gate_init,
-                           args.gate_temperature, args.gates_open)
+                           args.gate_temperature, args.gates_open,
+                           args.nan_safe_numerical)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
