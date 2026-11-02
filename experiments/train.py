@@ -83,7 +83,8 @@ DEFAULTS: Dict[str, Any] = dict(
 RESULT_FIELDS = [
     'dataset', 'task', 'model', 'seed', 'tune_metric', 'best_epoch',
     'val_roc_auc', 'test_roc_auc', 'val_nmae', 'test_nmae', 'val_mae',
-    'test_mae', 'epochs', 'minutes', 'text_embedder', 'lambda_col',
+    'test_mae', 'epochs', 'lr', 'channels', 'batch_size', 'minutes',
+    'text_embedder', 'lambda_col',
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
     'open_columns', 'open_tables'
 ]
@@ -559,7 +560,8 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
     r"""One :obj:`results.csv` row for the output of :meth:`fit`."""
     row = dict(dataset=args.dataset, task=args.task, model=args.model,
                seed=args.seed, tune_metric=spec.tune_metric,
-               best_epoch=out['best_epoch'], epochs=args.epochs,
+               best_epoch=out['best_epoch'], epochs=args.epochs, lr=args.lr,
+               channels=args.channels, batch_size=args.batch_size,
                minutes=round(minutes, 2), text_embedder=args.text_embedder)
     for split in ['val', 'test']:
         for name, value in out[split].items():

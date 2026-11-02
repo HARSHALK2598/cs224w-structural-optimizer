@@ -42,7 +42,8 @@ import train  # noqa: E402
 SWEEP_FIELDS = ['run_id', 'device'] + train.RESULT_FIELDS
 # Short names for run ids; 'lambda' sets both lambda_col and lambda_table.
 SHORT = dict(gate_lr='glr', gate_init='gi', gate_temperature='gt',
-             lambda_col='lc', lambda_table='lt')
+             lambda_col='lc', lambda_table='lt', lambda_='lam', lr='lr',
+             channels='ch')
 
 
 def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -60,9 +61,10 @@ def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
                         setting.update(lambda_col=value, lambda_table=value)
                     else:
                         setting[key] = value
+                # The run name lists the grid values (one 'lam' for 'lambda'):
                 name = '_'.join([arm['model']] + [
-                    f'{SHORT.get(k, k)}{v:g}' for k, v in setting.items()
-                    if k != 'model' and k != 'lambda_table'
+                    f"{SHORT.get(k if k != 'lambda' else 'lambda_', k)}{v:g}"
+                    for k, v in zip(keys, values)
                 ])
                 runs.append(dict(run_id=f'{name}_seed{seed}',
                                  setting=name, seed=seed,
