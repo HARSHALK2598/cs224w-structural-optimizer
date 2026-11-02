@@ -1,0 +1,5 @@
+run_id,device,dataset,task,model,seed,tune_metric,best_epoch,val_roc_auc,test_roc_auc,val_nmae,test_nmae,val_mae,test_mae,epochs,minutes,text_embedder,lambda_col,lambda_table,gate_lr,gate_init,gate_temperature,open_columns,open_tables
+base_seed0,cpu,rel-f1,driver-top3,base,0,roc_auc,19,0.766049703463475,0.7734440321906354,,,,,20,1.34,glove,,,,,,,
+filter_gates_open1_seed0,cpu,rel-f1,driver-top3,filter,0,roc_auc,19,0.756248768163982,0.7889383883779264,,,,,20,1.07,glove,0.0,0.0,0.005,2.0,0.6667,45,8
+base_seed1,cpu,rel-f1,driver-top3,base,1,roc_auc,11,0.7953629212879182,0.7777030204849498,,,,,20,1.09,glove,,,,,,,
+filter_gates_open1_seed1,cpu,rel-f1,driver-top3,filter,1,roc_auc,18,0.7966350719392234,0.8028911475752507,,,,,20,0.99,glove,0.0,0.0,0.005,2.0,0.6667,45,8
