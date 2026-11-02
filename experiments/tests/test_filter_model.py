@@ -219,3 +219,61 @@ def test_filter_model_gates_open_option(setup):
     with torch.no_grad():
         assert torch.equal(model(batch, task.entity_table),
                            base(batch, task.entity_table))
+
+
+def perturbed(batch, node_type, col=None):
+    r"""A copy of :obj:`batch` with new random values in one numerical
+    column of :obj:`node_type` (or in all its numerical columns and its
+    timestamps if :obj:`col` is :obj:`None`)."""
+    import copy
+
+    import torch_frame
+    out = copy.copy(batch)
+    store = out[node_type]
+    tf = copy.copy(store.tf)
+    tf.feat_dict = dict(tf.feat_dict)
+    num = tf.feat_dict[torch_frame.numerical].clone()
+    names = tf.col_names_dict[torch_frame.numerical]
+    cols = [names.index(col)] if col is not None else range(len(names))
+    for c in cols:
+        num[:, c] = torch.randn(num.size(0)) * 100
+    tf.feat_dict[torch_frame.numerical] = num
+    store.tf = tf
+    if col is None:
+        store.time = store.time - torch.randint(1, 10**8, store.time.shape)
+    return out
+
+
+@requires_rel_f1
+def test_filter_model_closed_column_removes_its_information(setup):
+    r"""A closed column gate removes that column from the model: changing
+    the column's values leaves the prediction unchanged (and changes it when
+    the gate is open)."""
+    task, _, _, batch = setup
+    model = make(setup)
+    model.eval()
+    idx = model.col_names['results'].index('grid')
+    other = perturbed(batch, 'results', col='grid')
+    with torch.no_grad():
+        assert not torch.equal(model(batch, task.entity_table),
+                               model(other, task.entity_table))  # Open.
+        model.filter.column_gates['results'].logit[idx] = -10.0
+        assert torch.equal(model(batch, task.entity_table),
+                           model(other, task.entity_table))  # Closed.
+
+
+@requires_rel_f1
+def test_filter_model_closed_table_removes_its_information(setup):
+    r"""A closed table gate removes the table's own content (its columns and
+    its timestamps) from the model; the table's rows still pass on what they
+    receive from their neighbours (a closed table stays a path)."""
+    task, _, _, batch = setup
+    model = make(setup)
+    model.eval()
+    other = perturbed(batch, 'standings')
+    with torch.no_grad():
+        assert not torch.equal(model(batch, task.entity_table),
+                               model(other, task.entity_table))  # Open.
+        model.filter.table_gates['standings'].logit.fill_(-10.0)
+        assert torch.equal(model(batch, task.entity_table),
+                           model(other, task.entity_table))  # Closed.
