@@ -1,0 +1,6 @@
+dataset,task,model,seed,tune_metric,best_epoch,val_roc_auc,test_roc_auc,val_nmae,test_nmae,val_mae,test_mae,epochs,minutes,text_embedder
+rel-f1,driver-top3,base,0,roc_auc,19,0.7933919836591352,0.8225138482441472,,,,,20,1.12,glove
+rel-f1,driver-top3,base,1,roc_auc,19,0.7748830875633836,0.7998340823578595,,,,,20,1.09,glove
+rel-f1,driver-top3,base,2,roc_auc,18,0.7855799036032324,0.772294366638796,,,,,20,1.14,glove
+rel-f1,driver-top3,base,3,roc_auc,17,0.7894859436311839,0.7799370296822743,,,,,20,0.97,glove
+rel-f1,driver-top3,base,4,roc_auc,14,0.7889484151869703,0.7866913147993311,,,,,20,1.11,glove

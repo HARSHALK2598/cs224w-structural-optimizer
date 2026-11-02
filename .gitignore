@@ -24,3 +24,5 @@ runs/
 *.bbl
 *.blg
 *.synctex.gz
+# ...but experiment logs are committed (they hold per-epoch scores)
+!experiments/results/**/logs/*.log

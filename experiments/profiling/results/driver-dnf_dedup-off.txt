@@ -1,0 +1,39 @@
+torch threads: 4
+dedup_encoder: False
+setup (graph from cache, loaders, model): 5.1s
+driver-dnf: 11411 train targets, 23 batches/epoch
+
+one training epoch: 53.4s, 23 steps, 71,181 sampled nodes per batch on average, 22,625 distinct rows (3.1x duplication)
+  1 sample mini-batch (NeighborLoader)        0.5s    1.0%
+  2 row encoder (ResNet per table)           28.3s   52.9%
+  3 time encoding                             0.5s    0.8%
+  4 GNN (2 GraphSAGE layers)                  6.0s   11.2%
+  5 head + loss                               0.0s    0.1%
+  6 backward pass                            17.6s   33.0%
+  7 optimizer step (Adam)                     0.4s    0.8%
+validation pass (566 targets): 1.1s
+
+top operators over 3 steps (model forward + backward only):
+----------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                    Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls  
+----------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                aten::mm        37.51%        1.642s        37.52%        1.643s       2.139ms           768  
+                             aten::addmm        11.16%     488.485ms        12.69%     555.528ms       1.243ms           447  
+                               aten::cat         8.03%     351.418ms         8.05%     352.676ms       1.434ms           246  
+                               aten::mul         7.47%     326.904ms         9.60%     420.363ms       1.752ms           240  
+                             aten::copy_         3.81%     166.608ms         3.81%     166.626ms      34.434us          4839  
+                               aten::abs         3.63%     159.089ms         7.26%     317.910ms       3.785ms            84  
+                               aten::add         3.03%     132.639ms         3.03%     132.639ms     381.148us           348  
+        aten::native_layer_norm_backward         2.38%     104.262ms         2.44%     107.008ms     604.563us           177  
+                               aten::sum         2.10%      92.040ms         2.70%     118.187ms     351.748us           336  
+                 aten::native_layer_norm         1.74%      76.380ms         1.88%      82.158ms     276.625us           297  
+                              aten::add_         1.47%      64.483ms         1.59%      69.651ms      33.844us          2058  
+                             aten::fill_         1.47%      64.351ms         1.47%      64.351ms     100.705us           639  
+----------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 4.379s
+
+hop 1 (rows -> drivers), fan-out 128 per relation:
+  qualifying   eligible rows per target: median     0, max   98 | targets with > 128 (random):     0 / 11411 (0.0%)
+  standings    eligible rows per target: median    33, max  259 | targets with > 128 (random):   892 / 11411 (7.8%)
+  results      eligible rows per target: median    27, max  256 | targets with > 128 (random):   780 / 11411 (6.8%)
+hop 2: every hop-1 row links to exactly one race / driver / constructor, so hop 2 never needs to sample.
