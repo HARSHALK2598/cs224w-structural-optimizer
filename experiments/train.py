@@ -45,6 +45,7 @@ from relbench.modeling.graph import (  # noqa: E402
     make_pkey_fkey_graph,
 )
 from relbench.modeling.nn import (  # noqa: E402
+    _DEFAULT_STYPE_ENCODER_CLS_KWARGS,
     HeteroEncoder,
     HeteroGraphSAGE,
     HeteroTemporalEncoder,
@@ -83,7 +84,8 @@ DEFAULTS: Dict[str, Any] = dict(
 RESULT_FIELDS = [
     'dataset', 'task', 'model', 'seed', 'tune_metric', 'best_epoch',
     'val_roc_auc', 'test_roc_auc', 'val_nmae', 'test_nmae', 'val_mae',
-    'test_mae', 'epochs', 'minutes', 'text_embedder', 'lambda_col',
+    'test_mae', 'epochs', 'lr', 'channels', 'batch_size', 'minutes',
+    'text_embedder', 'lambda_col',
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
     'open_columns', 'open_tables'
 ]
@@ -96,9 +98,15 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     for key, value in DEFAULTS.items():
         parser.add_argument(f'--{key.replace("_", "-")}', type=type(value),
                             default=None)
+    parser.add_argument('--gates-open', action='store_true',
+                        help='--model filter: keep every gate at 1 (a check '
+                        'that the gated model then trains like Base).')
     parser.add_argument('--dedup-encoder', action='store_true',
                         help='Encode each distinct row once per batch '
                         '(see experiments/profiling/README.md).')
+    parser.add_argument('--nan-safe-numerical', action='store_true',
+                        help='Keep numerical columns with missing values '
+                        'trainable (issue #6).')
     parser.add_argument('--smoke', action='store_true',
                         help='Run one train and one val batch, write nothing.')
     parser.add_argument('--results', type=str,
@@ -246,6 +254,29 @@ def make_loaders(data, task, args) -> Dict[str, NeighborLoader]:
     return loaders
 
 
+class NaNSafeLinearEncoder(torch_frame.nn.LinearEncoder):
+    r"""PyTorch Frame's numerical encoder with finite gradients for missing
+    values (issue #6).
+
+    The original computes :math:`x = \frac{v - \mu}{\sigma} w + b` with the
+    NaN still in :math:`v`, and :class:`StypeEncoder` later replaces the NaN
+    output with 0. The forward pass is fine, but the weight gradient
+    :math:`v \cdot \partial L / \partial x` is :math:`\mathrm{NaN} \times 0
+    = \mathrm{NaN}`, so Adam writes NaN into the column's weights and the
+    column encodes to 0 for every row from then on.
+
+    Here a missing value is replaced by 0 *before* the multiplication and its
+    output is masked to 0 afterwards: the same forward output, but a finite
+    gradient (zero from the missing rows), so the column keeps learning.
+    """
+    def encode_forward(self, feat: Tensor, col_names=None) -> Tensor:
+        missing = torch.isnan(feat)  # [batch_size, num_cols]
+        feat = (feat - self.mean) / self.std
+        feat = feat.masked_fill(missing, 0.0)
+        x = torch.einsum('ij,jk->ijk', feat, self.weight) + self.bias
+        return x.masked_fill(missing.unsqueeze(-1), 0.0)
+
+
 class BaseModel(torch.nn.Module):
     r"""RelBench's relational GraphSAGE: encoder -> hetero GNN -> MLP head.
 
@@ -259,9 +290,13 @@ class BaseModel(torch.nn.Module):
     dropout; in training, all copies of a row share one dropout mask.
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
-                 num_layers: int, aggr: str, dedup_encoder: bool = False):
+                 num_layers: int, aggr: str, dedup_encoder: bool = False,
+                 nan_safe_numerical: bool = False):
         super().__init__()
         self.dedup_encoder = dedup_encoder
+        stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
+        if nan_safe_numerical:
+            stype_encoders[torch_frame.numerical] = (NaNSafeLinearEncoder, {})
         self.encoder = HeteroEncoder(
             channels=channels,
             node_to_col_names_dict={
@@ -269,6 +304,7 @@ class BaseModel(torch.nn.Module):
                 for node_type in data.node_types
             },
             node_to_col_stats=col_stats_dict,
+            default_stype_encoder_cls_kwargs=stype_encoders,
         )
         self.temporal_encoder = HeteroTemporalEncoder(
             node_types=[nt for nt in data.node_types if 'time' in data[nt]],
@@ -340,11 +376,15 @@ class FilterModel(BaseModel):
                  num_layers: int, aggr: str, entity_table: str,
                  lambda_col: float = 0.0, lambda_table: float = 0.0,
                  dedup_encoder: bool = False, gate_init: float = 2.0,
-                 gate_temperature: float = 2. / 3.):
+                 gate_temperature: float = 2. / 3., gates_open: bool = False,
+                 nan_safe_numerical: bool = False):
         super().__init__(data, col_stats_dict, channels, out_channels,
-                         num_layers, aggr, dedup_encoder)
+                         num_layers, aggr, dedup_encoder, nan_safe_numerical)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
+        # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
+        # which also draws no random numbers.
+        self.gates_open = gates_open
         # Gate c of a table belongs to its c-th encoded column; PyTorch Frame
         # orders the columns by stype:
         self.col_names = {
@@ -367,13 +407,15 @@ class FilterModel(BaseModel):
     def encode_table(self, node_type: str, tf) -> Tensor:
         resnet = self.encoder.encoders[node_type]
         x, _ = resnet.encoder(tf)  # [N, C, channels]
-        x = self.filter.gate_columns(node_type, x)
+        if not self.gates_open:
+            x = self.filter.gate_columns(node_type, x)
         # As in ResNet.forward (`math.prod` also handles empty tables):
         x = x.view(x.size(0), math.prod(x.shape[1:]))
         return resnet.decoder(resnet.backbone(x))
 
     def encode(self, batch, entity_table: str) -> Dict[str, Tensor]:
-        return self.filter.gate_tables(super().encode(batch, entity_table))
+        x_dict = super().encode(batch, entity_table)
+        return x_dict if self.gates_open else self.filter.gate_tables(x_dict)
 
     def structural_loss(self) -> Tensor:
         r"""The penalty term :math:`\lambda \sum \mathbb{E}\|g\|_0 +
@@ -411,13 +453,15 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                 entity_table: Optional[str] = None):
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
-                         args.num_layers, args.aggr, args.dedup_encoder)
+                         args.num_layers, args.aggr, args.dedup_encoder,
+                         args.nan_safe_numerical)
     if args.model == 'filter':
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
                            args.dedup_encoder, args.gate_init,
-                           args.gate_temperature)
+                           args.gate_temperature, args.gates_open,
+                           args.nan_safe_numerical)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -526,22 +570,50 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
                 history=history, gates=best_gates)
 
 
-def write_result(path: str, row: Dict[str, Any]) -> None:
+def write_result(path: str, row: Dict[str, Any],
+                 fields: Optional[List[str]] = None) -> None:
     r"""Appends one row to :obj:`path`, writing the header for a new file."""
+    fields = fields or RESULT_FIELDS
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     new_file = not path.exists()
     if not new_file:
         with open(path, newline='') as f:
             header = next(csv.reader(f), None)
-        if header != RESULT_FIELDS:
+        if header != fields:
             raise ValueError(f"'{path}' has different columns than "
-                             f"RESULT_FIELDS; write to a new file")
+                             f"expected; write to a new file")
     with open(path, 'a', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=RESULT_FIELDS, restval='')
+        writer = csv.DictWriter(f, fieldnames=fields, restval='')
         if new_file:
             writer.writeheader()
         writer.writerow(row)
+
+
+def result_row(args, spec: TaskSpec, out: Dict[str, Any],
+               minutes: float) -> Dict[str, Any]:
+    r"""One :obj:`results.csv` row for the output of :meth:`fit`."""
+    row = dict(dataset=args.dataset, task=args.task, model=args.model,
+               seed=args.seed, tune_metric=spec.tune_metric,
+               best_epoch=out['best_epoch'], epochs=args.epochs, lr=args.lr,
+               channels=args.channels, batch_size=args.batch_size,
+               minutes=round(minutes, 2), text_embedder=args.text_embedder)
+    for split in ['val', 'test']:
+        for name, value in out[split].items():
+            row[f'{split}_{name}'] = value
+    if out['gates'] is not None:  # --model filter
+        row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
+                   gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
+                   gate_temperature=round(args.gate_temperature, 4),
+                   open_columns=out['gates']['open_columns'],
+                   open_tables=out['gates']['open_tables'])
+    return row
+
+
+def save_gates(path: Path, gates: Dict[str, Any]) -> None:
+    r"""Writes every gate's state (from :meth:`FilterModel.gate_summary`)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(gates, indent=2))
 
 
 def main() -> None:
@@ -570,27 +642,13 @@ def main() -> None:
 
     start = time.time()
     out = fit(model, loaders, task, spec, args, device)
-    row = dict(dataset=args.dataset, task=args.task, model=args.model,
-               seed=args.seed, tune_metric=spec.tune_metric,
-               best_epoch=out['best_epoch'], epochs=args.epochs,
-               minutes=round((time.time() - start) / 60, 2),
-               text_embedder=args.text_embedder)
-    for split in ['val', 'test']:
-        for name, value in out[split].items():
-            row[f'{split}_{name}'] = value
-    if out['gates'] is not None:  # --model filter
-        row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
-                   gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
-                   gate_temperature=round(args.gate_temperature, 4),
-                   open_columns=out['gates']['open_columns'],
-                   open_tables=out['gates']['open_tables'])
-        # Every gate's state at the best epoch, next to results.csv:
+    row = result_row(args, spec, out, minutes=(time.time() - start) / 60)
+    if out['gates'] is not None:  # Every gate's state, next to results.csv:
         path = Path(args.results).parent / 'gates' / (
             f'{args.task}_seed{args.seed}_lc{args.lambda_col:g}'
             f'_lt{args.lambda_table:g}_glr{args.gate_lr or args.lr:g}'
             f'_gi{args.gate_init:g}_gt{args.gate_temperature:.2g}.json')
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(out['gates'], indent=2))
+        save_gates(path, out['gates'])
     write_result(args.results, row)
 
 

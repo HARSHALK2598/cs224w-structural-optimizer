@@ -1,0 +1,11 @@
+run_id,device,dataset,task,model,seed,tune_metric,best_epoch,val_roc_auc,test_roc_auc,val_nmae,test_nmae,val_mae,test_mae,epochs,lr,channels,batch_size,minutes,text_embedder,lambda_col,lambda_table,gate_lr,gate_init,gate_temperature,open_columns,open_tables
+base_seed10,cuda,rel-f1,driver-top3,base,10,roc_auc,22,0.7834835426707996,0.7580737876254181,,,,,30,0.01,64,512,0.36,glove,,,,,,,
+filter_lc0.0001_lt0.0001_seed10,cuda,rel-f1,driver-top3,filter,10,roc_auc,30,0.798247657271864,0.7204222408026756,,,,,30,0.01,64,512,0.38,glove,0.0001,0.0001,0.1,5.0,0.6667,30,5
+base_seed11,cuda,rel-f1,driver-top3,base,11,roc_auc,15,0.7871029008618373,0.8076792433110367,,,,,30,0.01,64,512,0.36,glove,,,,,,,
+filter_lc0.0001_lt0.0001_seed11,cuda,rel-f1,driver-top3,filter,11,roc_auc,20,0.7677339592553439,0.8060461956521741,,,,,30,0.01,64,512,0.34,glove,0.0001,0.0001,0.1,5.0,0.6667,30,5
+base_seed12,cuda,rel-f1,driver-top3,base,12,roc_auc,14,0.7949508161473545,0.7224733486622074,,,,,30,0.01,64,512,0.37,glove,,,,,,,
+filter_lc0.0001_lt0.0001_seed12,cuda,rel-f1,driver-top3,filter,12,roc_auc,16,0.7922273386966727,0.734185566471572,,,,,30,0.01,64,512,0.36,glove,0.0001,0.0001,0.1,5.0,0.6667,32,5
+base_seed13,cuda,rel-f1,driver-top3,base,13,roc_auc,15,0.7864757843435883,0.7344925794314382,,,,,30,0.01,64,512,0.37,glove,,,,,,,
+filter_lc0.0001_lt0.0001_seed13,cuda,rel-f1,driver-top3,filter,13,roc_auc,21,0.8051817742022183,0.801793739548495,,,,,30,0.01,64,512,0.36,glove,0.0001,0.0001,0.1,5.0,0.6667,31,5
+base_seed14,cuda,rel-f1,driver-top3,base,14,roc_auc,20,0.7725896328680726,0.8056673285953178,,,,,30,0.01,64,512,0.36,glove,,,,,,,
+filter_lc0.0001_lt0.0001_seed14,cuda,rel-f1,driver-top3,filter,14,roc_auc,16,0.7872462417802942,0.7970513691471572,,,,,30,0.01,64,512,0.37,glove,0.0001,0.0001,0.1,5.0,0.6667,30,5

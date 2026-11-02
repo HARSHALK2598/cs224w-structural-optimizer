@@ -1,0 +1,3 @@
+run_id,device,dataset,task,model,seed,tune_metric,best_epoch,val_roc_auc,test_roc_auc,val_nmae,test_nmae,val_mae,test_mae,epochs,lr,channels,batch_size,minutes,text_embedder,lambda_col,lambda_table,gate_lr,gate_init,gate_temperature,open_columns,open_tables
+filter_lc0.0001_lt0.0001_seed0,cuda,rel-f1,driver-top3,filter,0,roc_auc,2,0.6712655211338266,0.7344272575250836,,,,,2,0.01,64,512,0.04,glove,0.0001,0.0001,0.1,5.0,0.6667,45,8
+filter_lc0.0001_lt0.001_seed0,cuda,rel-f1,driver-top3,filter,0,roc_auc,2,0.6716597086595832,0.7338328281772575,,,,,2,0.01,64,512,0.03,glove,0.0001,0.001,0.1,5.0,0.6667,45,8
