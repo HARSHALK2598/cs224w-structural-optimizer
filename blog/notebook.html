@@ -199,6 +199,7 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
       <a href="#pipeline">Pipeline</a>
       <a href="#results">Results</a>
       <a href="#gates">Making the gates work</a>
+      <a href="#filter-result">Does filtering help?</a>
       <a href="#findings">Findings</a>
       <a href="#log">Log</a>
     </nav>
@@ -331,6 +332,51 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
     <p class="note">One seed per run, and runs are not exactly repeatable, so these numbers show direction only. Choices use validation; test is for reference. Logs, per-gate files and a longer write-up are in <code>experiments/results/dryrun_filter/</code> (PR #10).</p>
   </section>
 
+  <section id="filter-result" aria-labelledby="filter-result-h">
+    <div class="section-head">
+      <div class="eyebrow">Plan 01 · result · driver-top3</div>
+      <h2 id="filter-result-h">Does filtering help? Not on this task</h2>
+      <p>We fixed the protocol before running anything. Base and the filter each got the same tuning budget, settings were chosen on validation, and test was read once at the end.</p>
+    </div>
+    <ol class="story">
+      <li>
+        <h3>Tune Base on the paper's grid</h3>
+        <div class="runs">stage A · learning rate {1e-4, 1e-3, 1e-2} × hidden size {64, 128, 256} · 3 seeds · 27 runs, CPU</div>
+        <dl>
+          <dt>Saw</dt><dd>Learning rate 0.01 with hidden size 64 wins (val 0.788 ± 0.005), but the top three settings are within noise. 1e-4 is clearly too slow for 90 training steps.</dd>
+        </dl>
+      </li>
+      <li>
+        <h3>Tune the filter with the same budget</h3>
+        <div class="runs">stage B · λ {1e-4, 1e-3, 1e-2} × λ_s {1e-4, 1e-3, 1e-2} at Base's settings · 3 seeds · 27 runs, T4 GPU</div>
+        <dl>
+          <dt>Saw</dt><dd>All 9 settings lie within 0.011 of each other on validation, with no inverted U. A larger λ does leave fewer gates open, but only late in training (chart below).</dd>
+          <dt>Why</dt><dd>Starting at θ = 5 and moving 0.1 per step, a gate needs about 14 epochs to reach 0. The best validation epoch is usually around 16, so the models we pick have barely been filtered.</dd>
+        </dl>
+      </li>
+      <li>
+        <h3>Final comparison on fresh seeds</h3>
+        <div class="runs">stage C · the two winners · seeds 10–14 · same GPU · test read once</div>
+        <dl>
+          <dt>Saw</dt><dd>Base: val 0.785 ± 0.008, test 0.766 ± 0.040. Filter: val 0.790 ± 0.014, test 0.772 ± 0.041. The difference is +0.006 on test, p = 0.81. The paper reports +3.2 points (81.48 → 84.66).</dd>
+          <dt>Means</dt><dd>No measurable gain on driver-top3, and the paper's gain is not reproduced. Our test scores vary across seeds (0.72–0.81) far more than the paper's reported spread.</dd>
+        </dl>
+      </li>
+    </ol>
+    <div class="chart" id="gates-epoch-chart"></div>
+    <p class="note">Mean number of open column gates (of 45) per epoch in stage B, for each λ. The shaded band covers the epochs where most runs had their best validation score (13–19; median 16).</p>
+    <div class="deviation">
+      <h3>What we learned</h3>
+      <ol>
+        <li><strong>Most columns are redundant here.</strong> With only about 13 of 45 columns left open (λ = 1e-2, epoch 30), validation stays within one standard deviation of Base. But removing them does not improve the score either.</li>
+        <li><strong>λ controls sparsity</strong>, as the paper's theory needs, but only once the gates have time to move.</li>
+        <li><strong>The NaN bug had been doing some of the "filtering".</strong> With it fixed, <code>results.milliseconds</code> and <code>position</code> never close.</li>
+        <li><strong>When the gates close matters.</strong> Too fast and they remove useful columns (dry run 7); too slow and the selected model is barely filtered. Next, the gates will be learned first, then frozen at 0/1 before the final model is chosen.</li>
+      </ol>
+      <p>Configurations tried in total: 7 dry runs, 9 Base settings and 9 filter settings, then the two winners on 5 fresh seeds.</p>
+    </div>
+  </section>
+
   <section id="findings" aria-labelledby="findings-h">
     <div class="section-head">
       <div class="eyebrow">What the measurements showed</div>
@@ -393,7 +439,8 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
       <li><time datetime="2026-10-30">2026-10-30</time><div>Deduplication keeps accuracy (arm C). Plan 01 written: column and table gates (PR #9). Decision: driver-top3 is the development task; other tasks once improvements show.</div></li>
       <li><time datetime="2026-10-31">2026-10-31</time><div>Notation for the whole model, with real tensor shapes (<code>notes/notation.md</code>). Plan 01 extended with a worked example of the encoding and why the gates sit where they do; decisions: gate table columns, sum the penalties, a closed table stays a path.</div></li>
       <li><time datetime="2026-11-01">2026-11-01</time><div>Steps 1–3 of Plan 01 as PRs: <code>HardConcreteGate</code>, <code>RelationalFilter</code> (fork #1, #2) and <code>--model filter</code> (PR #10). Seven dry runs: the plan's gate settings cannot work on driver-top3; a separate gate learning rate (0.1, not faster) and a start at θ = 5 fix it (see "Making the gates work").</div></li>
-      <li class="next"><time>next</time><div>Agree the new gate settings in Plan 01, then the 20 runs: λ ∈ {0, 1e-4, 1e-3, 1e-2} × 5 seeds, against Base.</div></li>
+      <li><time datetime="2026-11-02">2026-11-02</time><div>The implementation checked: with gates at 1 it trains exactly like Base, and a closed gate removes exactly its column or table. Compared against the paper and the authors' code (Plan 01 §12–13). Staged sweep: Base on the paper's grid, the filter with an equal budget, the final comparison on fresh seeds (Colab T4). Filtering does not beat Base on driver-top3 (see "Does filtering help?").</div></li>
+      <li class="next"><time>next</time><div>Merge Plan 01's code. Then Plan 02, edge injection, with gates that are learned first and then frozen.</div></li>
     </ol>
   </section>
 
@@ -751,7 +798,11 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
     { id: "B · NaN fix", what: "A + --nan-safe-numerical", time: "180 s", where: "PR #8",
       val: [0.7863, 0.7860, 0.7716, 0.7958, 0.7771], test: [0.7858, 0.7905, 0.7684, 0.7571, 0.8110] },
     { id: "C · dedup", what: "A + --dedup-encoder", time: "74 s", where: "PR #5",
-      val: [0.7934, 0.7749, 0.7856, 0.7895, 0.7889], test: [0.8225, 0.7998, 0.7723, 0.7799, 0.7867] }
+      val: [0.7934, 0.7749, 0.7856, 0.7895, 0.7889], test: [0.8225, 0.7998, 0.7723, 0.7799, 0.7867] },
+    { id: "Final · Base", what: "tuned on the paper's grid (lr 0.01, hidden 64), 30 epochs, NaN-safe, fresh seeds 10–14, T4 GPU", time: "22 s", where: "Plan 01 stage C",
+      val: [0.7835, 0.7871, 0.7950, 0.7865, 0.7726], test: [0.7581, 0.8077, 0.7225, 0.7345, 0.8057] },
+    { id: "Final · Filter", what: "column + table gates, λ = λ_s = 1e-4 (stage B), same seeds and GPU", time: "22 s", where: "Plan 01 stage C",
+      val: [0.7982, 0.7677, 0.7922, 0.8052, 0.7872], test: [0.7204, 0.8060, 0.7342, 0.8018, 0.7971] }
   ];
   var PAPER = { mean: 0.8148, std: 0.0106 };
   function mean(a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; }
@@ -801,6 +852,35 @@ footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
       out += t(X(r.val) + 12, y + 4, r.val.toFixed(3), "s-mono");
     });
     document.getElementById("gate-chart").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Validation ROC-AUC of the seven gate dry runs against Base">' + out + "</svg>";
+  })();
+
+
+  // ---------- open gates per epoch (stage B) ----------
+  (function drawGatesEpoch() {
+    var OPEN = {
+      "λ = 1e-4": [45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 31.3, 31.1, 31.1, 31.0, 31.0, 30.9, 30.9, 30.9, 30.9, 30.9, 30.8, 30.8, 30.8, 30.7, 30.6, 30.6],
+      "λ = 1e-3": [45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 31.0, 30.1, 29.1, 28.4, 28.2, 28.1, 27.9, 27.4, 27.1, 26.9, 26.9, 26.7, 26.1, 25.9, 25.7, 25.4, 25.3],
+      "λ = 1e-2": [45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 28.1, 23.7, 20.7, 19.2, 18.8, 18.2, 17.3, 16.8, 16.0, 15.2, 14.9, 14.6, 14.3, 13.7, 13.4, 12.8, 12.6]
+    };
+    var colors = ["var(--cool)", "var(--t-standings)", "var(--accent)"];
+    var W = 960, H = 300, left = 60, right = 120, top = 24, bottom = 44;
+    function X(e) { return left + (e - 1) / 29 * (W - left - right); }
+    function Y(v) { return top + (45 - v) / 45 * (H - top - bottom); }
+    var out = '<rect x="' + X(13) + '" y="' + top + '" width="' + (X(19) - X(13)) + '" height="' + (H - top - bottom) + '" style="fill:var(--cool-soft)"></rect>' +
+      '<line x1="' + X(16) + '" y1="' + top + '" x2="' + X(16) + '" y2="' + (H - bottom) + '" style="stroke:var(--cool);stroke-width:1.5;stroke-dasharray:5 4"></line>' +
+      t(X(16) + 6, top + 14, "median best epoch", "s-mono");
+    [0, 15, 30, 45].forEach(function (v) {
+      out += '<line x1="' + left + '" y1="' + Y(v) + '" x2="' + (W - right) + '" y2="' + Y(v) + '" style="stroke:var(--line);stroke-width:1"></line>' +
+        t(left - 8, Y(v) + 4, v, "s-mono-muted", "end");
+    });
+    [1, 5, 10, 15, 20, 25, 30].forEach(function (e) { out += t(X(e), H - bottom + 18, e, "s-mono-muted", "middle"); });
+    out += t((left + W - right) / 2, H - 6, "epoch", "s-small", "middle");
+    Object.keys(OPEN).forEach(function (k, i) {
+      var pts = OPEN[k].map(function (v, j) { return X(j + 1) + "," + Y(v); }).join(" ");
+      out += '<polyline points="' + pts + '" style="fill:none;stroke:' + colors[i] + ';stroke-width:2.5"></polyline>' +
+        t(X(30) + 8, Y(OPEN[k][29]) + 4, k, "s-label");
+    });
+    document.getElementById("gates-epoch-chart").innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Open column gates per epoch for three values of lambda; gates start closing at epoch 14, around the typical best epoch">' + out + "</svg>";
   })();
 
   var split = "val";
