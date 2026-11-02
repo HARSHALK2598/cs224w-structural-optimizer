@@ -481,3 +481,47 @@ this lists them for our column version (b), with the test that checks each one.
 - **No table gate on the target table:** the theorem does not depend on it.
 - **Gate settings** (temperature, start logit, gate learning rate) do not appear in the
   theory. They change only how training reaches a solution.
+
+## 14. Outcome (2026-11-02)
+
+Ran as in §8. The results and their write-ups are in `experiments/results/sweeps/` on
+branch `step/01-4-sweep`.
+
+**Final comparison** (stage C: 5 fresh seeds, Colab T4, test read once):
+
+| | Validation | Test | Paper (Table 1, test) |
+|---|---|---|---|
+| Base (lr 0.01, hidden 64) | 0.785 ± 0.008 | 0.766 ± 0.040 | 0.815 ± 0.011 |
+| Filter (λ = λ_s = 1e-4) | 0.790 ± 0.014 | 0.772 ± 0.041 | 0.847 ± 0.006 |
+| Filter − Base | +0.005 (Welch p = 0.50) | +0.006 (p = 0.81) | +0.032 |
+
+1. **No measurable gain from filtering on `driver-top3`.** The paper's +3.2 points is not
+   reproduced. Our test varies far more across seeds (0.72–0.81) than the paper reports.
+2. **Our Base is about 5 points below the paper's**, even with the paper's grid for
+   learning rate and hidden size (stage A). Stage A's top three settings were within
+   noise of each other.
+3. **The gates act too late.** From a start of θ = 5 at gate learning rate 0.1, they begin
+   closing around epoch 14, and the best validation epoch is usually around epoch 16. At
+   the selected epoch they had removed only the 3 tables a 2-layer model never reaches
+   (which changes no prediction), plus `races.round`, `results.fastestLap` and
+   `races.year` in some seeds.
+4. **λ does control sparsity by the end of training** (stage B, epoch 30: 31, 25 and 13 of
+   45 columns open for λ = 1e-4, 1e-3 and 1e-2), as §13 requires. Even with only about 13
+   columns open, validation stays within one std of Base. Most columns are redundant for
+   this task, but removing them does not improve it.
+5. **Validation against λ is flat**, with no inverted U in [1e-4, 1e-2].
+6. **With the NaN fix on**, `results.milliseconds` and `results.position` never closed.
+   Their closing in the dry runs was the NaN bug, not learned relevance.
+
+**Configurations tried:** 7 dry runs, 9 Base settings, 9 filter settings, then the two
+winners on 5 fresh seeds.
+
+**Checks of the implementation:**
+- With every gate fixed at 1, the model trains exactly like Base (test a), and over 5 seeds
+  it scores the same (test b: p = 0.97 on validation, 0.77 on test).
+- A closed gate removes exactly its column or table (§13).
+
+**Carried forward:**
+- **A "learn the gates, then freeze them at 0/1" option**, so gates have settled by the
+  epoch selected. The template gates of edge injection (step B) need it too.
+- **The gap to the paper's Base** remains open; Plan 00 has notes on it.
