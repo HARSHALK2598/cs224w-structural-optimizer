@@ -1,0 +1,238 @@
+{
+  "open_columns": 11,
+  "open_tables": 4,
+  "columns": {
+    "races": {
+      "round": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "year": {
+        "prob_open": 0.0064,
+        "open": false
+      },
+      "date": {
+        "prob_open": 0.0085,
+        "open": false
+      },
+      "time": {
+        "prob_open": 0.0076,
+        "open": false
+      },
+      "name": {
+        "prob_open": 0.0497,
+        "open": false
+      }
+    },
+    "qualifying": {
+      "number": {
+        "prob_open": 0.0088,
+        "open": false
+      },
+      "position": {
+        "prob_open": 0.983,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.0115,
+        "open": false
+      }
+    },
+    "constructor_standings": {
+      "points": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "position": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "wins": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "date": {
+        "prob_open": 0.0062,
+        "open": false
+      }
+    },
+    "standings": {
+      "points": {
+        "prob_open": 0.9987,
+        "open": true
+      },
+      "position": {
+        "prob_open": 0.5519,
+        "open": false
+      },
+      "wins": {
+        "prob_open": 0.2092,
+        "open": false
+      },
+      "date": {
+        "prob_open": 0.0635,
+        "open": false
+      }
+    },
+    "constructors": {
+      "constructorRef": {
+        "prob_open": 0.8941,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9934,
+        "open": true
+      },
+      "nationality": {
+        "prob_open": 0.0516,
+        "open": false
+      }
+    },
+    "drivers": {
+      "dob": {
+        "prob_open": 0.2335,
+        "open": false
+      },
+      "code": {
+        "prob_open": 0.9752,
+        "open": true
+      },
+      "driverRef": {
+        "prob_open": 0.9924,
+        "open": true
+      },
+      "forename": {
+        "prob_open": 0.8546,
+        "open": true
+      },
+      "nationality": {
+        "prob_open": 0.9781,
+        "open": true
+      },
+      "surname": {
+        "prob_open": 0.9949,
+        "open": true
+      }
+    },
+    "constructor_results": {
+      "points": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "date": {
+        "prob_open": 0.0062,
+        "open": false
+      }
+    },
+    "circuits": {
+      "alt": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "lat": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "lng": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "circuitRef": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "country": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "location": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "name": {
+        "prob_open": 0.0062,
+        "open": false
+      }
+    },
+    "results": {
+      "fastestLap": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "grid": {
+        "prob_open": 0.997,
+        "open": true
+      },
+      "laps": {
+        "prob_open": 0.0082,
+        "open": false
+      },
+      "milliseconds": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "number": {
+        "prob_open": 0.1552,
+        "open": false
+      },
+      "points": {
+        "prob_open": 0.9388,
+        "open": true
+      },
+      "position": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "positionOrder": {
+        "prob_open": 0.0678,
+        "open": false
+      },
+      "rank": {
+        "prob_open": 0.0062,
+        "open": false
+      },
+      "statusId": {
+        "prob_open": 0.0746,
+        "open": false
+      },
+      "date": {
+        "prob_open": 0.1112,
+        "open": false
+      }
+    }
+  },
+  "tables": {
+    "races": {
+      "prob_open": 0.9977,
+      "open": true
+    },
+    "qualifying": {
+      "prob_open": 0.2643,
+      "open": false
+    },
+    "constructor_standings": {
+      "prob_open": 0.0062,
+      "open": false
+    },
+    "standings": {
+      "prob_open": 0.968,
+      "open": true
+    },
+    "constructors": {
+      "prob_open": 0.9996,
+      "open": true
+    },
+    "constructor_results": {
+      "prob_open": 0.0062,
+      "open": false
+    },
+    "circuits": {
+      "prob_open": 0.0062,
+      "open": false
+    },
+    "results": {
+      "prob_open": 0.9979,
+      "open": true
+    }
+  }
+}

@@ -1,0 +1,25 @@
+# Plan 01, stage C: the final comparison, as pre-registered in Plan 01 §8.
+#
+# Stage A's winner (Base, lr 0.01, hidden 64) against stage B's winner
+# (filter, lambda = lambda_s = 1e-4) on 5 fresh seeds (10-14), on the same
+# device. Test is looked at once, here. Same settings as stages A and B:
+# 30 epochs, dedup, NaN-safe encoder; gate start 5, gate lr 0.1,
+# temperature 2/3 (Base ignores the gate settings).
+name: stageC_final_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 30
+  dedup_encoder: true
+  nan_safe_numerical: true
+  lr: 0.01
+  channels: 64
+  gate_lr: 0.1
+  gate_init: 5.0
+seeds: [10, 11, 12, 13, 14]
+arms:
+  - model: base
+  - model: filter
+    grid:
+      lambda_col: [1.0e-4]
+      lambda_table: [1.0e-4]

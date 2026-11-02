@@ -1,0 +1,22 @@
+# Plan 01, stage A: tune Base on the paper's grid (Table 8).
+#
+# The protocol (decided 2026-11-02), each stage chosen on mean validation:
+#   A. Base: learning rate x hidden size = 9 settings x 3 seeds        (this file)
+#   B. Filter at A's learning rate and hidden size:
+#      lambda x lambda_s = 9 settings x 3 seeds (equal budget to A)
+#   C. A's and B's winners on 5 fresh seeds; test looked at once.
+# All stages: 30 epochs, --dedup-encoder, --nan-safe-numerical (issue #6), so
+# the gates are not rewarded for closing the columns the NaN bug breaks.
+name: stageA_base_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 30
+  dedup_encoder: true
+  nan_safe_numerical: true
+seeds: [0, 1, 2]
+arms:
+  - model: base
+    grid:
+      lr: [1.0e-4, 1.0e-3, 1.0e-2]
+      channels: [64, 128, 256]

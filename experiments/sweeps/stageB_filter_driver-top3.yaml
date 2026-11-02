@@ -1,0 +1,25 @@
+# Plan 01, stage B: tune the filter at stage A's learning rate and hidden size.
+#
+# Stage A (Base, 9 settings x 3 seeds) chose lr 0.01, hidden 64 on mean
+# validation ROC-AUC (0.7880 +- 0.0053; results in
+# experiments/results/sweeps/stageA_base_driver-top3/). Here the filter gets
+# an equal budget of 9 settings: lambda x lambda_s, on the paper's range.
+# Gate settings are fixed as chosen in the dry runs (start 5, gate lr 0.1,
+# temperature 2/3). Same as stage A: 30 epochs, dedup, NaN-safe encoder.
+name: stageB_filter_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 30
+  dedup_encoder: true
+  nan_safe_numerical: true
+  lr: 0.01
+  channels: 64
+  gate_lr: 0.1
+  gate_init: 5.0
+seeds: [0, 1, 2]
+arms:
+  - model: filter
+    grid:
+      lambda_col: [1.0e-4, 1.0e-3, 1.0e-2]
+      lambda_table: [1.0e-4, 1.0e-3, 1.0e-2]

@@ -1,0 +1,4 @@
+dataset,task,model,seed,tune_metric,best_epoch,val_roc_auc,test_roc_auc,val_nmae,test_nmae,val_mae,test_mae,epochs,minutes,text_embedder,lambda_col,lambda_table,gate_lr,gate_init,gate_temperature,open_columns,open_tables
+rel-f1,driver-top3,base,0,roc_auc,13,0.7884288043575639,0.771294941471572,,,,,20,2.94,glove,,,,,,,
+rel-f1,driver-top3,base,0,roc_auc,14,0.7884108867427567,0.7606278741638797,,,,,20,2.92,glove,,,,,,,
+rel-f1,driver-top3,filter,0,roc_auc,14,0.786439949113974,0.7701126149665551,,,,,20,2.9,glove,0.0,0.0,0.005,2.0,0.6667,45,8
