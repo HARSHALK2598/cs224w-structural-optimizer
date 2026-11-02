@@ -338,29 +338,45 @@ $$\mathcal{L} = \mathcal{L}_\text{task} + \lambda \sum_T \sum_{c} \mathbb{E}\|g_
 
 ## 8. Experiment on `driver-top3` (decided on validation)
 
-Settings: `train.py`, 20 epochs, `--dedup-encoder`, 5 seeds, about 74 s per run.
+*Revised 2026-11-02, after the dry runs (`experiments/results/dryrun_filter/README.md`)
+and a review of the selection risks. Replaces the earlier F0–F3 design.*
 
-| Arm | Gates | λ (columns), λ_s (tables) | Runs |
+**Fixed before tuning, as chosen in the dry runs** (not tuned further): gate start
+θ = 5, gate learning rate 0.1, temperature 2/3. The paper gives no values for these.
+
+**Same for every run:** 30 epochs (gates were still closing at epoch 20),
+`--dedup-encoder`, and `--nan-safe-numerical`, so that closing the columns broken by the
+NaN bug (#6) is not mistaken for learned relevance.
+
+| Stage | What | Settings × seeds | Runs |
 |---|---|---|---|
-| Base | none | – | done: validation 0.786 ± 0.006 (arm C) |
-| F0 | (b) columns + tables | 0, 0 | 5 |
-| F1 | (b) | 1e-4, 1e-4 | 5 |
-| F2 | (b) | 1e-3, 1e-3 | 5 |
-| F3 | (b) | 1e-2, 1e-2 | 5 |
+| A | Base on the paper's grid: learning rate {1e-4, 1e-3, 1e-2} × hidden size {64, 128, 256} | 9 × 3 (seeds 0–2) | 27 |
+| B | Filter at A's learning rate and hidden size: λ {1e-4, 1e-3, 1e-2} × λ_s {1e-4, 1e-3, 1e-2} | 9 × 3 (seeds 0–2) | 27 |
+| C | A's winner and B's winner, 5 fresh seeds (10–14) | 2 × 5 | 10 |
 
-20 runs ≈ 25 minutes, in background batches of 5.
+**Rules:**
+- Each stage picks the setting with the best **mean validation** ROC-AUC over its seeds.
+- Base and the filter get the same tuning budget: 9 settings each.
+- Test is computed for every run but **looked at once**, for the stage C winners.
+- The report states how many configurations were tried in total: the 7 dry runs, 9 in
+  A and 9 in B.
+- No dry-run test score (for example run 7's 0.806) influences any choice.
 
-**Success:** at least one filtered arm is no worse than Base within noise (validation
-≥ 0.780, i.e. Base minus one std), preferably better; and the gates close a non-trivial,
-sensible set of columns or tables. We report validation for all arms and test only for
-the λ chosen on validation.
+**Reported alongside the scores** (from stage B's 27 runs):
+1. Open gates against λ: the check that λ controls sparsity (§13).
+2. Validation against λ: the paper's inverted-U claim (Fig. 2).
+3. Open gates per epoch, to show whether the gates have settled before the best epoch.
+   If they have not, the fallback is a λ warm-up (λ = 0 for the first epochs, then on).
+
+**Targets from the paper** (test ROC-AUC, Table 1): Base 81.48 ± 1.06, FullFilter
+84.66 ± 0.61.
 
 ## 9. Steps (each one PR, reviewed before merging)
 
 1. **PyG fork:** `HardConcreteGate`, with tests.
 2. **PyG fork:** `RelationalFilter` (column/dimension gates and table gates), with tests.
 3. **Project repo:** `FilterModel`, flags, loss, logging, with the "all open = Base" test.
-4. **Project repo:** run the 20 runs, commit results and a short analysis.
+4. **Project repo:** run stages A–C (§8), commit results and a short analysis.
 
 ## 10. Out of scope
 
