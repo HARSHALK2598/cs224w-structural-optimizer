@@ -1,0 +1,32 @@
+run filter_lc0.0001_lt0.0001_seed10: --dataset rel-f1 --task driver-top3 --model filter --seed 10 --epochs 30 --lr 0.01 --batch-size 512 --channels 64 --num-layers 2 --num-neighbors 128 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.0001 --lambda-table 0.0001 --gate-lr 0.1 --gate-init 5.0 --gate-temperature 0.6666666666666666 --dedup-encoder --nan-safe-numerical --results /content/cs224w-structural-optimizer/experiments/results/results.csv
+epoch 01  loss 0.6192  val roc_auc 0.6046  penalty 0.0053  open columns 45  open tables 8
+epoch 02  loss 0.4465  val roc_auc 0.6318  penalty 0.0053  open columns 45  open tables 8
+epoch 03  loss 0.4383  val roc_auc 0.6606  penalty 0.0053  open columns 45  open tables 8
+epoch 04  loss 0.4246  val roc_auc 0.7022  penalty 0.0053  open columns 45  open tables 8
+epoch 05  loss 0.3894  val roc_auc 0.7695  penalty 0.0053  open columns 45  open tables 8
+epoch 06  loss 0.3600  val roc_auc 0.7876  penalty 0.0053  open columns 45  open tables 8
+epoch 07  loss 0.3345  val roc_auc 0.7767  penalty 0.0053  open columns 45  open tables 8
+epoch 08  loss 0.3292  val roc_auc 0.7814  penalty 0.0053  open columns 45  open tables 8
+epoch 09  loss 0.3226  val roc_auc 0.7852  penalty 0.0052  open columns 45  open tables 8
+epoch 10  loss 0.3274  val roc_auc 0.7703  penalty 0.0052  open columns 45  open tables 8
+epoch 11  loss 0.3070  val roc_auc 0.7934  penalty 0.0052  open columns 45  open tables 8
+epoch 12  loss 0.2955  val roc_auc 0.7753  penalty 0.0052  open columns 45  open tables 8
+epoch 13  loss 0.2831  val roc_auc 0.7720  penalty 0.0051  open columns 45  open tables 8
+epoch 14  loss 0.2812  val roc_auc 0.7900  penalty 0.0050  open columns 45  open tables 8
+epoch 15  loss 0.2798  val roc_auc 0.7958  penalty 0.0049  open columns 31  open tables 5
+epoch 16  loss 0.2666  val roc_auc 0.7913  penalty 0.0047  open columns 31  open tables 5
+epoch 17  loss 0.2722  val roc_auc 0.7875  penalty 0.0045  open columns 31  open tables 5
+epoch 18  loss 0.2625  val roc_auc 0.7851  penalty 0.0043  open columns 31  open tables 5
+epoch 19  loss 0.2739  val roc_auc 0.7816  penalty 0.0041  open columns 31  open tables 5
+epoch 20  loss 0.2701  val roc_auc 0.7817  penalty 0.0040  open columns 31  open tables 5
+epoch 21  loss 0.2764  val roc_auc 0.7787  penalty 0.0038  open columns 31  open tables 5
+epoch 22  loss 0.2553  val roc_auc 0.7775  penalty 0.0038  open columns 31  open tables 5
+epoch 23  loss 0.2691  val roc_auc 0.7645  penalty 0.0037  open columns 31  open tables 5
+epoch 24  loss 0.2530  val roc_auc 0.7659  penalty 0.0037  open columns 31  open tables 5
+epoch 25  loss 0.2537  val roc_auc 0.7610  penalty 0.0036  open columns 31  open tables 5
+epoch 26  loss 0.2602  val roc_auc 0.7616  penalty 0.0036  open columns 31  open tables 5
+epoch 27  loss 0.2479  val roc_auc 0.7714  penalty 0.0036  open columns 30  open tables 5
+epoch 28  loss 0.2458  val roc_auc 0.7752  penalty 0.0036  open columns 30  open tables 5
+epoch 29  loss 0.2473  val roc_auc 0.7796  penalty 0.0036  open columns 30  open tables 5
+epoch 30  loss 0.2420  val roc_auc 0.7982  penalty 0.0036  open columns 30  open tables 5
+best epoch 30: val roc_auc 0.7982  test roc_auc 0.7204
