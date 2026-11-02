@@ -1,0 +1,15 @@
+# Test (b): with every gate fixed at 1 (--gates-open), the gated model should
+# score like Base over full 20-epoch runs (5 seeds each, same machine). Runs
+# are not bit-for-bit repeatable here, so the check is statistical.
+name: check_gates_open
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 20
+  dedup_encoder: true
+seeds: [0, 1, 2, 3, 4]
+arms:
+  - model: base
+  - model: filter
+    grid:
+      gates_open: [true]

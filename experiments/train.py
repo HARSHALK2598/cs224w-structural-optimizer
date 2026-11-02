@@ -96,6 +96,9 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     for key, value in DEFAULTS.items():
         parser.add_argument(f'--{key.replace("_", "-")}', type=type(value),
                             default=None)
+    parser.add_argument('--gates-open', action='store_true',
+                        help='--model filter: keep every gate at 1 (a check '
+                        'that the gated model then trains like Base).')
     parser.add_argument('--dedup-encoder', action='store_true',
                         help='Encode each distinct row once per batch '
                         '(see experiments/profiling/README.md).')
@@ -340,11 +343,14 @@ class FilterModel(BaseModel):
                  num_layers: int, aggr: str, entity_table: str,
                  lambda_col: float = 0.0, lambda_table: float = 0.0,
                  dedup_encoder: bool = False, gate_init: float = 2.0,
-                 gate_temperature: float = 2. / 3.):
+                 gate_temperature: float = 2. / 3., gates_open: bool = False):
         super().__init__(data, col_stats_dict, channels, out_channels,
                          num_layers, aggr, dedup_encoder)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
+        # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
+        # which also draws no random numbers.
+        self.gates_open = gates_open
         # Gate c of a table belongs to its c-th encoded column; PyTorch Frame
         # orders the columns by stype:
         self.col_names = {
@@ -367,13 +373,15 @@ class FilterModel(BaseModel):
     def encode_table(self, node_type: str, tf) -> Tensor:
         resnet = self.encoder.encoders[node_type]
         x, _ = resnet.encoder(tf)  # [N, C, channels]
-        x = self.filter.gate_columns(node_type, x)
+        if not self.gates_open:
+            x = self.filter.gate_columns(node_type, x)
         # As in ResNet.forward (`math.prod` also handles empty tables):
         x = x.view(x.size(0), math.prod(x.shape[1:]))
         return resnet.decoder(resnet.backbone(x))
 
     def encode(self, batch, entity_table: str) -> Dict[str, Tensor]:
-        return self.filter.gate_tables(super().encode(batch, entity_table))
+        x_dict = super().encode(batch, entity_table)
+        return x_dict if self.gates_open else self.filter.gate_tables(x_dict)
 
     def structural_loss(self) -> Tensor:
         r"""The penalty term :math:`\lambda \sum \mathbb{E}\|g\|_0 +
@@ -417,7 +425,7 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
                            args.dedup_encoder, args.gate_init,
-                           args.gate_temperature)
+                           args.gate_temperature, args.gates_open)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 

@@ -135,3 +135,87 @@ def test_filter_model_gate_options(setup):
     for gate in list(model.filter.column_gates.values()) + list(
             model.filter.table_gates.values()):
         assert (gate.logit == 5.0).all() and gate.temperature == 0.2
+
+
+def force_open(model):
+    r"""Fixes every gate of :obj:`model` at exactly 1, drawing no random
+    numbers (so dropout masks match a Base model's)."""
+    def ones(gate):
+        def forward(num_samples=None):
+            size = (gate.num_gates, ) if num_samples is None else (
+                num_samples, gate.num_gates)
+            return torch.ones(size)
+        return forward
+
+    for gate in list(model.filter.column_gates.values()) + list(
+            model.filter.table_gates.values()):
+        gate.forward = ones(gate)
+
+
+@requires_rel_f1
+@pytest.mark.parametrize('dedup', [False, True])
+def test_filter_model_open_trains_like_base(setup, dedup):
+    r"""Test (a): with every gate fixed at 1, training the gated model gives
+    the same loss at every step and the same weights as training Base."""
+    task, data, col_stats, _ = setup
+    spec = train.task_spec(task)
+    args = train.parse_args(['--batch-size', '64', '--num-neighbors', '16',
+                             '--gate-lr', '0.1'])
+    torch.manual_seed(0)
+    batches = [b for b, _ in zip(train.make_loaders(data, task, args)['train'],
+                                 range(4))]
+    val_batch = next(iter(train.make_loaders(data, task, args)['val']))
+
+    model = make(setup, dedup_encoder=dedup)
+    force_open(model)
+    base = train.BaseModel(data, col_stats, 128, 1, 2, 'sum', dedup)
+    base.load_state_dict(model.state_dict(), strict=False)
+
+    # With deduplication, the backward pass sums the gradients of a row's
+    # copies in parallel, in a varying order; one thread makes it exact
+    # (Base against Base differs by ~1e-8 otherwise).
+    threads = torch.get_num_threads()
+    torch.set_num_threads(1)
+    losses = {}
+    for name, m, optimizer in [
+        ('base', base, torch.optim.Adam(base.parameters(), lr=args.lr)),
+        ('filter', model, train.make_optimizer(model, args)),
+    ]:
+        torch.manual_seed(1)  # The same dropout masks for both models.
+        losses[name] = [
+            train.train_epoch(m, [b], optimizer, spec, task.entity_table,
+                              torch.device('cpu'), max_steps=1)
+            for b in batches
+        ]
+    torch.set_num_threads(threads)
+    assert losses['filter'] == losses['base']
+
+    base_state = base.state_dict()
+    for key, value in model.state_dict().items():
+        if key.startswith('filter.'):
+            continue
+        # Exactly equal; NaN weights (issue #6) occur in both models alike.
+        assert torch.allclose(value, base_state[key], rtol=0, atol=0,
+                              equal_nan=True), key
+
+    model.eval()
+    base.eval()
+    with torch.no_grad():
+        assert torch.equal(model(val_batch, task.entity_table),
+                           base(val_batch, task.entity_table))
+
+
+@requires_rel_f1
+def test_filter_model_gates_open_option(setup):
+    task, data, col_stats, batch = setup
+    model = make(setup, gates_open=True)
+    with torch.no_grad():  # Closed logits have no effect when gates are open.
+        for gate in model.filter.column_gates.values():
+            gate.logit.fill_(-10.0)
+    base = train.BaseModel(data, col_stats, 128, 1, 2, 'sum')
+    base.load_state_dict(model.state_dict(), strict=False)
+    model.eval()
+    base.eval()
+    with torch.no_grad():
+        assert torch.equal(model(batch, task.entity_table),
+                           base(batch, task.entity_table))
