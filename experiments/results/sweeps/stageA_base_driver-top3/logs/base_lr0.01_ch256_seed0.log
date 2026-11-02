@@ -1,0 +1,32 @@
+run base_lr0.01_ch256_seed0: --dataset rel-f1 --task driver-top3 --model base --seed 0 --epochs 30 --lr 0.01 --batch-size 512 --channels 256 --num-layers 2 --num-neighbors 128 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.0 --lambda-table 0.0 --gate-lr 0.0 --gate-init 2.0 --gate-temperature 0.6666666666666666 --dedup-encoder --nan-safe-numerical --results /home/user/cs224w-structural-optimizer/experiments/results/results.csv
+epoch 01  loss 0.7455  val roc_auc 0.6062
+epoch 02  loss 0.4845  val roc_auc 0.5793
+epoch 03  loss 0.4465  val roc_auc 0.6074
+epoch 04  loss 0.4429  val roc_auc 0.6044
+epoch 05  loss 0.4418  val roc_auc 0.6110
+epoch 06  loss 0.4389  val roc_auc 0.6087
+epoch 07  loss 0.4373  val roc_auc 0.6204
+epoch 08  loss 0.4287  val roc_auc 0.6441
+epoch 09  loss 0.4185  val roc_auc 0.6506
+epoch 10  loss 0.3912  val roc_auc 0.6898
+epoch 11  loss 0.3604  val roc_auc 0.7089
+epoch 12  loss 0.3242  val roc_auc 0.7363
+epoch 13  loss 0.3108  val roc_auc 0.7580
+epoch 14  loss 0.3101  val roc_auc 0.7590
+epoch 15  loss 0.3006  val roc_auc 0.7649
+epoch 16  loss 0.3031  val roc_auc 0.7658
+epoch 17  loss 0.3080  val roc_auc 0.7589
+epoch 18  loss 0.2863  val roc_auc 0.7593
+epoch 19  loss 0.2745  val roc_auc 0.7569
+epoch 20  loss 0.2718  val roc_auc 0.7581
+epoch 21  loss 0.2691  val roc_auc 0.7613
+epoch 22  loss 0.2631  val roc_auc 0.7607
+epoch 23  loss 0.2624  val roc_auc 0.7596
+epoch 24  loss 0.2599  val roc_auc 0.7594
+epoch 25  loss 0.2554  val roc_auc 0.7588
+epoch 26  loss 0.2564  val roc_auc 0.7568
+epoch 27  loss 0.2677  val roc_auc 0.7572
+epoch 28  loss 0.2618  val roc_auc 0.7645
+epoch 29  loss 0.2572  val roc_auc 0.7574
+epoch 30  loss 0.2500  val roc_auc 0.7581
+best epoch 16: val roc_auc 0.7658  test roc_auc 0.7773
