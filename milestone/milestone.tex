@@ -1,0 +1,139 @@
+\documentclass{article}
+% NeurIPS 2022 format, final (non-anonymous) mode, as for the proposal.
+\PassOptionsToPackage{numbers}{natbib}
+\usepackage[preprint]{neurips_2022}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlist[itemize]{leftmargin=1.2em, itemsep=1pt, topsep=1pt, parsep=0pt}
+\makeatletter
+\renewcommand{\@toptitlebar}{\hrule height 4\p@ \vskip 0.18in \vskip -\parskip}
+\renewcommand{\@bottomtitlebar}{\vskip 0.18in \vskip -\parskip \hrule height 1\p@ \vskip 0.02in}
+\makeatother
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\E}{\mathbb{E}}
+
+\title{Learning the Graph for Relational Deep Learning\\[2pt]\large Milestone report}
+\author{%
+  Harshal Kulkarni \quad \texttt{hsk8171@stanford.edu} \\
+  Project 3: PR to \texttt{torch\_geometric.contrib} + blog post
+}
+
+\begin{document}
+\maketitle
+\vspace{-2.6em}
+
+\section{Goal}
+\vspace{-0.4em}
+We implement the structural optimizer of \emph{What Makes a Desired Graph for Relational Deep
+Learning?} (Cheng \& Luo, ICML 2026) as PyG modules and test its claims on RelBench. Relational
+deep learning turns a database into a graph (rows $\to$ nodes, foreign keys $\to$ edges). The
+paper argues that this schema graph carries irrelevant columns and tables, and learns which ones
+to keep (\textbf{A}, filtering), which edges to add (\textbf{B}, injection), how much to trust
+each added relation (\textbf{C}, gated aggregation), with a sparsity penalty (\textbf{D}). This
+milestone covers \textbf{A} end to end: code, tests and a full experiment.
+
+\section{Method: filtering (paper Eq.~3--5, 11)}
+\vspace{-0.4em}
+\textbf{Base model} (RelBench's relational GraphSAGE). Each table's encoder turns row $v$ into
+$h^{(0)}_v$; two GraphSAGE layers and a linear head give the prediction $\hat y_v$.
+
+\textbf{Gates.} Every column $c$ of table $T$ gets a gate $g_{T,c}$ and every table a gate $s_T$,
+each with one learned logit $\theta$. In training a gate is a Hard-Concrete sample; at test time it
+is a hard 0/1 switch (Eq.~4):
+\begin{align*}
+\text{train: } g &= \min\!\Big(1, \max\!\big(0,\ \sigma\big(\tfrac{\log u - \log(1-u) + \theta}{t}\big)(\zeta-\gamma)+\gamma\big)\Big),\quad u \sim U(0,1);\\
+\text{test: } g &= \mathbb{I}[\sigma(\theta) > \tau].
+\end{align*}
+The gates multiply what the model sees, and the loss pays for every gate left open (Eq.~11):
+\begin{gather*}
+\tilde e_{v,c} = g_{T,c}\, e_{v,c}, \qquad \tilde h^{(0)}_v = s_T\, h^{(0)}_v,\\
+\mathcal L = \mathcal L_\text{task} + \lambda \sum_{T,c} \E\|g_{T,c}\|_0 + \lambda_s \sum_T \E\|s_T\|_0,
+\qquad \E\|g\|_0 = \sigma\!\big(\theta - t\log\tfrac{-\gamma}{\zeta}\big).
+\end{gather*}
+Here $e_{v,c}$ is column $c$'s 128-d encoding; the column gate acts inside the encoder, before
+columns are mixed, so a closed column is removed exactly. The paper's Eq.~3 gates the 128
+dimensions of $h^{(0)}$ instead; we gate columns so the result is readable (``the model dropped
+\code{results.rank}'') and document the difference. No table gate is put on the target table.
+Settings: $\gamma=-0.1$, $\zeta=1.1$, $t=2/3$, $\tau=0.5$.
+
+\section{What is built}
+\vspace{-0.4em}
+\begin{itemize}
+\item \textbf{PyG fork} (\code{contrib}, merged after review): \code{HardConcreteGate} and
+  \code{RelationalFilter}, PyG-style docstrings, 13 unit tests.
+\item \textbf{Experiment code}: one training script that reproduces RelBench's official example within
+  seed noise; \code{--model filter}; a resumable sweep runner; a Colab notebook for GPU runs.
+\item \textbf{Correctness checks.} With every gate fixed at 1 the gated model trains \emph{exactly}
+  like Base (same loss at every step, same weights), and over 5 seeds it scores the same
+  ($p=0.97$). A closed gate removes exactly its column or table: the prediction no longer depends
+  on its values (35 experiment tests in all).
+\item \textbf{Found along the way.} A bug in PyTorch Frame 0.3.0: a missing value gives its
+  column's weights a NaN gradient, so mostly-missing columns stop learning after one step (fixed
+  behind a flag). Encoding each sampled row once per batch makes training $2.5\times$ faster with
+  the same accuracy.
+\end{itemize}
+
+\section{Experiment and results}
+\vspace{-0.4em}
+\textbf{Setup.} \code{rel-f1}, task \code{driver-top3} (will a driver finish top 3; 1{,}353 / 588 /
+726 train / val / test rows), ROC-AUC. To avoid picking noise, the protocol was fixed in advance:
+\textbf{(A)} tune Base on the paper's grid (learning rate $\{10^{-4},10^{-3},10^{-2}\}$ $\times$
+hidden $\{64,128,256\}$, 3 seeds); \textbf{(B)} tune the filter with the same budget,
+$\lambda,\lambda_s \in \{10^{-4},10^{-3},10^{-2}\}$, 3 seeds; \textbf{(C)} compare the two winners on
+5 fresh seeds and read test once. All runs: 30 epochs, NaN fix on. Gate start $\theta_0=5$ and a
+separate gate learning rate of 0.1 were chosen in 7 dry runs: with the model's learning rate a gate
+can move only $\sim$0.3 in the 60--90 training steps this small task allows, and starting at
+$\theta_0=2$ made gates noisy enough to cost $\sim$0.03 even when none closed.
+
+\begin{center}
+\vspace{-0.6em}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & Validation (ours) & Test (ours) & Test (paper, Table 1) \\
+\midrule
+Base (lr $10^{-2}$, hidden 64) & $0.785 \pm 0.008$ & $0.766 \pm 0.040$ & $0.815 \pm 0.011$ \\
+Base + filtering ($\lambda=\lambda_s=10^{-4}$) & $0.790 \pm 0.014$ & $0.772 \pm 0.041$ & $0.847 \pm 0.006$ \\
+\midrule
+Difference & $+0.005$ ($p=0.50$) & $+0.006$ ($p=0.81$) & $+0.032$ \\
+\bottomrule
+\end{tabular}
+\vspace{-0.4em}
+\end{center}
+
+\textbf{Findings.}
+\begin{itemize}
+\item \textbf{No measurable gain from filtering} on this task: the paper's +3.2 points is not
+  reproduced. Our test scores vary across seeds (0.72--0.81) far more than the paper reports.
+\item \textbf{$\lambda$ controls sparsity}, as the paper's Theorem~3.2 needs: by epoch 30, 31, 25 and
+  13 of 45 columns stay open for $\lambda = 10^{-4}, 10^{-3}, 10^{-2}$. With only 13 open,
+  validation is still within one std of Base: most columns are redundant, but removing them does
+  not help.
+\item \textbf{The gates act too late.} They start closing around epoch 14, while the best
+  validation epoch is around 16, so the selected models are barely filtered (mostly the 3 tables a
+  2-layer model never reaches). Too fast a gate learning rate closes useful columns instead.
+\item Our Base is about 5 points below the paper's Base even with the paper's tuning grid.
+\end{itemize}
+
+\section{Next steps}
+\vspace{-0.4em}
+\textbf{(1)} Learn the gates first, then freeze them at 0/1 before choosing the final model.
+\textbf{(2)} Injection (KNN, two-hop, behavioural, temporal edges) with gated aggregation (B, C) and
+the bottleneck (D), then the full optimizer against the paper's 0.868. \textbf{(3)} More tasks
+(\code{driver-dnf}, \code{driver-position}, \code{rel-trial}). \textbf{(4)} PR polish and the blog post.
+Code, results and a lab notebook of every run are in the project repository.
+
+\end{document}
