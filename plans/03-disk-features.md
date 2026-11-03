@@ -9,7 +9,7 @@ The plan has two parts, each a separate optimisation:
 
 - **Part 1, done:** keep table features on disk. Build them chunk by chunk, embed each
   distinct text once, and choose `none` / `text` / `all`.
-- **Part 2, new:** read the raw tables one at a time, so that the raw database never has
+- **Part 2, done:** read the raw tables one at a time, so that the raw database never has
   to fit in memory at once.
 
 # Part 1: features on disk (implemented)
@@ -123,7 +123,7 @@ Branch `step/03-1-disk-features`, in `experiments/disk_features.py`, with
     on `rel-trial`);
   - background workers that overlap the disk reads with training.
 
-# Part 2: read the raw tables one at a time (to review)
+# Part 2: read the raw tables one at a time (implemented)
 
 ## 8. Why
 
@@ -185,5 +185,7 @@ At any moment, memory holds one raw table plus the graph structure built so far.
 
 ## 12. Before building
 
-- Confirm how each dataset stores its tables: one file per table on Hugging Face.
-- Confirm task tables are downloaded ready-made, not computed from the database.
+- Confirmed: every dataset stores one Parquet file per table, and a `manifest.yaml` with
+  each table's primary key, date column and foreign keys.
+- Confirmed: all 30 tasks of the 7 datasets come with ready-made `train` / `val` / `test`
+  labels, so no task needs the whole database.
