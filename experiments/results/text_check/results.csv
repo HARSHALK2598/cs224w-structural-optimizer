@@ -52,3 +52,4 @@ rel-event,users,location,37143,5396,2706,1.19e-07,0,0,0.02
 rel-event,events,city,2459811,1178993,28765,0,0,0,0.91
 rel-event,events,state,2459811,1445569,773,0,0,0,0.79
 rel-event,events,zip,2459811,2245620,50247,4.47e-08,0,0,0.79
+rel-event,events,country,2459811,1158966,203,0,0,0,0.77
