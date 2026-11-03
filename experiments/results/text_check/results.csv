@@ -50,3 +50,4 @@ rel-trial,designs,intervention_model_description,249093,227583,19980,1.19e-07,0,
 rel-event,users,locale,37143,0,64,0,0,0,0.02
 rel-event,users,location,37143,5396,2706,1.19e-07,0,0,0.02
 rel-event,events,city,2459811,1178993,28765,0,0,0,0.91
+rel-event,events,state,2459811,1445569,773,0,0,0,0.79
