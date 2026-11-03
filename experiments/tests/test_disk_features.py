@@ -47,7 +47,9 @@ def test_build_tables_matches_relbench(rel_f1, tmp_path, text):
     assert sorted(p.name for p in tmp_path.iterdir()) == sorted(
         f'{t}.pt' for t in db.table_dict)  # No temporary files left.
 
-    # RelBench reads the files we built, and gets what it builds itself:
+    # RelBench reads the files we built, and gets what it builds itself.
+    # Exact here; on longer texts, text vectors can differ by float32
+    # rounding (~1e-7), as they do between PyTorch Frame batch sizes:
     ours, our_stats = make_pkey_fkey_graph(db, stypes, cfg,
                                            cache_dir=str(tmp_path))
     relbench, relbench_stats = make_pkey_fkey_graph(db, stypes, cfg,

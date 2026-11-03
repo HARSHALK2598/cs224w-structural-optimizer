@@ -79,9 +79,13 @@ class DistinctTexts:
     r"""Wraps a text embedder so that each distinct text of a call is
     embedded once, and its vector copied to every position with that text.
 
-    A text always gets the same vector, so the output is unchanged; in
-    RelBench most text cells repeat (e.g. 21% of ``rel-trial``'s and 1% of
-    ``rel-event``'s are distinct), so far fewer texts are embedded.
+    Each row gets the vector of its text, as before. The vectors can differ in
+    the last float32 bit (up to ~1e-7) because texts are batched differently:
+    the GloVe embedder rounds slightly differently depending on which texts
+    share a batch, and PyTorch Frame's own output changes the same way when
+    only its ``batch_size`` changes. In RelBench most text cells repeat (21%
+    of ``rel-trial``'s and 1% of ``rel-event``'s are distinct), so far fewer
+    texts are embedded.
     """
     def __init__(self, text_embedder):
         self.text_embedder = text_embedder
@@ -101,8 +105,9 @@ def materialize_in_chunks(dataset: torch_frame.data.Dataset, path: Path,
     so every chunk maps values (e.g. category indices) the same way. The
     rows are then converted chunk by chunk, each chunk written straight into
     a file-backed tensor, and the result is saved in the usual format.
-    Conversion maps each row on its own, so the result is the same as
-    converting the whole table at once.
+    Conversion maps each row on its own, so the result is that of converting
+    the whole table at once (text vectors: up to float32 rounding from
+    batching, see :class:`DistinctTexts`).
 
     Uses ``Dataset``'s private converter, since PyTorch Frame has no public
     chunked conversion.
