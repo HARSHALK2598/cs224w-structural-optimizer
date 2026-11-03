@@ -1,0 +1,4 @@
+dataset,table,column,rows,missing,distinct,max_abs_diff,rows_off,missing_rows_off,minutes
+rel-trial,interventions,mesh_term,3462,0,3462,2.98e-08,0,0,0.01
+rel-trial,drop_withdrawals,period,381199,0,7039,5.96e-08,0,0,0.17
+rel-trial,drop_withdrawals,reason,381199,0,22089,5.96e-08,0,0,0.14
