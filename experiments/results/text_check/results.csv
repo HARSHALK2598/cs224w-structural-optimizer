@@ -2,3 +2,14 @@ dataset,table,column,rows,missing,distinct,max_abs_diff,rows_off,missing_rows_of
 rel-trial,interventions,mesh_term,3462,0,3462,2.98e-08,0,0,0.01
 rel-trial,drop_withdrawals,period,381199,0,7039,5.96e-08,0,0,0.17
 rel-trial,drop_withdrawals,reason,381199,0,22089,5.96e-08,0,0,0.14
+rel-trial,outcome_analyses,non_inferiority_description,225846,199484,9343,8.94e-08,0,0,0.06
+rel-trial,outcome_analyses,param_type,225846,73416,4751,5.96e-08,0,0,0.07
+rel-trial,outcome_analyses,p_value_description,225846,158749,15783,5.96e-08,0,0,0.09
+rel-trial,outcome_analyses,method,225846,30847,3340,0,0,0,0.06
+rel-trial,outcome_analyses,method_description,225846,181810,10393,8.94e-08,0,0,0.07
+rel-trial,outcome_analyses,estimate_description,225846,181476,13121,8.94e-08,0,0,0.07
+rel-trial,outcome_analyses,groups_description,225846,90885,60426,8.94e-08,0,0,0.1
+rel-trial,outcome_analyses,other_analysis_description,225846,224103,920,8.94e-08,0,0,0.06
+rel-trial,eligibilities,minimum_age,249730,15682,289,0,0,0,0.06
+rel-trial,eligibilities,maximum_age,249730,117182,435,0,0,0,0.06
+rel-trial,eligibilities,population,249730,200515,47240,1.19e-07,0,0,0.13
