@@ -1,6 +1,8 @@
-dataset,text_embedder,step,peak_gb,minutes,num_nodes,num_edges
-rel-trial,none,get_db,4.31,0.21,5434924,
-rel-trial,none,relbench,4.28,0.66,5434924,15335102
-rel-trial,none,ours,2.95,0.8,5434924,15335102
-rel-trial,none,ours-cached,1.43,0.01,5434924,15335102
-rel-event,none,get_db,9.83,0.21,41328337,
+dataset,text_embedder,step,peak_gb,minutes,num_nodes,num_edges,task,cache_files,gpu_peak_gb,val,device
+rel-trial,none,get_db,4.31,0.21,5434924,,,,,,
+rel-trial,none,relbench,4.28,0.66,5434924,15335102,,,,,
+rel-trial,none,ours,2.95,0.8,5434924,15335102,,,,,
+rel-trial,none,ours-cached,1.43,0.01,5434924,15335102,,,,,
+rel-event,none,get_db,9.83,0.21,41328337,,,,,,
+rel-event,none,ours,13.85,28.68,41328337,77435772,,,,,
+rel-event,none,ours-cached,5.34,0.02,41328337,77435772,,6,,,cpu

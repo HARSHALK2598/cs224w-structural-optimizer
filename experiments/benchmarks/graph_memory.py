@@ -47,7 +47,46 @@ os.environ.setdefault('HF_HOME', str(EXPERIMENTS.parent / 'data' / 'hf'))
 STEPS = ('get_db', 'relbench', 'ours', 'ours-cached', 'train')
 FIELDS = ['dataset', 'text_embedder', 'step', 'peak_gb', 'minutes',
           'num_nodes', 'num_edges', 'task', 'cache_files', 'gpu_peak_gb',
-          'val', 'device']
+          'val', 'device', 'peak_anon_gb', 'peak_file_gb']
+
+
+class MemorySampler:
+    r"""Peaks of this process's memory, sampled every 0.1 s, split into the
+    kinds of ``/proc/self/status``: ``RssAnon`` (ordinary memory, which the
+    system cannot drop) and ``RssFile`` + ``RssShmem`` (pages of files mapped
+    into memory, e.g. memory-mapped features, which it can drop or write
+    back). ``ru_maxrss`` (``peak_gb``) is the peak of their sum."""
+    def __init__(self):
+        import threading
+        self.anon = self.file = 0
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _read(self):
+        kb = {}
+        with open('/proc/self/status') as f:
+            for line in f:
+                if line.startswith(('RssAnon:', 'RssFile:', 'RssShmem:')):
+                    kb[line.split(':')[0]] = int(line.split()[1])
+        return kb.get('RssAnon', 0), kb.get('RssFile', 0) + kb.get(
+            'RssShmem', 0)
+
+    def _run(self):
+        while not self._stop.is_set():
+            self.sample()
+            self._stop.wait(0.1)
+
+    def sample(self):
+        anon, file = self._read()
+        self.anon, self.file = max(self.anon, anon), max(self.file, file)
+
+    def stop(self):
+        self._stop.set()
+        self._thread.join()
+        self.sample()
+        return dict(peak_anon_gb=round(self.anon / 1e6, 2),
+                    peak_file_gb=round(self.file / 1e6, 2))
 
 
 def _measure(step, dataset_name, text_embedder, cache_dir, queue,
@@ -62,6 +101,7 @@ def _measure(step, dataset_name, text_embedder, cache_dir, queue,
     dataset = load_dataset(dataset_name)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     cache_files = len(list(Path(cache_dir).glob('*.pt')))
+    sampler = MemorySampler()
     start = time.time()
     data, extra = None, {}
     if step == 'get_db':
@@ -101,6 +141,7 @@ def _measure(step, dataset_name, text_embedder, cache_dir, queue,
             extra['gpu_peak_gb'] = round(
                 torch.cuda.max_memory_allocated() / 1e9, 2)
     minutes = (time.time() - start) / 60
+    extra.update(sampler.stop())
     peak_gb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
     if data is not None:
         sizes = dict(num_nodes=sum(data[n].tf.num_rows
