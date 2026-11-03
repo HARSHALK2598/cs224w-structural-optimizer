@@ -1,7 +1,7 @@
 import pytest
 import torch
 import torch_frame
-from conftest import requires_glove, requires_rel_f1
+from conftest import GLOVE_CACHED, requires_glove, requires_rel_f1
 from relbench.modeling.graph import make_pkey_fkey_graph
 from relbench.modeling.utils import get_stype_proposal
 
@@ -27,22 +27,33 @@ def assert_same_features(data_a, data_b):
 
 
 @requires_rel_f1
-def test_build_tables_matches_relbench(rel_f1, tmp_path):
+@pytest.mark.parametrize('text', [False, True])
+def test_build_tables_matches_relbench(rel_f1, tmp_path, text):
+    if text and not GLOVE_CACHED:
+        pytest.skip('GloVe model not downloaded')
     db = rel_f1.get_db()
     stypes = get_stype_proposal(db)
-    stypes = {  # Without text, to keep the test quick.
-        t: {c: s
-            for c, s in cols.items() if s != torch_frame.text_embedded}
-        for t, cols in stypes.items()
-    }
-    disk_features.build_tables(db, stypes, tmp_path, log=lambda _: None)
-    assert sorted(p.stem for p in tmp_path.glob('*.pt')) == sorted(
-        db.table_dict.keys())
+    if not text:  # Quicker.
+        stypes = {
+            t: {c: s
+                for c, s in cols.items() if s != torch_frame.text_embedded}
+            for t, cols in stypes.items()
+        }
+    cfg = train.text_embedder_cfg('glove' if text else 'none',
+                                  torch.device('cpu'))
+    # Small chunks, so that most tables are converted in several pieces:
+    disk_features.build_tables(db, stypes, tmp_path, cfg, rows_per_chunk=1000,
+                               log=lambda _: None)
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(
+        f'{t}.pt' for t in db.table_dict)  # No temporary files left.
 
     # RelBench reads the files we built, and gets what it builds itself:
-    ours, _ = make_pkey_fkey_graph(db, stypes, cache_dir=str(tmp_path))
-    relbench, _ = make_pkey_fkey_graph(db, stypes, cache_dir=None)
+    ours, our_stats = make_pkey_fkey_graph(db, stypes, cfg,
+                                           cache_dir=str(tmp_path))
+    relbench, relbench_stats = make_pkey_fkey_graph(db, stypes, cfg,
+                                                    cache_dir=None)
     assert_same_features(ours, relbench)
+    assert repr(our_stats) == repr(relbench_stats)
 
 
 @requires_rel_f1
