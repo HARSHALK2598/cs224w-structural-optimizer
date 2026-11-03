@@ -9,3 +9,5 @@ rel-event,none,ours-cached,5.34,0.02,41328337,77435772,,6,,,cpu,,
 rel-event,none,get_db,10.33,0.52,41328337,,,0,,,cpu,10.09,0.15
 rel-event,none,ours,9.6,1.28,41328337,77435772,,0,,,cpu,9.42,1.33
 rel-event,none,ours-cached,5.28,0.03,41328337,77435772,,6,,,cpu,3.44,1.84
+rel-arxiv,glove,get_db,1.42,0.08,2146112,,,0,,,cpu,1.24,0.15
+rel-arxiv,glove,relbench,4.26,0.75,2146112,7611490,,0,,,cpu,4.1,0.39
