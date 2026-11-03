@@ -7,6 +7,7 @@ from relbench.modeling.utils import get_stype_proposal
 
 import disk_features
 import train
+from test_tables_one_at_a_time import assert_same_graph
 
 
 def tensors(feat):
@@ -83,6 +84,16 @@ def test_features_on_disk_same_features(graphs):
     data_none = by_setting['none'][0]
     for setting in ['text', 'all']:
         assert_same_features(by_setting[setting][0], data_none)
+
+
+@requires_rel_f1
+@requires_glove
+def test_features_on_disk_same_graph(graphs):
+    # Through train.load_graph: RelBench's path ('none') against tables read
+    # one at a time ('text', 'all'), with driver-top3's hidden columns.
+    _, by_setting = graphs
+    for setting in ['text', 'all']:
+        assert_same_graph(*by_setting[setting], *by_setting['none'])
 
 
 @requires_rel_f1
