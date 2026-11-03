@@ -63,7 +63,9 @@ def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
                         setting[key] = value
                 # The run name lists the grid values (one 'lam' for 'lambda'):
                 name = '_'.join([arm['model']] + [
-                    f"{SHORT.get(k if k != 'lambda' else 'lambda_', k)}{v:g}"
+                    f"{SHORT.get(k if k != 'lambda' else 'lambda_', k)}"
+                    f"{v:g}" if isinstance(v, (int, float)) else
+                    f"{SHORT.get(k, k)}-{v}"
                     for k, v in zip(keys, values)
                 ])
                 runs.append(dict(run_id=f'{name}_seed{seed}',
@@ -146,17 +148,28 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
     if not todo:
         return
 
-    # Loaded once for every run (the task and dataset are fixed):
-    probe = train.parse_args(to_argv(fixed))
-    dataset = train.load_dataset(probe.dataset)
-    task = dataset.load_task(probe.task)
-    data, col_stats_dict = train.load_graph(dataset, task,
-                                            probe.text_embedder, device)
-    spec = train.task_spec(task)
+    # Each (dataset, task) is loaded once; its runs are done together.
+    def data_key(run) -> tuple:
+        args = train.parse_args(to_argv({**fixed, **run['overrides']}))
+        return args.dataset, args.task, args.text_embedder
+
+    keys = [data_key(r) for r in todo]
+    order = sorted(range(len(todo)), key=lambda j: keys.index(keys[j]))
+    todo = [todo[j] for j in order]
+    loaded_key = None
 
     start = time.time()
     for i, run in enumerate(todo, start=1):
         args = train.parse_args(to_argv({**fixed, **run['overrides']}))
+        if data_key(run) != loaded_key:
+            loaded_key = data_key(run)
+            print(f'loading {loaded_key[0]} / {loaded_key[1]}', flush=True)
+            dataset = train.load_dataset(args.dataset)
+            task = dataset.load_task(args.task)
+            data, col_stats_dict = train.load_graph(dataset, task,
+                                                    args.text_embedder,
+                                                    device)
+            spec = train.task_spec(task)
         log_path = out / 'logs' / f"{run['run_id']}.log"
         with open(log_path, 'w') as log_file:
 

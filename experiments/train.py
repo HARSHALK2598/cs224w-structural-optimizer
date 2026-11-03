@@ -87,7 +87,7 @@ RESULT_FIELDS = [
     'test_mae', 'epochs', 'lr', 'channels', 'batch_size', 'minutes',
     'text_embedder', 'lambda_col',
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
-    'open_columns', 'open_tables'
+    'open_columns', 'open_tables', 'numerical_columns', 'nan_columns'
 ]
 
 
@@ -107,6 +107,10 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument('--nan-safe-numerical', action='store_true',
                         help='Keep numerical columns with missing values '
                         'trainable (issue #6).')
+    parser.add_argument('--na-strategy-mean', action='store_true',
+                        help="Fill missing numerical values with the column "
+                        "mean before encoding (PyTorch Frame's existing "
+                        "na_strategy=MEAN; the workaround for issue #6).")
     parser.add_argument('--smoke', action='store_true',
                         help='Run one train and one val batch, write nothing.')
     parser.add_argument('--results', type=str,
@@ -291,12 +295,20 @@ class BaseModel(torch.nn.Module):
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
                  num_layers: int, aggr: str, dedup_encoder: bool = False,
-                 nan_safe_numerical: bool = False):
+                 nan_safe_numerical: bool = False,
+                 na_strategy_mean: bool = False):
         super().__init__()
+        if nan_safe_numerical and na_strategy_mean:
+            raise ValueError("Choose one of 'nan_safe_numerical' and "
+                             "'na_strategy_mean'")
         self.dedup_encoder = dedup_encoder
         stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
         if nan_safe_numerical:
             stype_encoders[torch_frame.numerical] = (NaNSafeLinearEncoder, {})
+        if na_strategy_mean:
+            stype_encoders[torch_frame.numerical] = (
+                torch_frame.nn.LinearEncoder,
+                dict(na_strategy=torch_frame.NAStrategy.MEAN))
         self.encoder = HeteroEncoder(
             channels=channels,
             node_to_col_names_dict={
@@ -377,9 +389,11 @@ class FilterModel(BaseModel):
                  lambda_col: float = 0.0, lambda_table: float = 0.0,
                  dedup_encoder: bool = False, gate_init: float = 2.0,
                  gate_temperature: float = 2. / 3., gates_open: bool = False,
-                 nan_safe_numerical: bool = False):
+                 nan_safe_numerical: bool = False,
+                 na_strategy_mean: bool = False):
         super().__init__(data, col_stats_dict, channels, out_channels,
-                         num_layers, aggr, dedup_encoder, nan_safe_numerical)
+                         num_layers, aggr, dedup_encoder, nan_safe_numerical,
+                         na_strategy_mean)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
         # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
@@ -454,14 +468,14 @@ def build_model(args, data, col_stats_dict, out_channels: int,
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
                          args.num_layers, args.aggr, args.dedup_encoder,
-                         args.nan_safe_numerical)
+                         args.nan_safe_numerical, args.na_strategy_mean)
     if args.model == 'filter':
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
                            args.dedup_encoder, args.gate_init,
                            args.gate_temperature, args.gates_open,
-                           args.nan_safe_numerical)
+                           args.nan_safe_numerical, args.na_strategy_mean)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -531,6 +545,19 @@ def make_optimizer(model, args) -> torch.optim.Optimizer:
     ], lr=args.lr)
 
 
+def count_nan_columns(model) -> Tuple[int, int]:
+    r"""The number of numerical columns, and how many of them have NaN
+    encoder weights (issue #6: such a column encodes to 0 for every row)."""
+    total = nan = 0
+    for resnet in model.encoder.encoders.values():
+        encoder = resnet.encoder.encoder_dict
+        if 'numerical' in encoder:
+            weight = encoder['numerical'].weight  # [num_columns, channels]
+            total += weight.size(0)
+            nan += int(torch.isnan(weight).any(dim=1).sum())
+    return total, nan
+
+
 def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         log: Callable[[str], None] = print) -> Dict[str, Any]:
     r"""Trains for :obj:`args.epochs` epochs, keeps the epoch with the best
@@ -566,8 +593,10 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
     log(f'best epoch {best_epoch}: ' +
         '  '.join(f'val {k} {v:.4f}' for k, v in best_val.items()) + '  ' +
         '  '.join(f'test {k} {v:.4f}' for k, v in test.items()))
+    numerical_columns, nan_columns = count_nan_columns(model)
     return dict(best_epoch=best_epoch, val=best_val, test=test,
-                history=history, gates=best_gates)
+                history=history, gates=best_gates,
+                numerical_columns=numerical_columns, nan_columns=nan_columns)
 
 
 def write_result(path: str, row: Dict[str, Any],
@@ -597,7 +626,9 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
                seed=args.seed, tune_metric=spec.tune_metric,
                best_epoch=out['best_epoch'], epochs=args.epochs, lr=args.lr,
                channels=args.channels, batch_size=args.batch_size,
-               minutes=round(minutes, 2), text_embedder=args.text_embedder)
+               minutes=round(minutes, 2), text_embedder=args.text_embedder,
+               numerical_columns=out.get('numerical_columns'),
+               nan_columns=out.get('nan_columns'))
     for split in ['val', 'test']:
         for name, value in out[split].items():
             row[f'{split}_{name}'] = value
