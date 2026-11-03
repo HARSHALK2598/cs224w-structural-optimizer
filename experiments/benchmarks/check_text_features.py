@@ -8,8 +8,9 @@ GloVe vectors are built twice:
     ours      ``build_tables``: chunked, each distinct text embedded once,
               written to disk
 
-and compared row by row. One column is built at a time, so memory holds one
-column's vectors. Results go to ``experiments/results/text_check/``:
+and compared row by row. One column is built at a time, and RelBench's side a
+slice of rows at a time, so memory holds one slice of one column's vectors
+and the table. Results go to ``experiments/results/text_check/``:
 
     python experiments/benchmarks/check_text_features.py rel-trial rel-event
 
@@ -42,12 +43,21 @@ FIELDS = ['dataset', 'table', 'column', 'rows', 'missing', 'distinct',
           'max_abs_diff', 'rows_off', 'missing_rows_off', 'minutes']
 
 
-def check_column(df, column, cfg, tmp: Path, rows_per_chunk: int):
+def check_column(df, column, cfg, tmp: Path, rows_per_chunk: int,
+                 rows_per_slice: int = 256 * 800):
+    r"""Our vectors of :obj:`column` against RelBench's: the largest
+    difference per row.
+
+    RelBench's vectors are built a slice of :obj:`rows_per_slice` rows at a
+    time, to bound memory. PyTorch Frame embeds a column in batches of
+    ``cfg.batch_size`` texts in row order, so slices whose boundaries are
+    multiples of the batch size form the same batches: the vectors are those
+    of building the whole column at once."""
+    batch = cfg.batch_size or len(df)
+    if rows_per_slice % batch != 0:
+        raise ValueError('rows_per_slice must be a multiple of the batch size')
     ser = df[[column]]
     stypes = {column: torch_frame.text_embedded}
-    ref = torch_frame.data.Dataset(df=ser, col_to_stype=stypes,
-                                   col_to_text_embedder_cfg=cfg).materialize()
-    ref = ref.tensor_frame.feat_dict[torch_frame.embedding].values
     path = tmp / 'one'
     shutil.rmtree(path, ignore_errors=True)
     disk_features.build_tables(
@@ -56,9 +66,19 @@ def check_column(df, column, cfg, tmp: Path, rows_per_chunk: int):
     with disk_features.memory_mapped_loading():
         tf, _ = torch_frame.load(str(path / 'one.pt'))
     ours = tf.feat_dict[torch_frame.embedding].values
-    assert ours.shape == ref.shape, (ours.shape, ref.shape)
-    diff = (ours - ref).abs().amax(dim=1)
-    return diff, ref
+    assert ours.shape[0] == len(df), (ours.shape, len(df))
+    diffs = []
+    for start in range(0, len(df), rows_per_slice):
+        part = ser.iloc[start:start + rows_per_slice]
+        ref = torch_frame.data.Dataset(
+            df=part, col_to_stype=stypes,
+            col_to_text_embedder_cfg=cfg).materialize()
+        ref = ref.tensor_frame.feat_dict[torch_frame.embedding].values
+        mine = ours[start:start + len(part)]
+        assert mine.shape == ref.shape, (mine.shape, ref.shape)
+        diffs.append((mine - ref).abs().amax(dim=1))
+        del ref
+    return torch.cat(diffs)
 
 
 def main():
@@ -94,8 +114,8 @@ def main():
                         continue
                     start = time.time()
                     df = table.df
-                    diff, _ = check_column(df, column, cfg, tmp,
-                                           args.rows_per_chunk)
+                    diff = check_column(df, column, cfg, tmp,
+                                        args.rows_per_chunk)
                     texts = df[column].astype(str)
                     missing = texts.isna().to_numpy()
                     off = (diff > args.tolerance).numpy()
