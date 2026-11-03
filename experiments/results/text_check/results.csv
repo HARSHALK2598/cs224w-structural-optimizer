@@ -13,3 +13,16 @@ rel-trial,outcome_analyses,other_analysis_description,225846,224103,920,8.94e-08
 rel-trial,eligibilities,minimum_age,249730,15682,289,0,0,0,0.06
 rel-trial,eligibilities,maximum_age,249730,117182,435,0,0,0,0.06
 rel-trial,eligibilities,population,249730,200515,47240,1.19e-07,0,0,0.13
+rel-trial,eligibilities,criteria,249730,20,247383,1.19e-07,0,0,1.28
+rel-trial,eligibilities,gender_description,249730,246685,2447,5.96e-08,0,0,0.06
+rel-trial,outcomes,title,411933,0,340156,1.19e-07,0,0,0.36
+rel-trial,outcomes,description,411933,36134,311351,1.19e-07,0,0,0.58
+rel-trial,outcomes,time_frame,411933,59,117763,1.79e-07,0,0,0.21
+rel-trial,outcomes,population,411933,93581,125183,1.19e-07,0,0,0.24
+rel-trial,outcomes,units,411933,26110,32453,7.45e-09,0,0,0.13
+rel-trial,outcomes,units_analyzed,411933,403943,1625,0,0,0,0.09
+rel-trial,outcomes,dispersion_type,411933,160983,36,0,0,0,0.1
+rel-trial,outcomes,param_type,411933,26077,10,0,0,0,0.1
+rel-trial,facilities,name,453233,1,453233,1.79e-07,0,0,0.33
+rel-trial,facilities,city,453233,12,28166,5.96e-08,0,0,0.14
+rel-trial,facilities,state,453233,227304,7723,2.98e-08,0,0,0.12
