@@ -1,9 +1,12 @@
+import numpy as np
+import pandas as pd
 import pytest
 import torch
 import torch_frame
 from conftest import GLOVE_CACHED, requires_glove, requires_rel_f1
 from relbench.modeling.graph import make_pkey_fkey_graph
 from relbench.modeling.utils import get_stype_proposal
+from torch_frame.data.stats import StatType, compute_col_stats
 
 import disk_features
 import train
@@ -152,3 +155,42 @@ def test_distinct_texts():
     out = disk_features.DistinctTexts(embed)(texts)
     assert torch.equal(out, embed(texts))  # Same vectors as embedding all.
     assert calls[0] == ['us', 'france', 'nan']  # Each text embedded once.
+
+
+@pytest.mark.parametrize('values', [
+    np.arange(1000, dtype=np.int64) % 37,  # integers
+    np.random.default_rng(0).normal(size=5000),  # floats
+    np.where(np.arange(500) % 7 == 0, np.nan, np.arange(500.0)),  # with NaN
+    np.where(np.arange(500) % 9 == 0, np.inf, np.arange(500.0)),  # with inf
+    np.full(20, np.nan),  # all missing
+    pd.array([1, None, 3, 4], dtype='Int64'),  # pandas' nullable: fallback
+    pd.array([0.5, None, 2.5], dtype='Float64'),  # fallback
+])
+def test_fast_numerical_stats_identical(values):
+    ser = pd.Series(values)
+    expected = compute_col_stats(ser, torch_frame.numerical)
+    with disk_features.fast_numerical_stats():
+        got = compute_col_stats(ser, torch_frame.numerical)
+    assert repr(got) == repr(expected)
+
+
+def test_fast_numerical_stats_same_error_on_booleans():
+    ser = pd.Series([True, False, True])  # PyTorch Frame fails; so do we.
+    with pytest.raises(TypeError) as expected:
+        compute_col_stats(ser, torch_frame.numerical)
+    with pytest.raises(TypeError) as got:
+        with disk_features.fast_numerical_stats():
+            compute_col_stats(ser, torch_frame.numerical)
+    assert str(got.value) == str(expected.value)
+
+
+def test_fast_numerical_stats_leaves_list_columns_alone():
+    # List-valued columns need PyTorch Frame's flattening; checked to fall
+    # back, with the same result:
+    ser = pd.Series([[1.0, 2.0], [3.0], [np.nan, 4.0, 5.0]])
+    expected = compute_col_stats(ser, torch_frame.sequence_numerical)
+    compute = StatType.compute
+    with disk_features.fast_numerical_stats():
+        got = compute_col_stats(ser, torch_frame.sequence_numerical)
+    assert StatType.compute is compute  # Restored.
+    assert repr(got) == repr(expected)

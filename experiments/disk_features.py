@@ -37,7 +37,7 @@ from relbench.modeling.utils import to_unix_time
 from torch import Tensor
 from torch_frame.config import TextEmbedderConfig
 from torch_frame.data import MultiEmbeddingTensor
-from torch_frame.data.stats import compute_col_stats
+from torch_frame.data.stats import StatType, compute_col_stats
 
 from torch_geometric.data import HeteroData
 from torch_geometric.utils import sort_edge_index
@@ -122,10 +122,11 @@ def materialize_in_chunks(dataset: torch_frame.data.Dataset, path: Path,
     chunked conversion.
     """
     df = dataset.df
-    for col, stype in dataset.col_to_stype.items():  # As materialize, step 1.
-        dataset._col_stats[col] = compute_col_stats(
-            df[col], stype, sep=dataset.col_to_sep.get(col, None),
-            time_format=dataset.col_to_time_format.get(col, None))
+    with fast_numerical_stats():
+        for col, stype in dataset.col_to_stype.items():  # As materialize, 1.
+            dataset._col_stats[col] = compute_col_stats(
+                df[col], stype, sep=dataset.col_to_sep.get(col, None),
+                time_format=dataset.col_to_time_format.get(col, None))
     converter = dataset._get_tensorframe_converter()
 
     num_rows, feat_dict, col_names_dict, files = len(df), {}, None, []
@@ -160,6 +161,44 @@ def materialize_in_chunks(dataset: torch_frame.data.Dataset, path: Path,
     gc.collect()
     for file in files:
         os.remove(file)
+
+
+_FLATTENED_STATS = (StatType.MEAN, StatType.STD, StatType.QUANTILES)
+
+
+@contextlib.contextmanager
+def fast_numerical_stats() -> Iterator[None]:
+    r"""Within this context, PyTorch Frame's mean, standard deviation and
+    quantiles of a plain numerical column skip a slow, value-by-value copy.
+
+    ``StatType.compute`` first flattens the values with
+    ``np.hstack(np.hstack(values))``, which handles list-valued columns but
+    walks a plain 1-D number array one value at a time in Python: about 6 s
+    per statistic for a column of 3 million rows. For such an array the
+    result is the array itself, so it is used directly and the statistics
+    are identical. Every other column (list-valued, pandas' own dtypes) goes
+    through PyTorch Frame's code unchanged."""
+    compute = StatType.compute
+
+    def fast_compute(self, ser, sep=None):
+        values = ser.values
+        if (self not in _FLATTENED_STATS or not isinstance(values, np.ndarray)
+                or values.ndim != 1 or values.dtype.kind not in 'iuf'):
+            return compute(self, ser, sep)
+        finite = values[np.isfinite(values)]
+        if finite.size == 0:
+            return compute(self, ser, sep)  # PyTorch Frame's NaN result.
+        if self == StatType.MEAN:
+            return np.mean(finite).item()
+        if self == StatType.STD:
+            return np.std(finite).item()
+        return np.quantile(finite, q=[0, 0.25, 0.5, 0.75, 1]).tolist()
+
+    StatType.compute = fast_compute
+    try:
+        yield
+    finally:
+        StatType.compute = compute
 
 
 def _memory_gb() -> float:
