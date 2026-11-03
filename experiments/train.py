@@ -53,9 +53,9 @@ from relbench.modeling.nn import (  # noqa: E402
 from relbench.modeling.utils import get_stype_proposal  # noqa: E402
 from disk_features import (  # noqa: E402
     FEATURES_ON_DISK,
-    build_tables,
+    build_graph,
     keep_in_memory,
-    memory_mapped_loading,
+    load_cached_graph,
 )
 from torch import Tensor  # noqa: E402
 
@@ -170,16 +170,9 @@ def text_embedder_cfg(name: str, device: torch.device):
     raise ValueError(f"Unknown text embedder '{name}'")
 
 
-def load_graph(dataset, task, text_embedder: str, device: torch.device,
-               features_on_disk: str = 'none'):
-    r"""Builds the database graph, without the columns that leak the task's
-    label (:meth:`task.hidden_columns`). With :obj:`features_on_disk` set to
-    ``'text'`` or ``'all'``, tables are built one at a time and those features
-    stay on disk, memory-mapped (see :mod:`disk_features`)."""
-    if features_on_disk not in FEATURES_ON_DISK:
-        raise ValueError(f"'features_on_disk' must be one of "
-                         f"{FEATURES_ON_DISK} (got '{features_on_disk}')")
-    db = dataset.get_db()
+def propose_stypes(db, text_embedder: str):
+    r"""RelBench's column types for every table of :obj:`db`, without the
+    text columns if :obj:`text_embedder` is ``'none'``."""
     col_to_stype_dict = get_stype_proposal(db)
     if text_embedder == 'none':  # Drop text columns (quick CPU runs).
         col_to_stype_dict = {
@@ -189,28 +182,41 @@ def load_graph(dataset, task, text_embedder: str, device: torch.device,
             }
             for table, cols in col_to_stype_dict.items()
         }
+    return col_to_stype_dict
+
+
+def load_graph(dataset, task, text_embedder: str, device: torch.device,
+               features_on_disk: str = 'none'):
+    r"""Builds the database graph, without the columns that leak the task's
+    label (:meth:`task.hidden_columns`).
+
+    With :obj:`features_on_disk` set to ``'text'`` or ``'all'``, the raw
+    tables are read one at a time, those features stay on disk,
+    memory-mapped, and the graph is cached: later runs read no raw table
+    (see :mod:`disk_features`). The result is the same graph."""
+    if features_on_disk not in FEATURES_ON_DISK:
+        raise ValueError(f"'features_on_disk' must be one of "
+                         f"{FEATURES_ON_DISK} (got '{features_on_disk}')")
     # Hidden columns are dropped after materialisation, so one cache per
     # dataset serves every task (as in the official example).
     name = Path(str(dataset.name_or_path)).name
     cache_dir = ROOT / 'data' / 'materialized' / name / text_embedder
-    embedder_cfg = text_embedder_cfg(text_embedder, device)
-    if features_on_disk == 'none':
+    if features_on_disk == 'none':  # RelBench's path: all tables at once.
+        db = dataset.get_db()
         return make_pkey_fkey_graph(
             db,
-            col_to_stype_dict=col_to_stype_dict,
-            text_embedder_cfg=embedder_cfg,
+            col_to_stype_dict=propose_stypes(db, text_embedder),
+            text_embedder_cfg=text_embedder_cfg(text_embedder, device),
             cache_dir=str(cache_dir),
             remove_columns=task.hidden_columns(),
         )
-    build_tables(db, col_to_stype_dict, cache_dir, embedder_cfg)
-    with memory_mapped_loading():  # Every table is cached now.
-        data, col_stats_dict = make_pkey_fkey_graph(
-            db,
-            col_to_stype_dict=col_to_stype_dict,
-            text_embedder_cfg=embedder_cfg,
-            cache_dir=str(cache_dir),
-            remove_columns=task.hidden_columns(),
-        )
+    loaded = load_cached_graph(dataset, cache_dir, task.hidden_columns())
+    if loaded is None:
+        build_graph(dataset, cache_dir,
+                    lambda db: propose_stypes(db, text_embedder),
+                    text_embedder_cfg(text_embedder, device))
+        loaded = load_cached_graph(dataset, cache_dir, task.hidden_columns())
+    data, col_stats_dict = loaded
     keep_in_memory(data, features_on_disk)
     return data, col_stats_dict
 
