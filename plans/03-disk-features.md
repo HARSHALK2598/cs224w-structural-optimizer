@@ -75,8 +75,7 @@ real data:
 - Sharing memory-mapped tensors with data-loader worker processes (`num_workers > 0`). We
   use 0 workers.
 
-## 6. Questions for you
+## 6. Decisions
 
-1. Default `none`, so nothing changes for anyone who doesn't ask for it. OK?
-2. Should Plan 02 wait for this, with `rel-trial` using `text`, or run `rel-f1` now and
-   `rel-trial` afterwards?
+1. The default is `none`: nothing changes for anyone who doesn't ask for it.
+2. Plan 02 waits for this plan, so its larger datasets can run.
