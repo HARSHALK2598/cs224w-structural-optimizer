@@ -218,25 +218,36 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
             torch.cuda.empty_cache()
 
 
-def summarize(out: Path, metric: Optional[str] = None):
-    r"""One row per setting (all seeds pooled), best validation first;
-    written to :obj:`summary.csv` and returned as a DataFrame."""
+def summarize(out: Path):
+    r"""One row per setting (all seeds pooled), grouped by task, best
+    validation first; written to :obj:`summary.csv` and returned as a
+    DataFrame. Each run is scored with its own task's metric (ROC-AUC for
+    classification, MAE for regression), named in the ``metric`` column."""
     import pandas as pd
     df = pd.read_csv(out / 'results.csv')
     df['setting'] = df['run_id'].str.replace(r'_seed\d+$', '', regex=True)
-    metric = metric or df['tune_metric'].iloc[0]
+    df['metric'] = df['tune_metric']
+    for split in ['val', 'test']:
+        df[f'{split}_score'] = [
+            row[f'{split}_{row.tune_metric}'] for _, row in df.iterrows()
+        ]
     agg = dict(seeds=('seed', 'count'),
-               val_mean=(f'val_{metric}', 'mean'),
-               val_std=(f'val_{metric}', 'std'),
-               test_mean=(f'test_{metric}', 'mean'),
-               test_std=(f'test_{metric}', 'std'),
+               val_mean=('val_score', 'mean'),
+               val_std=('val_score', 'std'),
+               test_mean=('test_score', 'mean'),
+               test_std=('test_score', 'std'),
                best_epoch=('best_epoch', 'mean'),
                minutes=('minutes', 'mean'))
-    for column in ['open_columns', 'open_tables']:
+    for column in ['open_columns', 'open_tables', 'nan_columns']:
         if column in df and df[column].notna().any():
             agg[column] = (column, 'mean')
-    summary = df.groupby('setting').agg(**agg).reset_index()
-    summary = summary.sort_values('val_mean', ascending=False)
+    summary = df.groupby(['task', 'metric', 'setting']).agg(**agg)
+    summary = summary.reset_index()
+    # Best first within each task: higher ROC-AUC, lower MAE.
+    summary['_key'] = [v if m == 'roc_auc' else -v
+                       for m, v in zip(summary.metric, summary.val_mean)]
+    summary = summary.sort_values(['task', '_key'], ascending=[True, False])
+    summary = summary.drop(columns='_key')
     summary.round(4).to_csv(out / 'summary.csv', index=False)
     return summary
 

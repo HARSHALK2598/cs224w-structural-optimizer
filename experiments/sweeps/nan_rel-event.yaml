@@ -1,0 +1,27 @@
+# Plan 02, benchmark 1: PyTorch Frame's NaN gradient bug (issue #6) on rel-event.
+#
+# Three ways to encode missing numerical values, same model otherwise
+# (RelBench's example settings: lr 0.005, hidden 128, batch 512; 20 epochs):
+#   default             na_strategy=None, as RelBench uses it (the bug)
+#   na_strategy_mean    PyTorch Frame's existing fill-in with the column mean
+#   nan_safe_numerical  our fix: a missing value encodes to 0, gradients clean
+# results.csv also records nan_columns: numerical columns whose weights
+# became NaN. --dedup-encoder only saves time (it is exact up to dropout).
+name: nan_rel-event
+fixed:
+  dataset: rel-event
+  epochs: 20
+  dedup_encoder: true
+seeds: [0, 1, 2, 3, 4]
+arms:
+  - model: base
+    grid:
+      task: [user-repeat, user-ignore, user-attendance]
+  - model: base
+    grid:
+      task: [user-repeat, user-ignore, user-attendance]
+      na_strategy_mean: [true]
+  - model: base
+    grid:
+      task: [user-repeat, user-ignore, user-attendance]
+      nan_safe_numerical: [true]

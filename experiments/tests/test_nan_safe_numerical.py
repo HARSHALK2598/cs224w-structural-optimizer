@@ -46,11 +46,10 @@ def batch_setup(rel_f1):
     return task, data, col_stats, batch
 
 
-def nan_parameters_after_one_step(batch_setup, nan_safe):
+def model_after_one_step(batch_setup, **kwargs):
     task, data, col_stats, batch = batch_setup
     torch.manual_seed(0)
-    model = train.BaseModel(data, col_stats, 128, 1, 2, 'sum',
-                            nan_safe_numerical=nan_safe)
+    model = train.BaseModel(data, col_stats, 128, 1, 2, 'sum', **kwargs)
     opt = torch.optim.Adam(model.parameters(), lr=0.005)
     model.train()
     loss = torch.nn.functional.binary_cross_entropy_with_logits(
@@ -58,6 +57,11 @@ def nan_parameters_after_one_step(batch_setup, nan_safe):
         batch[task.entity_table].y.float())
     loss.backward()
     opt.step()
+    return model
+
+
+def nan_parameters_after_one_step(batch_setup, nan_safe):
+    model = model_after_one_step(batch_setup, nan_safe_numerical=nan_safe)
     return [n for n, p in model.named_parameters() if torch.isnan(p).any()]
 
 
@@ -78,3 +82,33 @@ def test_original_encoder_gets_nan_weights(batch_setup):
 @requires_rel_f1
 def test_nan_safe_encoder_keeps_all_parameters_finite(batch_setup):
     assert nan_parameters_after_one_step(batch_setup, nan_safe=True) == []
+
+
+@requires_rel_f1
+def test_count_nan_columns(batch_setup):
+    model = model_after_one_step(batch_setup)  # the default encoder
+    total, nan = train.count_nan_columns(model)
+    weight = model.encoder.encoders['results'].encoder.encoder_dict[
+        'numerical'].weight
+    assert nan == int(torch.isnan(weight).any(dim=1).sum()) > 0
+    assert total >= weight.size(0)
+    model = model_after_one_step(batch_setup, nan_safe_numerical=True)
+    assert train.count_nan_columns(model) == (total, 0)
+
+
+@requires_rel_f1
+def test_na_strategy_mean_keeps_all_parameters_finite(batch_setup):
+    model = model_after_one_step(batch_setup, na_strategy_mean=True)
+    encoder = model.encoder.encoders['results'].encoder.encoder_dict[
+        'numerical']
+    assert encoder.na_strategy == torch_frame.NAStrategy.MEAN
+    assert train.count_nan_columns(model)[1] == 0
+    assert all(torch.isfinite(p).all() for p in model.parameters())
+
+
+@requires_rel_f1
+def test_nan_options_are_exclusive(batch_setup):
+    _, data, col_stats, _ = batch_setup
+    with pytest.raises(ValueError, match='Choose one'):
+        train.BaseModel(data, col_stats, 128, 1, 2, 'sum',
+                        nan_safe_numerical=True, na_strategy_mean=True)
