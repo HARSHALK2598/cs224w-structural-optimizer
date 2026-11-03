@@ -157,6 +157,38 @@ def test_distinct_texts():
     assert calls[0] == ['us', 'france', 'nan']  # Each text embedded once.
 
 
+def _embed_or_mark_missing(texts):
+    r"""A stand-in embedder that, like GloveTextEmbedding, gives missing
+    values their own vector."""
+    def one(t):
+        if t is None or (isinstance(t, float) and t != t):
+            return [-1.0, -1.0]
+        return [float(len(t)), float(ord(t[0]))]
+    return torch.tensor([one(t) for t in texts])
+
+
+@pytest.mark.parametrize('texts', [
+    ['us', float('nan'), 'fr', 'us', float('nan')],  # some missing
+    [None, 'us', None],
+    [float('nan')] * 4,  # a chunk with only missing values
+])
+def test_distinct_texts_missing_values(texts):
+    out = disk_features.DistinctTexts(_embed_or_mark_missing)(texts)
+    assert torch.equal(out, _embed_or_mark_missing(texts))
+
+
+def test_distinct_texts_through_pytorch_frame():
+    # PyTorch Frame's text mapper, which calls ser.astype(str) first (with
+    # pandas 3, missing values stay missing):
+    from torch_frame.data.mapper import EmbeddingTensorMapper
+    ser = pd.Series(['us', None, 'fr', np.nan, 'us'] * 3, dtype=object)
+    plain = EmbeddingTensorMapper(_embed_or_mark_missing, None)
+    distinct = EmbeddingTensorMapper(
+        disk_features.DistinctTexts(_embed_or_mark_missing), None)
+    assert torch.equal(distinct.forward(ser).values,
+                       plain.forward(ser).values)
+
+
 @pytest.mark.parametrize('values', [
     np.arange(1000, dtype=np.int64) % 37,  # integers
     np.random.default_rng(0).normal(size=5000),  # floats

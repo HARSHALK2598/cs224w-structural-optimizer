@@ -37,6 +37,11 @@ def make_tables(seed: int = 0):
                          rng.integers(10, 500, n_studies).astype(float)),
         'phase': rng.choice(['I', 'II', 'III'], n_studies),
     })
+    # Missing titles, including a run of 20 in a row, so that some chunks of
+    # 16 rows have only missing texts:
+    missing = (rng.random(n_studies) < 0.2) | (np.arange(n_studies) >= 40) & (
+        np.arange(n_studies) < 60)
+    studies['title'] = studies['title'].where(~missing, None)
     sites = pd.DataFrame({  # No date: never cut.
         'site_id': np.arange(n_sites),
         'beds': rng.integers(5, 900, n_sites).astype(float),
@@ -115,7 +120,10 @@ def write_dataset(root: Path, tables=None, specs=None) -> Path:
 
 
 def embed(texts):
-    r"""A stand-in text embedder: a few numbers per text."""
+    r"""A stand-in text embedder: a few numbers per text. Missing values
+    become empty texts, as in ``GloveTextEmbedding``."""
     import torch
+    texts = ['' if t is None or (isinstance(t, float) and t != t) else t
+             for t in texts]
     return torch.tensor([[float(len(t)), float(t.count('e')),
-                          float(ord(t[0]))] for t in texts])
+                          float(ord(t[0])) if t else 0.0] for t in texts])

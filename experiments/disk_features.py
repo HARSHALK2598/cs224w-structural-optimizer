@@ -95,12 +95,20 @@ class DistinctTexts:
     only its ``batch_size`` changes. In RelBench most text cells repeat (21%
     of ``rel-trial``'s and 1% of ``rel-event``'s are distinct), so far fewer
     texts are embedded.
+
+    A missing value is one more distinct value, passed to the embedder as it
+    came: with pandas 3, PyTorch Frame's ``ser.astype(str)`` keeps missing
+    values missing (pandas 2 turns them into ``'nan'``), and the embedder
+    decides what they become (``GloveTextEmbedding``: an empty text).
     """
     def __init__(self, text_embedder):
         self.text_embedder = text_embedder
 
     def __call__(self, texts):
-        codes, distinct = pd.factorize(pd.Series(texts, dtype=object))
+        # use_na_sentinel=False: missing values get a code of their own, not
+        # -1 (which would pick the last distinct text's vector).
+        codes, distinct = pd.factorize(pd.Series(texts, dtype=object),
+                                       use_na_sentinel=False)
         vectors = self.text_embedder(list(distinct))
         return vectors[torch.from_numpy(codes)]
 
