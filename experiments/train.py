@@ -186,21 +186,26 @@ def propose_stypes(db, text_embedder: str):
 
 
 def load_graph(dataset, task, text_embedder: str, device: torch.device,
-               features_on_disk: str = 'none'):
+               features_on_disk: str = 'none',
+               cache_dir: Optional[Path] = None):
     r"""Builds the database graph, without the columns that leak the task's
     label (:meth:`task.hidden_columns`).
 
     With :obj:`features_on_disk` set to ``'text'`` or ``'all'``, the raw
     tables are read one at a time, those features stay on disk,
     memory-mapped, and the graph is cached: later runs read no raw table
-    (see :mod:`disk_features`). The result is the same graph."""
+    (see :mod:`disk_features`). The result is the same graph.
+
+    :obj:`cache_dir` defaults to ``data/materialized/<dataset>/<embedder>``."""
     if features_on_disk not in FEATURES_ON_DISK:
         raise ValueError(f"'features_on_disk' must be one of "
                          f"{FEATURES_ON_DISK} (got '{features_on_disk}')")
     # Hidden columns are dropped after materialisation, so one cache per
     # dataset serves every task (as in the official example).
-    name = Path(str(dataset.name_or_path)).name
-    cache_dir = ROOT / 'data' / 'materialized' / name / text_embedder
+    if cache_dir is None:
+        name = Path(str(dataset.name_or_path)).name
+        cache_dir = ROOT / 'data' / 'materialized' / name / text_embedder
+    cache_dir = Path(cache_dir)
     if features_on_disk == 'none':  # RelBench's path: all tables at once.
         db = dataset.get_db()
         return make_pkey_fkey_graph(
