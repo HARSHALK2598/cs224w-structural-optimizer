@@ -1,11 +1,11 @@
 dataset,text_embedder,step,peak_gb,minutes,num_nodes,num_edges,task,cache_files,gpu_peak_gb,val,device,peak_anon_gb,peak_file_gb
-rel-trial,none,get_db,4.31,0.21,5434924,,,,,,,,
-rel-trial,none,relbench,4.28,0.66,5434924,15335102,,,,,,,
-rel-trial,none,ours,2.95,0.8,5434924,15335102,,,,,,,
-rel-trial,none,ours-cached,1.43,0.01,5434924,15335102,,,,,,,
-rel-event,none,get_db,9.83,0.21,41328337,,,,,,,,
-rel-event,none,ours,13.85,28.68,41328337,77435772,,,,,,,
-rel-event,none,ours-cached,5.34,0.02,41328337,77435772,,6,,,cpu,,
-rel-event,none,get_db,10.33,0.52,41328337,,,0,,,cpu,10.09,0.15
-rel-event,none,ours,9.6,1.28,41328337,77435772,,0,,,cpu,9.42,1.33
-rel-event,none,ours-cached,5.28,0.03,41328337,77435772,,6,,,cpu,3.44,1.84
+rel-event,glove,ours,10.38,16.03,41328337,77435772,,0,,,cuda,9.81,2.69
+rel-event,glove,ours-cached,5.69,0.14,41328337,77435772,,6,,,cuda,3.58,2.11
+rel-event,glove,train,11.38,0.94,41328337,77435772,user-repeat,6,4.95,0.6218,cuda,9.9,2.12
+rel-hm,glove,ours,5.14,2.7,16664809,60749148,,0,,,cuda,4.01,2.25
+rel-hm,glove,ours-cached,4.08,0.09,16664809,60749148,,4,,,cuda,2.61,1.47
+rel-event,glove,ours,10.3,18.48,41328337,77435772,,0,,,cpu,9.96,2.6
+rel-event,glove,ours-cached,5.4,0.21,41328337,77435772,,6,,,cpu,3.5,1.91
+rel-event,glove,train,failed (exit -9),,,,user-repeat,,,,,,
+rel-hm,glove,ours,6.25,3.8,16664809,60749148,,0,,,cpu,4.35,3.5
+rel-hm,glove,ours-cached,3.73,0.11,16664809,60749148,,4,,,cpu,2.48,1.25
