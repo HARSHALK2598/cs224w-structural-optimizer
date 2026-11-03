@@ -126,3 +126,16 @@ def test_features_on_disk_rejects_unknown_setting(rel_f1):
     task = rel_f1.load_task('driver-top3')
     with pytest.raises(ValueError, match='features_on_disk'):
         train.load_graph(rel_f1, task, 'none', torch.device('cpu'), 'some')
+
+
+def test_distinct_texts():
+    calls = []
+
+    def embed(texts):  # A stand-in embedder: one vector per text.
+        calls.append(list(texts))
+        return torch.tensor([[float(len(t)), float(ord(t[0]))] for t in texts])
+
+    texts = ['us', 'france', 'us', 'nan', 'us', 'france']
+    out = disk_features.DistinctTexts(embed)(texts)
+    assert torch.equal(out, embed(texts))  # Same vectors as embedding all.
+    assert calls[0] == ['us', 'france', 'nan']  # Each text embedded once.

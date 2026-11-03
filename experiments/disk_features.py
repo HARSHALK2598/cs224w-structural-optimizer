@@ -43,7 +43,14 @@ def build_tables(db, col_to_stype_dict: Dict[str, Dict], cache_dir: Path,
     ``TensorFrame`` file in :obj:`cache_dir`, one table at a time. The files
     are the ones ``make_pkey_fkey_graph`` writes and reads, built with the same
     per-table steps. Each table is converted :obj:`rows_per_chunk` rows at a
-    time (see :func:`materialize_in_chunks`)."""
+    time (see :func:`materialize_in_chunks`), and each distinct text of a
+    chunk's column is embedded once (see :class:`DistinctTexts`)."""
+    if text_embedder_cfg is not None:
+        # One embedder call per column and chunk, so that repeated texts
+        # across the whole chunk are found:
+        text_embedder_cfg = TextEmbedderConfig(
+            text_embedder=DistinctTexts(text_embedder_cfg.text_embedder),
+            batch_size=None)
     cache_dir.mkdir(parents=True, exist_ok=True)
     for table_name, table in db.table_dict.items():
         path = cache_dir / f'{table_name}.pt'
@@ -66,6 +73,23 @@ def build_tables(db, col_to_stype_dict: Dict[str, Dict], cache_dir: Path,
         del dataset
         gc.collect()
         log(f'built {table_name}; process memory now {_memory_gb():.1f} GB')
+
+
+class DistinctTexts:
+    r"""Wraps a text embedder so that each distinct text of a call is
+    embedded once, and its vector copied to every position with that text.
+
+    A text always gets the same vector, so the output is unchanged; in
+    RelBench most text cells repeat (e.g. 21% of ``rel-trial``'s and 1% of
+    ``rel-event``'s are distinct), so far fewer texts are embedded.
+    """
+    def __init__(self, text_embedder):
+        self.text_embedder = text_embedder
+
+    def __call__(self, texts):
+        codes, distinct = pd.factorize(pd.Series(texts, dtype=object))
+        vectors = self.text_embedder(list(distinct))
+        return vectors[torch.from_numpy(codes)]
 
 
 def materialize_in_chunks(dataset: torch_frame.data.Dataset, path: Path,
