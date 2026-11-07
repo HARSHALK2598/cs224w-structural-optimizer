@@ -1,0 +1,6 @@
+run_id,device,dataset,task,model,seed,tune_metric,best_epoch,val_roc_auc,test_roc_auc,val_nmae,test_nmae,val_mae,test_mae,epochs,lr,channels,batch_size,minutes,text_embedder,lambda_col,lambda_table,gate_lr,gate_init,gate_temperature,open_columns,open_tables,inject,knn_n,temporal_m,behavioral_threshold,inject_tables,injected_relations
+base_n10_inject-knn_seed10,cpu,rel-f1,driver-top3,base,10,roc_auc,15,0.736772320868646,0.8139109531772576,,,,,30,0.01,64,512,1.07,glove,,,,,,,,knn,10,1,0.9,(task table),1
+base_n10_inject-knn_seed11,cpu,rel-f1,driver-top3,base,11,roc_auc,25,0.7570371432154952,0.7578647575250835,,,,,30,0.01,64,512,1.0,glove,,,,,,,,knn,10,1,0.9,(task table),1
+base_n10_inject-knn_seed12,cpu,rel-f1,driver-top3,base,12,roc_auc,27,0.7521097991435379,0.7756976379598663,,,,,30,0.01,64,512,0.96,glove,,,,,,,,knn,10,1,0.9,(task table),1
+base_n10_inject-knn_seed13,cpu,rel-f1,driver-top3,base,13,roc_auc,30,0.7435810144953504,0.7971232232441472,,,,,30,0.01,64,512,0.92,glove,,,,,,,,knn,10,1,0.9,(task table),1
+base_n10_inject-knn_seed14,cpu,rel-f1,driver-top3,base,14,roc_auc,9,0.771729587357331,0.7765860158862876,,,,,30,0.01,64,512,0.94,glove,,,,,,,,knn,10,1,0.9,(task table),1

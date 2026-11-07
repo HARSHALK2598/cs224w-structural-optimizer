@@ -1,0 +1,18 @@
+# Plan 04: Base + KNN (n = 10) with Plan 01's stage C settings (tuned Base:
+# lr 0.01, hidden 64, 30 epochs, seeds 10-14), compared with stage C's Base
+# results (experiments/results/sweeps/stageC_final_driver-top3), which are not
+# rerun. Stage C's Base ran on a Colab GPU; compare means +- std over seeds.
+name: probe_knn_stageC_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 30
+  dedup_encoder: true
+  nan_safe_numerical: true
+  lr: 0.01
+  channels: 64
+seeds: [10, 11, 12, 13, 14]
+arms:
+  - model: base
+    fixed: {inject: knn}
+    grid: {knn_n: [10]}
