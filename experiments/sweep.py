@@ -43,7 +43,8 @@ SWEEP_FIELDS = ['run_id', 'device'] + train.RESULT_FIELDS
 # Short names for run ids; 'lambda' sets both lambda_col and lambda_table.
 SHORT = dict(gate_lr='glr', gate_init='gi', gate_temperature='gt',
              lambda_col='lc', lambda_table='lt', lambda_='lam', lr='lr',
-             channels='ch')
+             channels='ch', inject='inject', knn_n='n', temporal_m='m',
+             behavioral_threshold='bt', inject_tables='tables')
 
 
 def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -55,7 +56,7 @@ def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             grid = arm.get('grid', {})
             keys = list(grid.keys())
             for values in itertools.product(*(grid[k] for k in keys)):
-                setting = {'model': arm['model']}
+                setting = {'model': arm['model'], **arm.get('fixed', {})}
                 for key, value in zip(keys, values):
                     if key == 'lambda':
                         setting.update(lambda_col=value, lambda_table=value)
@@ -63,13 +64,22 @@ def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
                         setting[key] = value
                 # The run name lists the grid values (one 'lam' for 'lambda'):
                 name = '_'.join([arm['model']] + [
-                    f"{SHORT.get(k if k != 'lambda' else 'lambda_', k)}{v:g}"
-                    for k, v in zip(keys, values)
-                ])
+                    run_name_part(k, v) for k, v in zip(keys, values)
+                ] + [run_name_part(k, v) for k, v in arm.get(
+                    'fixed', {}).items()])
                 runs.append(dict(run_id=f'{name}_seed{seed}',
                                  setting=name, seed=seed,
                                  overrides=dict(setting, seed=seed)))
     return runs
+
+
+def run_name_part(key: str, value: Any) -> str:
+    r"""A short name for one grid value: :obj:`lr0.01`, or :obj:`inject-knn`
+    for text."""
+    short = SHORT.get(key if key != 'lambda' else 'lambda_', key)
+    if isinstance(value, str):
+        return f"{short}-{value.replace(',', '+')}"
+    return f'{short}{value:g}'
 
 
 def to_argv(options: Dict[str, Any]) -> List[str]:
@@ -167,8 +177,9 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
             log(f"run {run['run_id']}: {' '.join(to_argv(vars(args)))}")
             try:
                 train.seed_everything(args.seed)
-                loaders = train.make_loaders(data, task, args)
-                model = train.build_model(args, data, col_stats_dict,
+                run_data = train.prepare_graph(data, args)
+                loaders = train.make_loaders(run_data, task, args)
+                model = train.build_model(args, run_data, col_stats_dict,
                                           spec.out_channels,
                                           task.entity_table).to(device)
                 run_start = time.time()

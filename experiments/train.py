@@ -53,7 +53,13 @@ from relbench.modeling.nn import (  # noqa: E402
 from relbench.modeling.utils import get_stype_proposal  # noqa: E402
 from torch import Tensor  # noqa: E402
 
-from torch_geometric.contrib.nn.models import RelationalFilter  # noqa: E402
+from torch_geometric.contrib.nn.models import (  # noqa: E402
+    BehavioralEdges,
+    KNNEdges,
+    RelationalFilter,
+    TwoHopEdges,
+)
+from torch_geometric.contrib.transforms import TemporalContinuity  # noqa
 from torch_geometric.loader import NeighborLoader  # noqa: E402
 from torch_geometric.nn import MLP  # noqa: E402
 from torch_geometric.seed import seed_everything  # noqa: E402
@@ -78,7 +84,14 @@ DEFAULTS: Dict[str, Any] = dict(
     gate_lr=0.0,  # --model filter: learning rate of the gates (0: --lr)
     gate_init=2.0,  # --model filter: initial gate logit
     gate_temperature=2. / 3.,  # --model filter: Hard-Concrete temperature
+    # Structural injection (plans/04-structural-injection.md):
+    inject='',  # comma-separated subset of INJECTIONS; '' for none
+    knn_n=10,  # KNN neighbours n per node (also the behavioural cap)
+    temporal_m=1,  # temporal continuity: links to the previous m records
+    behavioral_threshold=0.9,  # behavioural similarity threshold
+    inject_tables='',  # KNN/behavioural tables: '' (task's), 'all' or a list
 )
+INJECTIONS = ('temporal', 'twohop', 'knn', 'behavioral')
 
 # Columns of results.csv; metrics a task does not report are left empty.
 RESULT_FIELDS = [
@@ -87,7 +100,8 @@ RESULT_FIELDS = [
     'test_mae', 'epochs', 'lr', 'channels', 'batch_size', 'minutes',
     'text_embedder', 'lambda_col',
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
-    'open_columns', 'open_tables'
+    'open_columns', 'open_tables', 'inject', 'knn_n', 'temporal_m',
+    'behavioral_threshold', 'inject_tables', 'injected_relations'
 ]
 
 
@@ -123,7 +137,91 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
             cfg[key] = getattr(args, key)
     for key, value in cfg.items():
         setattr(args, key, value)
+    unknown = set(injections(args)) - set(INJECTIONS)
+    if unknown:
+        parser.error(f"--inject: unknown template(s) {sorted(unknown)}; "
+                     f"choose from {', '.join(INJECTIONS)}")
     return args
+
+
+def injections(args) -> List[str]:
+    r"""The templates named by :obj:`--inject`."""
+    return [name.strip() for name in args.inject.split(',') if name.strip()]
+
+
+def schema_edge_types(data) -> List[Tuple[str, str, str]]:
+    r"""The database's relations, without added temporal-continuity ones."""
+    return [et for et in data.edge_types if not et[1].startswith('next__')]
+
+
+def prepare_graph(data, args):
+    r"""The graph to train on: with :obj:`--inject temporal`, a shallow copy
+    of :obj:`data` with temporal-continuity relations added (the records of
+    each lasting entity, linked to their previous :obj:`temporal_m`); else
+    :obj:`data` itself. The copy shares :obj:`data`'s tensors, so a sweep can
+    keep one loaded graph for runs with and without these relations."""
+    if 'temporal' not in injections(args):
+        return data
+    data = copy.copy(data)
+    return TemporalContinuity(num_previous=args.temporal_m)(data)
+
+
+class Injection(torch.nn.Module):
+    r"""The per-batch injection templates of plans/04-structural-injection.md:
+    KNN and behavioural edges on :obj:`tables`, and two-hop shortcuts for
+    every pair of relations :math:`A \to B \to C` with :math:`A \neq C`.
+    Edges never reach a node from a subgraph with a later seed time."""
+    def __init__(self, names: List[str], edge_types, tables: List[str],
+                 knn_n: int, behavioral_threshold: float):
+        super().__init__()
+        self.knn = torch.nn.ModuleList([
+            KNNEdges(table, k=knn_n) for table in tables
+        ] if 'knn' in names else [])
+        self.behavioral = torch.nn.ModuleList([
+            BehavioralEdges(table, via=et, threshold=behavioral_threshold,
+                            max_neighbors=knn_n) for table in tables
+            for et in edge_types if et[2] == table and et[0] != table
+        ] if 'behavioral' in names else [])
+        self.two_hop = torch.nn.ModuleList(
+            TwoHopEdges.instances(edge_types) if 'twohop' in names else [])
+
+    @property
+    def edge_types(self) -> List[Tuple[str, str, str]]:
+        return [t.edge_type for t in [*self.knn, *self.behavioral,
+                                      *self.two_hop]]
+
+    def forward(self, x_dict, batch, entity_table: str) -> Dict[Any, Tensor]:
+        seed_time = batch[entity_table].seed_time
+        out = {}
+        for template in self.knn:
+            edge_type, edge_index = template(x_dict, batch.batch_dict,
+                                             seed_time)
+            out[edge_type] = edge_index
+        for template in self.behavioral:
+            edge_type, edge_index = template(x_dict, batch.edge_index_dict,
+                                             batch.batch_dict, seed_time)
+            out[edge_type] = edge_index
+        for template in self.two_hop:
+            edge_type, edge_index = template(batch.edge_index_dict,
+                                             batch.num_nodes_dict)
+            out[edge_type] = edge_index
+        return out
+
+
+def make_injection(args, data, entity_table: str) -> Optional[Injection]:
+    r"""The :class:`Injection` for :obj:`args`, or :obj:`None` if it adds no
+    per-batch relations."""
+    names = [name for name in injections(args) if name != 'temporal']
+    if not names:
+        return None
+    if args.inject_tables == 'all':
+        tables = list(data.node_types)
+    elif args.inject_tables:
+        tables = [t.strip() for t in args.inject_tables.split(',')]
+    else:
+        tables = [entity_table]
+    return Injection(names, schema_edge_types(data), tables, args.knn_n,
+                     args.behavioral_threshold)
 
 
 class GloveTextEmbedding:
@@ -291,7 +389,8 @@ class BaseModel(torch.nn.Module):
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
                  num_layers: int, aggr: str, dedup_encoder: bool = False,
-                 nan_safe_numerical: bool = False):
+                 nan_safe_numerical: bool = False,
+                 injection: Optional[Injection] = None):
         super().__init__()
         self.dedup_encoder = dedup_encoder
         stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
@@ -310,15 +409,21 @@ class BaseModel(torch.nn.Module):
             node_types=[nt for nt in data.node_types if 'time' in data[nt]],
             channels=channels,
         )
+        # Injected relations get their own convolution, like the schema's
+        # (temporal-continuity ones are already in data.edge_types):
+        injected = [] if injection is None else injection.edge_types
         self.gnn = HeteroGraphSAGE(
             node_types=data.node_types,
-            edge_types=data.edge_types,
+            edge_types=data.edge_types + injected,
             channels=channels,
             aggr=aggr,
             num_layers=num_layers,
         )
         self.head = MLP(channels, out_channels=out_channels, norm='batch_norm',
                         num_layers=1)
+        self.injection = injection
+        self.num_injected_relations = len(injected) + sum(
+            et[1].startswith('next__') for et in data.edge_types)
 
     def encode_table(self, node_type: str, tf) -> Tensor:
         r"""Encodes the rows :obj:`tf` of one table into
@@ -358,7 +463,13 @@ class BaseModel(torch.nn.Module):
 
     def forward(self, batch, entity_table: str) -> Tensor:
         x_dict = self.encode(batch, entity_table)
-        x_dict = self.gnn(x_dict, batch.edge_index_dict)
+        edge_index_dict = batch.edge_index_dict
+        if self.injection is not None:  # Built from h^(0), after any gates:
+            edge_index_dict = {
+                **edge_index_dict,
+                **self.injection(x_dict, batch, entity_table)
+            }
+        x_dict = self.gnn(x_dict, edge_index_dict)
         num_seeds = batch[entity_table].seed_time.size(0)
         return self.head(x_dict[entity_table][:num_seeds])
 
@@ -377,9 +488,11 @@ class FilterModel(BaseModel):
                  lambda_col: float = 0.0, lambda_table: float = 0.0,
                  dedup_encoder: bool = False, gate_init: float = 2.0,
                  gate_temperature: float = 2. / 3., gates_open: bool = False,
-                 nan_safe_numerical: bool = False):
+                 nan_safe_numerical: bool = False,
+                 injection: Optional[Injection] = None):
         super().__init__(data, col_stats_dict, channels, out_channels,
-                         num_layers, aggr, dedup_encoder, nan_safe_numerical)
+                         num_layers, aggr, dedup_encoder, nan_safe_numerical,
+                         injection)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
         # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
@@ -451,17 +564,18 @@ class FilterModel(BaseModel):
 
 def build_model(args, data, col_stats_dict, out_channels: int,
                 entity_table: Optional[str] = None):
+    injection = make_injection(args, data, entity_table)
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
                          args.num_layers, args.aggr, args.dedup_encoder,
-                         args.nan_safe_numerical)
+                         args.nan_safe_numerical, injection)
     if args.model == 'filter':
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
                            args.dedup_encoder, args.gate_init,
                            args.gate_temperature, args.gates_open,
-                           args.nan_safe_numerical)
+                           args.nan_safe_numerical, injection)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -567,7 +681,9 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         '  '.join(f'val {k} {v:.4f}' for k, v in best_val.items()) + '  ' +
         '  '.join(f'test {k} {v:.4f}' for k, v in test.items()))
     return dict(best_epoch=best_epoch, val=best_val, test=test,
-                history=history, gates=best_gates)
+                history=history, gates=best_gates,
+                injected_relations=getattr(model, 'num_injected_relations',
+                                           0))
 
 
 def write_result(path: str, row: Dict[str, Any],
@@ -598,6 +714,12 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
                best_epoch=out['best_epoch'], epochs=args.epochs, lr=args.lr,
                channels=args.channels, batch_size=args.batch_size,
                minutes=round(minutes, 2), text_embedder=args.text_embedder)
+    if args.inject:
+        row.update(inject=args.inject, knn_n=args.knn_n,
+                   temporal_m=args.temporal_m,
+                   behavioral_threshold=args.behavioral_threshold,
+                   inject_tables=args.inject_tables or '(task table)',
+                   injected_relations=out.get('injected_relations', ''))
     for split in ['val', 'test']:
         for name, value in out[split].items():
             row[f'{split}_{name}'] = value
@@ -625,6 +747,7 @@ def main() -> None:
     task = dataset.load_task(args.task)
     data, col_stats_dict = load_graph(dataset, task, args.text_embedder,
                                       device)
+    data = prepare_graph(data, args)  # + temporal relations (--inject)
     spec = task_spec(task)
     loaders = make_loaders(data, task, args)
     model = build_model(args, data, col_stats_dict, spec.out_channels,
