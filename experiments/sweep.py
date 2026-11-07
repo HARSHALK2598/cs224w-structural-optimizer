@@ -78,7 +78,7 @@ def run_name_part(key: str, value: Any) -> str:
     for text."""
     short = SHORT.get(key if key != 'lambda' else 'lambda_', key)
     if isinstance(value, str):
-        return f"{short}-{value.replace(',', '+')}"
+        return f"{short}-{value.replace(',', '+') or 'default'}"
     return f'{short}{value:g}'
 
 
