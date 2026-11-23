@@ -1,0 +1,6 @@
+model,trained_on,scored_on,dataset,task,rows,positive_rate,test_roc_auc,paper_test_roc_auc,difference
+base,full_db,full_db,rel-f1,driver-top3,726,0.1763,83.12,86.82,-3.7
+base,cutoff,cutoff,rel-f1,driver-top3,726,0.1763,75.71,86.82,-11.11
+base,full_db,cutoff,rel-f1,driver-top3,726,0.1763,75.71,86.82,-11.11
+full,full_db,full_db,rel-f1,driver-top3,726,0.1763,84.52,86.82,-2.3
+full,full_db,cutoff,rel-f1,driver-top3,726,0.1763,78.35,86.82,-8.47
