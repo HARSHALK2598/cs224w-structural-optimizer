@@ -60,6 +60,9 @@ def expand(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
                 for key, value in zip(keys, values):
                     if key == 'lambda':
                         setting.update(lambda_col=value, lambda_table=value)
+                    elif key == 'lambda_all':  # Also the template gates.
+                        setting.update(lambda_col=value, lambda_table=value,
+                                       lambda_template=value)
                     else:
                         setting[key] = value
                 # The run name lists the grid values (one 'lam' for 'lambda'):

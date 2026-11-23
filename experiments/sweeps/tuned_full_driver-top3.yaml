@@ -1,0 +1,34 @@
+# Tuning step 2 (full model) on step 1's best Base backbone (1 layer,
+# uniform sampling; best mean validation of tuned_base_driver-top3): one
+# shared gate penalty for columns, tables and templates, the gate threshold
+# chosen on validation, other settings at the paper's mid values.
+name: tuned_full_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 1
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0, 1, 2]
+arms:
+  - model: filter
+    grid:
+      lambda_all: [0.0001, 0.001, 0.01]
+    fixed:
+      inject: temporal,twohop,knn,behavioral
+      template_gates: true
+      beta_vib: 0.001
+      knn_n: 10
+      temporal_m: 5
+      behavioral_threshold: 0.8
+      gate_init: 2.0
+      gate_thresholds: 0.5,0.7,0.78,0.82,0.86,0.9
