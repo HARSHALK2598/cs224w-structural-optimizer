@@ -4,3 +4,4 @@ base_num_layers1_temporal_strategy-uniform_seed0,cpu,rel-f1,driver-top3,base,0,r
 base_num_layers1_temporal_strategy-last_seed0,cpu,rel-f1,driver-top3,base,0,roc_auc,33,0.8107541524072315,0.8844063545150502,,,,,50,0.001,128,256,1.33,glove,,,,,,,,,,,,,,,,,0.005,True,True,1,64,last,,
 base_num_layers2_temporal_strategy-last_seed1,cpu,rel-f1,driver-top3,base,1,roc_auc,36,0.7883571338983355,0.889815008361204,,,,,50,0.001,128,256,2.21,glove,,,,,,,,,,,,,,,,,0.005,True,True,2,64,last,,
 base_num_layers1_temporal_strategy-uniform_seed1,cpu,rel-f1,driver-top3,base,1,roc_auc,50,0.813423877013492,0.8829562081939799,,,,,50,0.001,128,256,1.33,glove,,,,,,,,,,,,,,,,,0.005,True,True,1,64,uniform,,
+base_num_layers1_temporal_strategy-last_seed1,cpu,rel-f1,driver-top3,base,1,roc_auc,48,0.8044471519951264,0.8733016304347826,,,,,50,0.001,128,256,1.31,glove,,,,,,,,,,,,,,,,,0.005,True,True,1,64,last,,
