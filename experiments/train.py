@@ -83,7 +83,7 @@ DEFAULTS: Dict[str, Any] = dict(
     gate_lr=0.0,  # --model filter: learning rate of the gates (0: --lr)
     gate_init=2.0,  # --model filter: initial gate logit
     gate_temperature=2. / 3.,  # --model filter: Hard-Concrete temperature
-    # Structural injection (plans/04-structural-injection.md):
+    # Structural injection (step B):
     inject='',  # comma-separated subset of INJECTIONS; '' for none
     knn_n=10,  # KNN neighbours n per node (also the behavioural cap)
     temporal_m=1,  # temporal continuity: links to the previous m records
@@ -166,7 +166,7 @@ def prepare_graph(data, args):
 
 
 class Injection(torch.nn.Module):
-    r"""The per-batch injection templates of plans/04-structural-injection.md:
+    r"""The per-batch injection templates (step B):
     KNN and behavioural edges on :obj:`tables`, and two-hop shortcuts for
     every pair of relations :math:`A \to B \to C` with :math:`A \neq C`.
     Edges never reach a node from a subgraph with a later seed time."""
