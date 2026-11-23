@@ -20,3 +20,13 @@ epoch 18  loss 0.2928  val roc_auc 0.7963  penalty 0.8856  open columns 45  open
 epoch 19  loss 0.2994  val roc_auc 0.7975  penalty 0.8850  open columns 45  open tables 8  open templates 78
 epoch 20  loss 0.3101  val roc_auc 0.7993  penalty 0.8852  open columns 45  open tables 8  open templates 78
 epoch 21  loss 0.2849  val roc_auc 0.8001  penalty 0.8847  open columns 45  open tables 8  open templates 78
+epoch 22  loss 0.3686  val roc_auc 0.7960  penalty 0.8850  open columns 45  open tables 8  open templates 78
+epoch 23  loss 0.3001  val roc_auc 0.7954  penalty 0.8848  open columns 45  open tables 8  open templates 78
+epoch 24  loss 0.3319  val roc_auc 0.7830  penalty 0.8854  open columns 45  open tables 8  open templates 78
+epoch 25  loss 0.3297  val roc_auc 0.8083  penalty 0.8861  open columns 45  open tables 8  open templates 78
+epoch 26  loss 0.3145  val roc_auc 0.8055  penalty 0.8862  open columns 45  open tables 8  open templates 78
+epoch 27  loss 0.3028  val roc_auc 0.8075  penalty 0.8850  open columns 45  open tables 8  open templates 78
+epoch 28  loss 0.2867  val roc_auc 0.8072  penalty 0.8833  open columns 45  open tables 8  open templates 78
+epoch 29  loss 0.2908  val roc_auc 0.8053  penalty 0.8823  open columns 45  open tables 8  open templates 78
+epoch 30  loss 0.3314  val roc_auc 0.8028  penalty 0.8817  open columns 45  open tables 8  open templates 78
+epoch 31  loss 0.3376  val roc_auc 0.8071  penalty 0.8818  open columns 45  open tables 8  open templates 78
