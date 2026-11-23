@@ -1,7 +1,7 @@
 # Test (b): with every gate fixed at 1 (--gates-open), the gated model should
 # score like Base over full 20-epoch runs (5 seeds each, same machine). Runs
 # are not bit-for-bit repeatable here, so the check is statistical.
-name: check_gates_open
+name: filter_gates_open_5seeds
 fixed:
   dataset: rel-f1
   task: driver-top3

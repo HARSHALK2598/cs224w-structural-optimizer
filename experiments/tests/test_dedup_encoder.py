@@ -91,7 +91,7 @@ def test_dedup_gives_identical_gradients_without_dropout(setup):
     assert ref.keys() == out.keys()
     for name in ref:
         # Some numerical-column weights get NaN gradients from missing values
-        # with or without dedup (see experiments/profiling/README.md), so
+        # with or without dedup (see experiments/profiling/profile_step.py), so
         # NaNs must sit in the same places and everything else must match.
         assert torch.allclose(out[name], ref[name], rtol=1e-4, atol=1e-6,
                               equal_nan=True), name
