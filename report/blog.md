@@ -10,202 +10,219 @@
 
 | Name | Meaning |
 |---|---|
-| **GraphSAGE baseline** | RelBench's standard model: an encoder for each table's columns, a heterogeneous GraphSAGE GNN over the database graph, and an MLP head. Nothing is learned about the graph itself. |
-| **Structural optimizer** | The paper's method: the GraphSAGE baseline plus four additions (Section 2). |
-| **Paper's code** | The authors' GitHub repository, commit 030b07c. |
-| **Released model** | The trained driver-top3 model file the authors published. |
-| **Repo settings** | The default training settings in the paper's code: 2 GNN layers, hidden size 128, 64 sampled neighbours, learning rate 1e-3. |
-| **Checkpoint settings** | The settings saved inside the released model file: 1 GNN layer, hidden size 64, 16 neighbours, learning rate 3e-3, a 100× larger column-gate penalty. |
-| **Tuned settings** | Settings we chose on validation (Section 4): 1 GNN layer and, for the structural optimizer, switch penalty 1e-4; otherwise the repo settings. |
-| **Full-history test** | The paper's test setup: a prediction at time *t* may use every database row before *t*. |
-| **RelBench cutoff test** | RelBench's standard setup: every test prediction uses only rows before the start of the test period. |
+| **GraphSAGE baseline** | RelBench's standard GNN model, with nothing learned about the graph |
+| **Structural optimizer** | the paper's method: the baseline plus four additions (Section 2) |
+| **Paper's code**, **released model** | the authors' GitHub code, and the trained model they published |
+| **Full-history test** | the paper's test setup: a prediction at time *t* may use every row before *t* |
+| **RelBench cutoff test** | RelBench's standard setup: test predictions use only rows before the test period |
 
-**Main assumption.** Unless marked otherwise, every number uses the full-history test,
-because that is how the paper's code evaluates. Section 5 shows why this matters.
+**Main assumption.** All numbers use the full-history test unless marked, because that is
+how the paper's code evaluates. Section 5 explains why this matters.
 
 ## 1. Motivation
 
-- Relational deep learning turns a database into a graph mechanically: rows become nodes,
-  and foreign-key links become edges (lectures 13–16).
-- The paper argues this graph is often a poor fit for message passing:
-  - irrelevant tables and columns add noise;
-  - related rows can be many hops apart.
-- Its answer is to learn the graph for each task, end to end.
-- No PyG component does this at training time. Explainers learn masks only after training,
-  one prediction at a time.
-- FIGURE 1: the rel-f1 database graph, the same graph after filtering, and after adding
-  edges.
+Relational deep learning (lectures 13–16) trains GNNs directly on databases. Every row
+becomes a node and every foreign-key link becomes an edge. In rel-f1, for example, a
+driver connects to their race results, standings and qualifying rows, and each result
+connects to its race and constructor.
 
-## 2. The structural optimizer in four additions
+This graph comes from the schema, not from the task. The paper (Cheng & Luo, ICML 2026)
+names two problems with it:
+- **Information overload.** Many tables and columns are irrelevant to a given prediction,
+  yet message passing averages them in.
+- **Semantic fragmentation.** Rows that should inform each other can be many hops apart, or
+  not linked at all. Two drivers with similar form, for example, share no edge.
 
-1. **Table and column switches.** Each table and each column gets a learned on/off switch
-   (a Hard-Concrete gate). A penalty pushes switches off unless they help.
-2. **Added edges**, of four kinds:
-   - *temporal*: each record links to the same entity's previous records;
-   - *two-hop shortcut*: A → B → C becomes A → C;
-   - *KNN*: each driver links to its most similar drivers;
+Its answer is to learn the graph for each task, end to end, without changing the GNN.
+Nothing in PyG does this at training time. PyG's explainers learn feature and edge masks
+only after training, for one prediction at a time.
+
+## 2. The structural optimizer
+
+The GraphSAGE baseline has three steps: encode each row's columns into a vector, run
+message passing over the database graph, and predict with an MLP. The structural
+optimizer keeps all three and inserts four additions.
+
+1. **Table and column switches**, between the encoder and the GNN. Each table *T* gets one
+   switch *s_T*, and each of its columns gets a switch *g_T*. A row's vector becomes
+   *s_T · (g_T ⊙ h)*.
+2. **Added edges**, built for each batch from four templates:
+   - *temporal*: each record links to the same entity's previous *m* records;
+   - *two-hop shortcut*: A → B → C becomes a direct A → C edge;
+   - *KNN*: each driver links to its *n* most similar drivers;
    - *behavioural*: drivers link when their linked rows look alike.
-3. **Edge-type switches.** One on/off switch per added edge type, with its own penalty.
-4. **Bottleneck.** Each node's embedding is compressed with a variational information
-   bottleneck.
+3. **Edge-type switches.** One switch per added edge type decides whether the GNN uses it.
+4. **Bottleneck.** Before message passing, each node's vector is compressed with a
+   variational information bottleneck, which removes detail the task does not need.
 
-At test time, a switch counts as on if its learned probability is above a threshold. The
-paper's code tries six thresholds (0.5 to 0.9) and keeps the one that scores best on
-validation.
+**How the switches work.** Each switch is a Hard-Concrete gate (Louizos et al.): a learned
+logit, sampled during training so it stays differentiable. The loss adds a penalty on the
+expected number of open switches, plus the bottleneck's KL term:
+
+*loss = task loss + λ · (expected open switches) + β · KL*
+
+At test time a switch is open if *sigmoid(logit) > threshold*. The paper's code tries six
+thresholds from 0.5 to 0.9 and keeps the one that scores best on validation.
+
+FIGURE 1: the rel-f1 graph around one driver, before and after the four additions:
+switched-off tables greyed out, added edges dashed.
 
 Course connections:
-- two-hop shortcuts ≈ RelGNN's atomic routes;
-- the rule that a prediction sees only earlier rows ≈ RT's sampling;
-- edge-type switches ≈ R-GCN's per-relation weights and InGram's relation importance.
+- two-hop shortcuts are close to RelGNN's atomic routes;
+- the rule that a prediction sees only earlier rows is RT's sampling rule;
+- edge-type switches play the role of R-GCN's per-relation weights and InGram's relation
+  importance.
 
-## 3. Implementation in PyG (`torch_geometric.contrib`)
+## 3. Implementation in PyG
+
+Each addition is its own module in `torch_geometric.contrib`, so it can be used alone:
 
 | Class | Addition |
 |---|---|
-| `HardConcreteGate` | the switches (1 and 3) |
+| `HardConcreteGate` | the switches (1, 3) |
 | `RelationalFilter` | table and column switches (1) |
 | `KNNEdges`, `BehavioralEdges`, `TwoHopEdges`, `TemporalContinuity` | added edges (2) |
 | `GatedHeteroConv` | message passing with edge-type switches (3) |
 | `VariationalBottleneck` | bottleneck (4) |
-| `StructuralOptimizer` | everything, each addition behind its own flag |
+| `StructuralOptimizer` | all four, each behind a flag |
 
-- With every flag off, `StructuralOptimizer` is exactly the GraphSAGE baseline (Test 4).
-- A switched-off edge type is skipped entirely, so pruning saves compute.
-- `test/contrib`: 87 passed, 11 skipped. Experiment tests: 56 passed.
-- CODE SNIPPET: `examples/contrib/structural_optimizer_relbench.py`.
-- TODO: CUDA, and GAT/GraphConv as the convolution.
+Usage on RelBench (from `examples/contrib/structural_optimizer_relbench.py`):
+
+```python
+from torch_geometric.contrib.nn.models import (KNNEdges, StructuralOptimizer,
+                                               TwoHopEdges)
+from torch_geometric.contrib.transforms import TemporalContinuity
+from torch_geometric.contrib.utils import from_relbench
+
+# The database graph, plus temporal edges (prefixed 'next__'):
+data = TemporalContinuity()(from_relbench(dataset.get_db()))
+schema = [et for et in data.edge_types if not et[1].startswith('next__')]
+temporal = [et for et in data.edge_types if et[1].startswith('next__')]
+
+model = StructuralOptimizer(
+    data.node_types, schema, channels=64, out_channels=1,
+    gated_tables=[nt for nt in data.node_types if nt != 'drivers'],
+    templates=[KNNEdges('drivers', k=5), *TwoHopEdges.instances(schema)],
+    injected_edge_types=temporal, template_gates=True, vib=True,
+    lambda_table=1e-3, lambda_template=1e-3, beta_vib=1e-3)
+
+# In the training loop, on a NeighborLoader batch:
+pred = model(x_dict, batch.edge_index_dict, 'drivers', batch.batch_dict,
+             batch['drivers'].seed_time, num_targets)
+loss = task_loss(pred, y) + model.structural_loss()
+```
+
+Design choices:
+- **Added edges respect time.** They are built per batch, and an edge can only bring in
+  rows from the same or an earlier prediction date.
+- **Closed means skipped.** A switched-off edge type is not computed at all, so pruning
+  saves compute.
+- **Off means baseline.** With every flag off, `StructuralOptimizer` is exactly the
+  GraphSAGE baseline, and a test checks this.
+
+Tests: `test/contrib` 87 passed, 11 skipped; experiment tests 56 passed.
+TODO: CUDA, and GAT/GraphConv as the convolution.
 
 ## 4. Results on rel-f1 driver-top3, and why
 
-Test ROC-AUC, mean ± std over 3 seeds unless marked.
+The task: will a driver finish in the top 3 in the next month? Test ROC-AUC, mean ± std
+over 3 seeds unless marked. We trained with three sets of settings:
+- **repo settings**: the paper's code's defaults, 2 GNN layers;
+- **checkpoint settings**: the settings saved inside the released model, 1 layer, learning
+  rate 3e-3;
+- **tuned settings**: chosen by us on validation, 1 layer and switch penalty 1e-4.
 
 | Model | Repo settings | Checkpoint settings | Tuned settings | Paper |
 |---|---|---|---|---|
-| GraphSAGE baseline, our PyG implementation | 82.48 ± 5.75 | 90.22 ± 0.32 | **87.86 ± 0.83** | 81.48 ± 1.06 |
-| Structural optimizer, our PyG implementation | 88.06 ± 0.83 | 89.90 ± 0.99 | **88.48 ± 1.05** | 86.82 |
-| GraphSAGE baseline, paper's code (1 seed) | 83.12 | – | – | |
+| GraphSAGE baseline, our implementation | 82.48 ± 5.75 | 90.22 ± 0.32 | **87.86 ± 0.83** | 81.48 ± 1.06 |
+| Structural optimizer, our implementation | 88.06 ± 0.83 | 89.90 ± 0.99 | **88.48 ± 1.05** | 86.82 |
 | Structural optimizer, paper's code (1 seed) | 84.52 | – | – | |
 | Released model | – | 90.33 | – | |
 
-Our implementation reproduces the released model (89.90 vs 90.33). It also beats the
-paper's 86.82. But once both models are tuned, the structural optimizer is only 0.6 points
-above the baseline, within one standard deviation. The rest of this section explains each
-part of the table from how the method works.
+Our implementation reproduces the released model, 89.90 vs 90.33, and beats the paper's
+86.82. Once both models are tuned, though, the structural optimizer is only 0.6 points
+above the baseline, within one standard deviation. Three mechanisms explain why.
 
-### 4.1 One GNN layer is what matters
+**One GNN layer carries the signal.** Whether a driver finishes top 3 depends mainly on
+their own recent results, standings and qualifying rows, all one hop away. A second layer
+adds races, circuits and constructors. That brings little signal and many more nodes, and
+with 1,353 training rows the model overfits. The baseline goes from 82.48 ± 5.75 with 2
+layers to 87.86 ± 0.83 with 1.
 
-| GraphSAGE baseline | Validation | Test |
-|---|---|---|
-| 2 layers (repo settings) | 79.60 ± 0.57 | 82.48 ± 5.75 |
-| 1 layer (tuned settings) | 81.63 ± 0.30 | 87.86 ± 0.83 |
+**The switches can barely move.**
+- A run is only 300 optimizer steps (6 per epoch, 50 epochs), and Adam moves a weight by at
+  most about the learning rate per step.
+- A switch starts at probability 0.88 (logit 2). At learning rate 1e-3 it can't go below
+  0.846; to close at threshold 0.5 it would need about 2,000 steps. Every switch in our
+  tuned runs ended between 0.848 and 0.878.
+- So pruning comes only from the threshold search. A threshold like 0.86 falls in the small
+  gap the penalty opened and closes the switches below it.
+- The released model, at 0.86, keeps only the results, standings and qualifying tables:
+  the same one-hop signal. Our runs with checkpoint settings did this for one seed, and kept
+  almost everything for the other two, with equal scores.
 
-- The task asks whether a driver finishes in the top 3 next month. The best evidence is the
-  driver's own recent results, standings and qualifying rows, all one hop from the driver.
-- A second layer adds what those rows link to: races, circuits, constructors. That makes
-  each subgraph much larger and adds weakly related information. With 1,353 training rows,
-  the model overfits it, so test scores swing between 78 and 89 across seeds.
-- Most of the jump from the repo settings to the checkpoint settings is this one change.
-  Sampling the most recent neighbours instead of random ones barely mattered (81.03 vs 81.63
-  validation).
+FIGURE 3: switch probabilities over training for one run, with the six thresholds as
+horizontal lines.
 
-### 4.2 The switches can barely move, so they cannot learn to prune
+**Only driver-to-driver edges are active.**
+- With one layer, only edges that point into the driver can change its prediction.
+  - Temporal edges link results to results, and their information would need a second
+    layer to reach the driver.
+  - Two-hop shortcuts need paths of length two, which a one-layer subgraph doesn't have.
+- We counted all 64,480 added edges in the test batches: every one was a KNN or
+  behavioural driver-to-driver edge.
+- These edges bring in other drivers' columns, such as nationality, which say little about
+  next month's result. So with every switch open, the structural optimizer is essentially
+  the baseline.
 
-- A training run is only 300 optimizer steps: 1,353 rows at batch 256 is 6 steps per
-  epoch, times 50 epochs.
-- Adam moves each weight by at most about the learning rate per step.
-- A switch starts at logit 2.0, a probability of 0.88. At learning rate 1e-3 it can move at
-  most 0.3 in logit, so it can't fall below 0.846. To switch off at threshold 0.5 it would
-  need logit 0, about 2,000 steps.
-- Measured:
-  - With tuned settings, every switch ended between 0.848 and 0.878. All stayed on at every
-    penalty we tried.
-  - With checkpoint settings, learning rate 3e-3 allows a floor of 0.75. The lowest switch
-    reached 0.753.
-- So pruning, when it happens, comes from the threshold search. The penalty pushes unhelpful
-  switches down by a few hundredths. A threshold such as 0.86 then lands in that small gap
-  and switches them off.
-  - The released model at 0.86 keeps only the qualifying, results and standings tables, and
-    no added edges.
-  - Our seed 1 with checkpoint settings picked 0.78 and kept the same three tables.
-  - Our seeds 0 and 2 picked thresholds that kept almost everything, and scored the same.
-- The tables that survive are exactly the one-hop tables from 4.1. The switches and the
-  layer result point to the same signal, but the switches are too weak to find it
-  reliably.
-
-### 4.3 Why the structural optimizer is close to the baseline
-
-- With every switch on, the structural optimizer is the baseline plus added edges plus the
-  bottleneck.
-- With one GNN layer, only edges pointing into the driver can change its prediction:
-  - temporal edges connect results to results, and that information would need a second
-    layer to reach the driver;
-  - two-hop shortcuts are built from sampled paths of length two, and a one-layer subgraph
-    has none.
-- So only KNN and behavioural driver-to-driver edges are active. We counted every edge in
-  every test batch: all 64,480 added edges were of these two kinds.
-- Those edges carry other drivers' encoded columns, such as nationality and date of birth.
-  That says little about next month's result. The bottleneck weight (1e-3) is too small to
-  change much.
-- With two layers (repo settings), the structural optimizer did beat the baseline, 88.06 vs
-  82.48. But that baseline's test scores spread from 78 to 89, so the gap is mostly the
-  baseline's instability, not a gain from the added structure.
-
-### 4.4 What we did not tune
-
-The checkpoint settings also change the learning rate (3e-3), hidden size (64), neighbours
-(16) and the penalties. We tuned only the number of layers, the sampling order and one
-shared penalty, so the remaining 2 points between our tuned baseline (87.86) and the
-checkpoint settings (90.22) come from these untuned settings. Several checkpoint values
-fall outside the paper's own search ranges (its Table 8): column penalty 0.1, learning rate
-3e-3, KNN k 25.
+The last 2 points between our tuned baseline (87.86) and the checkpoint settings (90.22)
+come from settings we did not tune: learning rate, hidden size, neighbour count and
+penalties. Several checkpoint values fall outside the paper's own search ranges (Table 8).
 
 ## 5. The test setup is the main assumption
 
-- Test predictions are monthly, from 2010-03 to 2013-03. The 726 test rows cover the same
-  42 drivers about 17 times each.
-- **Full-history test:** a prediction in 2012 sees every result before 2012. That includes
-  the races that decide that driver's earlier test labels.
-- **RelBench cutoff test:** a prediction in 2012 sees only rows before 2010.
-- Every prediction uses only data from before its own date, so no prediction sees its own
-  answer. We checked:
-  - no sampled row is newer than its prediction;
-  - no added edge brings in a later prediction's subgraph.
-- But under the full-history test, later predictions know recent form. Section 4.1 shows
-  recent form is exactly the signal that matters, so this is an easier task than RelBench's,
-  and its scores are not comparable with RelBench numbers.
+- Test predictions are monthly, from 2010-03 to 2013-03: the same 42 drivers, about 17
+  times each.
+- Under the full-history test, a 2012 prediction sees every race before 2012, including
+  the races that decided that driver's earlier test labels. Under the RelBench cutoff test,
+  it sees only rows before 2010.
+- No prediction sees its own answer. We checked that no sampled row and no added edge comes
+  from after a prediction's own date.
+- But recent form is exactly the signal that matters (Section 4). The full-history test is
+  therefore an easier task, and its scores are not comparable with RelBench numbers.
 
-| Test ROC-AUC (repo settings unless marked) | Full-history test | RelBench cutoff test |
+| Test ROC-AUC | Full-history test | RelBench cutoff test |
 |---|---|---|
-| Released model (checkpoint settings) | 90.33 | 83.98 |
-| Structural optimizer, paper's code (1 seed) | 84.52 | 78.35 |
-| Structural optimizer, our implementation | 88.06 ± 0.83 | 75.11 ± 2.62 |
-| GraphSAGE baseline, our implementation | 82.48 ± 5.75 | 78.42 ± 0.89 |
+| Released model | 90.33 | 83.98 |
+| Structural optimizer, paper's code, repo settings (1 seed) | 84.52 | 78.35 |
+| Structural optimizer, our implementation, repo settings | 88.06 ± 0.83 | 75.11 ± 2.62 |
+| GraphSAGE baseline, our implementation, repo settings | 82.48 ± 5.75 | 78.42 ± 0.89 |
 
-- Under the cutoff, the structural optimizer falls below the baseline. A likely reason: its
-  extra parameters fit recent-form signals that are stale by up to three years under the
-  cutoff. We did not test this further.
-- FIGURE 2: one driver's test predictions on a timeline, with the rows each prediction can
-  see under the two setups.
+Under the cutoff, the structural optimizer falls below the baseline. A plausible reason is
+that its extra parameters fit recent-form signals that are up to three years stale under
+the cutoff. We did not test this.
+
+FIGURE 2: one driver's monthly test predictions on a timeline, shading the rows each one
+can see under the two setups.
 
 ## 6. Differences from the paper's code
 
-| | Paper's text | Paper's code | Our PyG implementation |
+| | Paper's text | Paper's code | Our implementation |
 |---|---|---|---|
 | Column switch | one per "feature dimension" | one per embedding channel | one per database column |
 | Switch temperature | one value | lowered during training | fixed at 2/3 |
 | Two-hop round trips A → B → A | not stated | included | excluded |
-| KNN and behavioural edges | not stated | within each prediction's own subgraph | also from other predictions at the same or an earlier date |
-| Column statistics, full-history test | not stated | rows before the first training date | all rows |
-| Speed, CPU, repo settings | – | about 2 min per epoch | about 25 s per epoch |
+| KNN and behavioural edges | not stated | within one prediction's subgraph | also from other predictions at the same or an earlier date |
+| Column statistics (full-history test) | not stated | rows before the first training date | all rows |
+| Time per epoch (CPU, repo settings) | – | about 2 min | about 25 s |
 
-Our per-column switches can say which database columns matter. Per-channel switches
-cannot, because each embedding channel mixes all of a table's columns.
+Per-column switches can say which database columns matter. Per-channel switches cannot,
+because each embedding channel mixes all of a table's columns.
 
 ## 7. Other databases
 
-- TODO: score the 8 other released models, and run our implementation on each.
-- So far, the rel-f1 driver-dnf released model scores 80.41 (full-history test) vs 72.02
-  (RelBench cutoff test).
+TODO: the 8 other released models. So far, rel-f1 driver-dnf: released model 80.41
+(full-history test) vs 72.02 (RelBench cutoff test).
 
 ## 8. Takeaways
 
@@ -213,7 +230,7 @@ cannot, because each embedding channel mixes all of a table's columns.
    settings and test setup.
 2. On this task, the gains come from the training settings, mainly using one GNN layer, and
    from the full-history test. The four additions add little over a tuned baseline.
-3. The switches cannot learn to prune within 300 training steps. Their pruning comes from a
+3. The switches cannot learn to prune in 300 training steps. Their pruning comes from a
    threshold search over nearly equal values, so it changes from seed to seed.
 4. TODO after Section 7: whether this holds on other databases.
 
