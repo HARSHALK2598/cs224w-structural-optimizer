@@ -1,0 +1,2 @@
+setting,seeds,val_mean,val_std,test_mean,test_std,best_epoch,minutes
+base_n10_inject-knn,5,0.7522,0.0134,0.7842,0.0216,21.2,0.978

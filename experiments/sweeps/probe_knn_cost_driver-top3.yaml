@@ -1,0 +1,13 @@
+# Plan 04, section 3.3: the cost of KNN on every table against the task's
+# table only (seconds per epoch), driver-top3, one seed.
+name: probe_knn_cost_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  dedup_encoder: true
+  nan_safe_numerical: true
+  inject: knn
+seeds: [0]
+arms:
+  - model: base
+    grid: {inject_tables: ['', 'all']}

@@ -1,0 +1,25 @@
+# Plan 04, the paper's probe (Section 3.3, Figure 1): Base against Base + one
+# injection template, on driver-dnf. Templates as decided in
+# plans/04-structural-injection.md; KNN and behavioural on the task's table.
+# RelBench's settings (train.py defaults: 10 epochs, lr 0.005, hidden 128),
+# with --dedup-encoder and --nan-safe-numerical as in Plan 01.
+# Chosen on mean validation; test reported once, next to the paper's.
+name: probe_injection_driver-dnf
+fixed:
+  dataset: rel-f1
+  task: driver-dnf
+  dedup_encoder: true
+  nan_safe_numerical: true
+seeds: [0, 1, 2, 3, 4]
+arms:
+  - model: base
+  - model: base
+    fixed: {inject: knn}
+    grid: {knn_n: [5, 10]}
+  - model: base
+    fixed: {inject: temporal}
+    grid: {temporal_m: [1, 5]}
+  - model: base
+    fixed: {inject: twohop}
+  - model: base
+    fixed: {inject: behavioral}
