@@ -56,6 +56,7 @@ from torch_geometric.contrib.nn.models import (  # noqa: E402
     HardConcreteGate,
     KNNEdges,
     RelationalFilter,
+    VariationalBottleneck,
     TwoHopEdges,
 )
 from torch_geometric.contrib.nn.conv import GatedHeteroConv  # noqa: E402
@@ -92,6 +93,7 @@ DEFAULTS: Dict[str, Any] = dict(
     behavioral_threshold=0.9,  # behavioural similarity threshold
     inject_tables='',  # KNN/behavioural tables: '' (task's), 'all' or a list
     lambda_template=0.0,  # --template-gates: weight of the template penalty
+    beta_vib=0.0,  # > 0: the variational bottleneck with this KL weight
 )
 INJECTIONS = ('temporal', 'twohop', 'knn', 'behavioral')
 
@@ -104,7 +106,7 @@ RESULT_FIELDS = [
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
     'open_columns', 'open_tables', 'inject', 'knn_n', 'temporal_m',
     'behavioral_threshold', 'inject_tables', 'injected_relations',
-    'lambda_template', 'open_templates'
+    'lambda_template', 'open_templates', 'beta_vib'
 ]
 
 
@@ -453,10 +455,11 @@ class BaseModel(torch.nn.Module):
                  injection: Optional[Injection] = None,
                  template_gates: bool = False, lambda_template: float = 0.0,
                  gate_init: float = 2.0,
-                 gate_temperature: float = 2. / 3.):
+                 gate_temperature: float = 2. / 3., beta_vib: float = 0.0):
         super().__init__()
         self.dedup_encoder = dedup_encoder
         self.lambda_template = lambda_template
+        self.beta_vib = beta_vib
         stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
         if nan_safe_numerical:
             stype_encoders[torch_frame.numerical] = (NaNSafeLinearEncoder, {})
@@ -485,6 +488,10 @@ class BaseModel(torch.nn.Module):
                         num_layers=1)
         self.injection = injection
         self.num_injected_relations = len(injected)
+        # Created last, so the other modules start as in Base:
+        self.vib = (VariationalBottleneck(data.node_types, channels)
+                    if beta_vib > 0 else None)
+        self._kl = None
 
     def encode_table(self, node_type: str, tf) -> Tensor:
         r"""Encodes the rows :obj:`tf` of one table into
@@ -524,10 +531,14 @@ class BaseModel(torch.nn.Module):
 
     def structural_loss(self) -> Tensor:
         r"""The template penalty :math:`\lambda_k \sum_k
-        \mathbb{E}\|g_k\|_0` (0 without template gates)."""
-        if self.gnn.gate is None:
-            return torch.zeros(())
-        return self.lambda_template * self.gnn.gate.l0_penalty()
+        \mathbb{E}\|g_k\|_0` plus :math:`\beta_\text{vib}` times the
+        bottleneck's KL of the last forward pass (0 without either)."""
+        loss = torch.zeros(())
+        if self.gnn.gate is not None:
+            loss = loss + self.lambda_template * self.gnn.gate.l0_penalty()
+        if self.vib is not None and self._kl is not None:
+            loss = loss + self.beta_vib * self._kl
+        return loss
 
     def template_summary(self) -> Optional[Dict[str, Any]]:
         r"""Each template switch's open probability and evaluation-mode
@@ -564,6 +575,8 @@ class BaseModel(torch.nn.Module):
                 **edge_index_dict,
                 **self.injection(x_dict, batch, entity_table, only)
             }
+        if self.vib is not None:  # Messages carry z (Eq. 14):
+            x_dict, self._kl = self.vib(x_dict)
         x_dict = self.gnn(x_dict, edge_index_dict, gates)
         num_seeds = batch[entity_table].seed_time.size(0)
         return self.head(x_dict[entity_table][:num_seeds])
@@ -585,11 +598,12 @@ class FilterModel(BaseModel):
                  gate_temperature: float = 2. / 3., gates_open: bool = False,
                  nan_safe_numerical: bool = False,
                  injection: Optional[Injection] = None,
-                 template_gates: bool = False, lambda_template: float = 0.0):
+                 template_gates: bool = False, lambda_template: float = 0.0,
+                 beta_vib: float = 0.0):
         super().__init__(data, col_stats_dict, channels, out_channels,
                          num_layers, aggr, dedup_encoder, nan_safe_numerical,
                          injection, template_gates, lambda_template,
-                         gate_init, gate_temperature)
+                         gate_init, gate_temperature, beta_vib)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
         # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
@@ -669,7 +683,8 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                          args.num_layers, args.aggr, args.dedup_encoder,
                          args.nan_safe_numerical, injection,
                          args.template_gates, args.lambda_template,
-                         args.gate_init, args.gate_temperature)
+                         args.gate_init, args.gate_temperature,
+                         beta_vib=args.beta_vib)
     if args.model == 'filter':
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
@@ -677,7 +692,8 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                            args.dedup_encoder, args.gate_init,
                            args.gate_temperature, args.gates_open,
                            args.nan_safe_numerical, injection,
-                           args.template_gates, args.lambda_template)
+                           args.template_gates, args.lambda_template,
+                           beta_vib=args.beta_vib)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -822,6 +838,8 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
                best_epoch=out['best_epoch'], epochs=args.epochs, lr=args.lr,
                channels=args.channels, batch_size=args.batch_size,
                minutes=round(minutes, 2), text_embedder=args.text_embedder)
+    if args.beta_vib > 0:
+        row.update(beta_vib=args.beta_vib)
     if args.inject:
         row.update(inject=args.inject, knn_n=args.knn_n,
                    temporal_m=args.temporal_m,
