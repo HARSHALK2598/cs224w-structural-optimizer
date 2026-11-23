@@ -94,6 +94,7 @@ DEFAULTS: Dict[str, Any] = dict(
     inject_tables='',  # KNN/behavioural tables: '' (task's), 'all' or a list
     lambda_template=0.0,  # --template-gates: weight of the template penalty
     beta_vib=0.0,  # > 0: the variational bottleneck with this KL weight
+    weight_decay=0.0,  # Adam weight decay
 )
 INJECTIONS = ('temporal', 'twohop', 'knn', 'behavioral')
 
@@ -106,7 +107,8 @@ RESULT_FIELDS = [
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
     'open_columns', 'open_tables', 'inject', 'knn_n', 'temporal_m',
     'behavioral_threshold', 'inject_tables', 'injected_relations',
-    'lambda_template', 'open_templates', 'beta_vib'
+    'lambda_template', 'open_templates', 'beta_vib', 'weight_decay',
+    'full_db', 'strict_time'
 ]
 
 
@@ -117,6 +119,15 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     for key, value in DEFAULTS.items():
         parser.add_argument(f'--{key.replace("_", "-")}', type=type(value),
                             default=None)
+    parser.add_argument('--full-db', action='store_true',
+                        help='Build the graph from the whole database, not '
+                        "cut at RelBench's test timestamp (the authors' "
+                        'released code; test seeds then see test-period '
+                        'rows). Not RelBench protocol.')
+    parser.add_argument('--strict-time', action='store_true',
+                        help='Sample only rows strictly older than the seed '
+                        "(the authors' code; RelBench includes the seed's "
+                        'own timestamp).')
     parser.add_argument('--template-gates', action='store_true',
                         help='A switch per injected relation (step C).')
     parser.add_argument('--gates-open', action='store_true',
@@ -276,10 +287,12 @@ def text_embedder_cfg(name: str, device: torch.device):
     raise ValueError(f"Unknown text embedder '{name}'")
 
 
-def load_graph(dataset, task, text_embedder: str, device: torch.device):
+def load_graph(dataset, task, text_embedder: str, device: torch.device,
+               full_db: bool = False):
     r"""Builds the database graph, without the columns that leak the task's
-    label (:meth:`task.hidden_columns`)."""
-    db = dataset.get_db()
+    label (:meth:`task.hidden_columns`). With :obj:`full_db`, from the whole
+    database instead of RelBench's cut at the test timestamp."""
+    db = dataset.get_db(upto_test_timestamp=not full_db)
     col_to_stype_dict = get_stype_proposal(db)
     if text_embedder == 'none':  # Drop text columns (quick CPU runs).
         col_to_stype_dict = {
@@ -292,7 +305,8 @@ def load_graph(dataset, task, text_embedder: str, device: torch.device):
     # Hidden columns are dropped after materialisation, so one cache per
     # dataset serves every task (as in the official example).
     name = Path(str(dataset.name_or_path)).name
-    cache_dir = ROOT / 'data' / 'materialized' / name / text_embedder
+    cache_dir = ROOT / 'data' / 'materialized' / name / (
+        text_embedder + ('_full_db' if full_db else ''))
     return make_pkey_fkey_graph(
         db,
         col_to_stype_dict=col_to_stype_dict,
@@ -356,7 +370,10 @@ def make_loaders(data, task, args) -> Dict[str, NeighborLoader]:
             ],
             time_attr='time',
             input_nodes=table_input.nodes,
-            input_time=table_input.time,
+            # --strict-time: rows strictly older than the seed (times are
+            # in seconds, so 1 s earlier):
+            input_time=(table_input.time - 1 if getattr(
+                args, 'strict_time', False) else table_input.time),
             transform=table_input.transform,
             batch_size=args.batch_size,
             temporal_strategy='uniform',
@@ -759,13 +776,14 @@ def make_optimizer(model, args) -> torch.optim.Optimizer:
     if getattr(getattr(model, 'gnn', None), 'gate', None) is not None:
         gates += list(model.gnn.gate.parameters())
     if not gates or args.gate_lr <= 0:
-        return torch.optim.Adam(model.parameters(), lr=args.lr)
+        return torch.optim.Adam(model.parameters(), lr=args.lr,
+                                weight_decay=args.weight_decay)
     gate_ids = {id(p) for p in gates}
     rest = [p for p in model.parameters() if id(p) not in gate_ids]
     return torch.optim.Adam([
         dict(params=rest),
         dict(params=gates, lr=args.gate_lr),
-    ], lr=args.lr)
+    ], lr=args.lr, weight_decay=args.weight_decay)
 
 
 def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
@@ -840,6 +858,8 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
                minutes=round(minutes, 2), text_embedder=args.text_embedder)
     if args.beta_vib > 0:
         row.update(beta_vib=args.beta_vib)
+    row.update(weight_decay=args.weight_decay, full_db=args.full_db,
+               strict_time=args.strict_time)
     if args.inject:
         row.update(inject=args.inject, knn_n=args.knn_n,
                    temporal_m=args.temporal_m,
@@ -877,7 +897,7 @@ def main() -> None:
     dataset = load_dataset(args.dataset)
     task = dataset.load_task(args.task)
     data, col_stats_dict = load_graph(dataset, task, args.text_embedder,
-                                      device)
+                                      device, args.full_db)
     data = prepare_graph(data, args)  # + temporal relations (--inject)
     spec = task_spec(task)
     loaders = make_loaders(data, task, args)
