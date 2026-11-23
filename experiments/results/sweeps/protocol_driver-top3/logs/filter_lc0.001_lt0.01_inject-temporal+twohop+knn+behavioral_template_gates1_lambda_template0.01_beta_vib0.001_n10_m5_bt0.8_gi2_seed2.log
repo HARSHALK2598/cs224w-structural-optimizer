@@ -1,1 +1,13 @@
 run filter_lc0.001_lt0.01_inject-temporal+twohop+knn+behavioral_template_gates1_lambda_template0.01_beta_vib0.001_n10_m5_bt0.8_gi2_seed2: --dataset rel-f1 --task driver-top3 --model filter --seed 2 --epochs 50 --lr 0.001 --batch-size 256 --channels 128 --num-layers 2 --num-neighbors 64 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.001 --lambda-table 0.01 --gate-lr 0.0 --gate-init 2.0 --gate-temperature 0.6666666666666666 --inject temporal,twohop,knn,behavioral --knn-n 10 --temporal-m 5 --behavioral-threshold 0.8 --inject-tables  --lambda-template 0.01 --beta-vib 0.001 --weight-decay 0.005 --template-gates --dedup-encoder --nan-safe-numerical --results /home/user/cs224w-structural-optimizer/experiments/results/results.csv
+epoch 01  loss 0.5542  val roc_auc 0.6942  penalty 0.9501  open columns 45  open tables 8  open templates 78
+epoch 02  loss 0.4395  val roc_auc 0.7130  penalty 0.9199  open columns 45  open tables 8  open templates 78
+epoch 03  loss 0.4304  val roc_auc 0.7277  penalty 0.9008  open columns 45  open tables 8  open templates 78
+epoch 04  loss 0.4125  val roc_auc 0.7834  penalty 0.8939  open columns 45  open tables 8  open templates 78
+epoch 05  loss 0.3530  val roc_auc 0.7427  penalty 0.8966  open columns 45  open tables 8  open templates 78
+epoch 06  loss 0.3327  val roc_auc 0.8070  penalty 0.8981  open columns 45  open tables 8  open templates 78
+epoch 07  loss 0.3351  val roc_auc 0.8024  penalty 0.8973  open columns 45  open tables 8  open templates 78
+epoch 08  loss 0.3422  val roc_auc 0.8068  penalty 0.8972  open columns 45  open tables 8  open templates 78
+epoch 09  loss 0.3237  val roc_auc 0.8011  penalty 0.8931  open columns 45  open tables 8  open templates 78
+epoch 10  loss 0.3031  val roc_auc 0.8059  penalty 0.8916  open columns 45  open tables 8  open templates 78
+epoch 11  loss 0.3048  val roc_auc 0.8086  penalty 0.8895  open columns 45  open tables 8  open templates 78
+epoch 12  loss 0.3148  val roc_auc 0.8105  penalty 0.8878  open columns 45  open tables 8  open templates 78
