@@ -1,0 +1,3 @@
+setting,seeds,val_mean,val_std,test_mean,test_std,best_epoch,minutes,open_columns,open_tables,open_templates
+filter_lc0.1_lt0.0001_inject-temporal+twohop+knn+behavioral_template_gates1_lambda_template0.001_beta_vib0.001_n25_m3_bt0.95_gi2_gate_thresholds-0.5+0.7+0.78+0.82+0.86+0.9,3,0.8948,0.0056,0.899,0.0099,18.3333,1.4233,31.0,6.3333,53.3333
+base,3,0.8924,0.0014,0.9022,0.0032,2.3333,0.8233,,,
