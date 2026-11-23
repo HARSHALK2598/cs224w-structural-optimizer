@@ -1,3 +1,8 @@
 run base_num_layers1_temporal_strategy-uniform_seed1: --dataset rel-f1 --task driver-top3 --model base --seed 1 --epochs 50 --lr 0.001 --batch-size 256 --channels 128 --num-layers 1 --num-neighbors 64 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.0 --lambda-table 0.0 --gate-lr 0.0 --gate-init 2.0 --gate-temperature 0.6666666666666666 --inject  --knn-n 10 --temporal-m 1 --behavioral-threshold 0.9 --inject-tables  --lambda-template 0.0 --beta-vib 0.0 --weight-decay 0.005 --gate-thresholds  --temporal-strategy uniform --full-db --strict-time --dedup-encoder --nan-safe-numerical --results /home/user/cs224w-structural-optimizer/experiments/results/results.csv
 epoch 01  loss 0.5261  val roc_auc 0.7303
 epoch 02  loss 0.4381  val roc_auc 0.7492
+epoch 03  loss 0.4179  val roc_auc 0.7646
+epoch 04  loss 0.3732  val roc_auc 0.7794
+epoch 05  loss 0.3159  val roc_auc 0.7829
+epoch 06  loss 0.2966  val roc_auc 0.7909
+epoch 07  loss 0.2921  val roc_auc 0.7899
