@@ -2,3 +2,8 @@ run base_num_layers1_temporal_strategy-last_seed2: --dataset rel-f1 --task drive
 epoch 01  loss 0.4985  val roc_auc 0.7103
 epoch 02  loss 0.4317  val roc_auc 0.7499
 epoch 03  loss 0.3957  val roc_auc 0.7803
+epoch 04  loss 0.3269  val roc_auc 0.7924
+epoch 05  loss 0.3064  val roc_auc 0.7929
+epoch 06  loss 0.2936  val roc_auc 0.7930
+epoch 07  loss 0.2881  val roc_auc 0.7898
+epoch 08  loss 0.2912  val roc_auc 0.7863
