@@ -203,9 +203,10 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
                              result['gates'])
         elapsed = (time.time() - start) / 60
         eta = elapsed / i * (len(todo) - i)
-        gates = ('' if result['gates'] is None else
-                 f"  open {result['gates']['open_columns']} cols / "
-                 f"{result['gates']['open_tables']} tables")
+        gates = '' if result['gates'] is None else '  open ' + ', '.join(
+            f"{result['gates'][key]} {key[5:]}"
+            for key in ['open_columns', 'open_tables', 'open_templates']
+            if key in result['gates'])
         print(f"[{i}/{len(todo)}] {run['run_id']}: val "
               f"{result['val'][spec.tune_metric]:.4f}  test "
               f"{result['test'][spec.tune_metric]:.4f}  best epoch "
@@ -230,7 +231,7 @@ def summarize(out: Path, metric: Optional[str] = None):
                test_std=(f'test_{metric}', 'std'),
                best_epoch=('best_epoch', 'mean'),
                minutes=('minutes', 'mean'))
-    for column in ['open_columns', 'open_tables']:
+    for column in ['open_columns', 'open_tables', 'open_templates']:
         if column in df and df[column].notna().any():
             agg[column] = (column, 'mean')
     summary = df.groupby('setting').agg(**agg).reset_index()
