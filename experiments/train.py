@@ -1,12 +1,11 @@
 """Single entry point for all experiments.
 
 Reproduces RelBench's official entity-task script (examples/gnn_entity.py at
-commit 91c1f64) for the Base model; see plans/00-baseline.md.
+commit 91c1f64) for the Base model.
 
 Models:
     base    RelBench's relational GraphSAGE (the paper's *Base*).
-    filter  Base + column and table gates (step A without the bottleneck;
-            plans/01-filtering-gates.md).
+    filter  Base + column and table gates (step A without the bottleneck).
     full    Base + the full optimizer (A-D).    [not implemented yet]
 
 Examples:
@@ -103,7 +102,7 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         'that the gated model then trains like Base).')
     parser.add_argument('--dedup-encoder', action='store_true',
                         help='Encode each distinct row once per batch '
-                        '(see experiments/profiling/README.md).')
+                        '(see experiments/profiling/profile_step.py).')
     parser.add_argument('--nan-safe-numerical', action='store_true',
                         help='Keep numerical columns with missing values '
                         'trainable (issue #6).')
@@ -364,7 +363,7 @@ class BaseModel(torch.nn.Module):
 
 
 class FilterModel(BaseModel):
-    r"""Base with column and table gates (plans/01-filtering-gates.md).
+    r"""Base with column and table gates.
 
     Each table's row encoder runs in two halves, with the column gates in
     between: the column encoders give :obj:`[N, C, channels]`, the gates
