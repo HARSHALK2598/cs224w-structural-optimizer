@@ -21,3 +21,14 @@ Paper (Table 1, test): Base 0.8148 ± 0.0106, filtering 0.8466 ± 0.0061.
 
 All runs from stage A on use `--dedup-encoder --nan-safe-numerical`; gated runs use gate
 start 5, gate lr 0.1, temperature 2/3.
+
+## The authors' released models
+
+`authors_weights/`: the authors' code (cy623/Structural_Optimizer_RDL @ `030b07c`, run unmodified in its own environment) with their released weights; test ROC-AUC (%) scored by `experiments/benchmarks/score_authors_predictions.py` against RelBench's test labels (checked against RelBench's evaluator). One model per task, so no std.
+
+| Task | Their weights | Paper (Ours) | Run |
+|---|---|---|---|
+| rel-f1 driver-top3 | 90.33 | 86.82 | CPU |
+| rel-f1 driver-dnf | 80.41 | 78.21 | CPU |
+
+The other 7 released models (rel-event, rel-hm, rel-stack, rel-amazon): `experiments/colab_authors_weights.ipynb`. No weights were released for rel-trial study-outcome or rel-avito user-visits / user-clicks.
