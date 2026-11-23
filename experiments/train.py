@@ -95,6 +95,10 @@ DEFAULTS: Dict[str, Any] = dict(
     lambda_template=0.0,  # --template-gates: weight of the template penalty
     beta_vib=0.0,  # > 0: the variational bottleneck with this KL weight
     weight_decay=0.0,  # Adam weight decay
+    # Evaluation-mode gate thresholds tried on validation each epoch
+    # (comma-separated, as in the authors' code); '' keeps 0.5:
+    gate_thresholds='',
+    temporal_strategy='uniform',  # neighbour sampling: 'uniform' or 'last'
 )
 INJECTIONS = ('temporal', 'twohop', 'knn', 'behavioral')
 
@@ -108,7 +112,8 @@ RESULT_FIELDS = [
     'open_columns', 'open_tables', 'inject', 'knn_n', 'temporal_m',
     'behavioral_threshold', 'inject_tables', 'injected_relations',
     'lambda_template', 'open_templates', 'beta_vib', 'weight_decay',
-    'full_db', 'strict_time'
+    'full_db', 'strict_time', 'num_layers', 'num_neighbors',
+    'temporal_strategy', 'gate_thresholds', 'gate_threshold'
 ]
 
 
@@ -376,7 +381,7 @@ def make_loaders(data, task, args) -> Dict[str, NeighborLoader]:
                 args, 'strict_time', False) else table_input.time),
             transform=table_input.transform,
             batch_size=args.batch_size,
-            temporal_strategy='uniform',
+            temporal_strategy=getattr(args, 'temporal_strategy', 'uniform'),
             shuffle=split == 'train',
             num_workers=args.num_workers,
             persistent_workers=args.num_workers > 0,
@@ -565,10 +570,13 @@ class BaseModel(torch.nn.Module):
             return None
         with torch.no_grad():
             prob = gate.prob_open()
-            is_open = gate.logit.sigmoid() > gate.threshold
+            sigmoid = gate.logit.sigmoid()
+            is_open = sigmoid > gate.threshold
         return {
-            '/'.join(et): dict(prob_open=round(float(p), 4), open=bool(o))
-            for et, p, o in zip(self.gnn.gated_edge_types, prob, is_open)
+            '/'.join(et): dict(prob_open=round(float(p), 4),
+                               sigmoid=round(float(q), 4), open=bool(o))
+            for et, p, q, o in zip(self.gnn.gated_edge_types, prob, sigmoid,
+                                   is_open)
         }
 
     def gate_summary(self) -> Optional[Dict[str, Any]]:
@@ -674,14 +682,17 @@ class FilterModel(BaseModel):
         with torch.no_grad():
             for node_type, gate in self.filter.column_gates.items():
                 prob, is_open = gate.prob_open(), threshold(gate)
+                sigmoid = gate.logit.sigmoid()
                 columns[node_type] = {
-                    col: dict(prob_open=round(float(p), 4), open=bool(o))
-                    for col, p, o in zip(self.col_names[node_type], prob,
-                                         is_open)
+                    col: dict(prob_open=round(float(p), 4),
+                              sigmoid=round(float(q), 4), open=bool(o))
+                    for col, p, q, o in zip(self.col_names[node_type], prob,
+                                            sigmoid, is_open)
                 }
             for node_type, gate in self.filter.table_gates.items():
                 tables[node_type] = dict(
                     prob_open=round(float(gate.prob_open()[0]), 4),
+                    sigmoid=round(float(gate.logit.sigmoid()[0]), 4),
                     open=bool(threshold(gate)[0]))
         out = dict(
             open_columns=sum(c['open'] for cols in columns.values()
@@ -786,6 +797,46 @@ def make_optimizer(model, args) -> torch.optim.Optimizer:
     ], lr=args.lr, weight_decay=args.weight_decay)
 
 
+def gates_of(model) -> List[HardConcreteGate]:
+    return [m for m in model.modules() if isinstance(m, HardConcreteGate)]
+
+
+def set_gate_threshold(model, threshold: float) -> None:
+    for gate in gates_of(model):
+        gate.threshold = threshold
+
+
+def validate(model, loaders, task, spec: TaskSpec, device: torch.device,
+             thresholds: List[float]):
+    r"""Validation scores at each evaluation-mode gate threshold, as in the
+    authors' code; thresholds that give the same open gates share one
+    pass. Returns the best threshold and its scores, and leaves the model
+    at that threshold."""
+    entity_table = task.entity_table
+    scores, by_mask = {}, {}
+    for threshold in thresholds:
+        set_gate_threshold(model, threshold)
+        with torch.no_grad():
+            mask = tuple(
+                tuple((g.logit.sigmoid() > threshold).tolist())
+                for g in gates_of(model))
+        if mask not in by_mask:
+            by_mask[mask] = evaluate(
+                task, spec,
+                predict(model, loaders['val'], spec, entity_table, device),
+                'val')
+        scores[threshold] = by_mask[mask]
+    best = None
+    for threshold in thresholds:  # The first of equally good thresholds.
+        value = scores[threshold][spec.tune_metric]
+        if best is None or (value > scores[best][spec.tune_metric]
+                            if spec.higher_is_better else
+                            value < scores[best][spec.tune_metric]):
+            best = threshold
+    set_gate_threshold(model, best)
+    return best, scores[best]
+
+
 def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         log: Callable[[str], None] = print) -> Dict[str, Any]:
     r"""Trains for :obj:`args.epochs` epochs, keeps the epoch with the best
@@ -793,18 +844,27 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
     optimizer = make_optimizer(model, args)
     entity_table = task.entity_table
     best, best_state, best_epoch, history = None, None, None, []
-    best_gates = None
+    best_gates, best_threshold = None, None
+    text = getattr(args, 'gate_thresholds', '')
+    thresholds = sorted({float(t) for t in text.split(',')}) if text else []
     for epoch in range(1, args.epochs + 1):
         loss = train_epoch(model, loaders['train'], optimizer, spec,
                            entity_table, device, args.max_steps_per_epoch)
-        val = evaluate(
-            task, spec,
-            predict(model, loaders['val'], spec, entity_table, device), 'val')
+        threshold = None
+        if thresholds and gates_of(model):
+            threshold, val = validate(model, loaders, task, spec, device,
+                                      thresholds)
+        else:
+            val = evaluate(
+                task, spec,
+                predict(model, loaders['val'], spec, entity_table, device),
+                'val')
         gates = model.gate_summary() if hasattr(model,
                                                 'gate_summary') else None
         history.append(dict(epoch=epoch, loss=loss, **val))
         log(f'epoch {epoch:02d}  loss {loss:.4f}  ' +
             '  '.join(f'val {k} {v:.4f}' for k, v in val.items()) +
+            ('' if threshold is None else f'  threshold {threshold:g}') +
             ('' if gates is None else
              f'  penalty {model.structural_loss().item():.4f}' +
              ''.join(f'  {key.replace("_", " ")} {gates[key]}'
@@ -813,9 +873,11 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         if is_better(val[spec.tune_metric], best, spec.higher_is_better):
             best, best_epoch = val[spec.tune_metric], epoch
             best_state, best_val = copy.deepcopy(model.state_dict()), val
-            best_gates = gates
+            best_gates, best_threshold = gates, threshold
 
     model.load_state_dict(best_state)
+    if best_threshold is not None:
+        set_gate_threshold(model, best_threshold)
     test = evaluate(
         task, spec,
         predict(model, loaders['test'], spec, entity_table, device), 'test')
@@ -824,6 +886,7 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         '  '.join(f'test {k} {v:.4f}' for k, v in test.items()))
     return dict(best_epoch=best_epoch, val=best_val, test=test,
                 history=history, gates=best_gates,
+                gate_threshold=best_threshold,
                 injected_relations=getattr(model, 'num_injected_relations',
                                            0))
 
@@ -859,7 +922,12 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
     if args.beta_vib > 0:
         row.update(beta_vib=args.beta_vib)
     row.update(weight_decay=args.weight_decay, full_db=args.full_db,
-               strict_time=args.strict_time)
+               strict_time=args.strict_time, num_layers=args.num_layers,
+               num_neighbors=args.num_neighbors,
+               temporal_strategy=args.temporal_strategy)
+    if out.get('gate_threshold') is not None:
+        row.update(gate_thresholds=args.gate_thresholds,
+                   gate_threshold=out['gate_threshold'])
     if args.inject:
         row.update(inject=args.inject, knn_n=args.knn_n,
                    temporal_m=args.temporal_m,

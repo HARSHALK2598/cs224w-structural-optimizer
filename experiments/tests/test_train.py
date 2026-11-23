@@ -38,7 +38,7 @@ def test_load_graph_drops_hidden_columns(monkeypatch):
 
     monkeypatch.setattr(train, 'make_pkey_fkey_graph', fake_graph)
     monkeypatch.setattr(train, 'get_stype_proposal', lambda db: {})
-    dataset = SimpleNamespace(name_or_path='rel-x', get_db=lambda: 'db')
+    dataset = SimpleNamespace(name_or_path='rel-x', get_db=lambda **_: 'db')
     task = SimpleNamespace(hidden_columns=lambda: [('drivers', 'dob')])
 
     train.load_graph(dataset, task, 'none', torch.device('cpu'))
