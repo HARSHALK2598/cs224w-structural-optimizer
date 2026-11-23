@@ -38,13 +38,13 @@ python experiments/train.py --task driver-top3 --smoke
 | `RelationalFilter` | A | `nn/models/relational_filter.py` | merged |
 | `KNNEdges`, `BehavioralEdges`, `TwoHopEdges` | B | `nn/models/edge_injection.py` | in review |
 | `TemporalContinuity` | B | `transforms/temporal_continuity.py` | in review |
-| `GatedHeteroConv` | C | `nn/conv/gated_hetero_conv.py` | planned |
+| `GatedHeteroConv` | C | `nn/conv/gated_hetero_conv.py` | in review |
 | `StructuralOptimizer` | A–D | `nn/models/structural_optimizer.py` | planned |
 
 ## Rubric checklist
 
 PR (50)
-- [ ] Correctness: Test 1 (`E‖g‖₀` vs open rate) ✓; Test 2 (template edges, in review); Test 3 (gated sum); Test 4 (all flags off = plain GNN); Test 5 (one rel-f1 epoch); `test/contrib` and flake8 clean
+- [ ] Correctness: Test 1 (`E‖g‖₀` vs open rate) ✓; Test 2 (template edges, in review); Test 3 (gated sum, in review); Test 4 (all flags off = plain GNN); Test 5 (one rel-f1 epoch); `test/contrib` and flake8 clean
 - [ ] Documentation: PyG docstrings (math, `Args:`, shapes, `Example:`) for every public class
 - [ ] Integration: `HeteroData`, `NeighborLoader`, any convolution, CPU and CUDA; docs index; `CHANGELOG.md`
 - [ ] Ease of use: usage snippet; `examples/contrib/structural_optimizer_relbench.py`; every step behind a flag

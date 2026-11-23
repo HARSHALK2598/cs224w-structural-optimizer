@@ -46,7 +46,6 @@ from relbench.modeling.graph import (  # noqa: E402
 from relbench.modeling.nn import (  # noqa: E402
     _DEFAULT_STYPE_ENCODER_CLS_KWARGS,
     HeteroEncoder,
-    HeteroGraphSAGE,
     HeteroTemporalEncoder,
 )
 from relbench.modeling.utils import get_stype_proposal  # noqa: E402
@@ -54,11 +53,14 @@ from torch import Tensor  # noqa: E402
 
 from torch_geometric.contrib.nn.models import (  # noqa: E402
     BehavioralEdges,
+    HardConcreteGate,
     KNNEdges,
     RelationalFilter,
     TwoHopEdges,
 )
+from torch_geometric.contrib.nn.conv import GatedHeteroConv  # noqa: E402
 from torch_geometric.contrib.transforms import TemporalContinuity  # noqa
+from torch_geometric.nn import LayerNorm, SAGEConv  # noqa: E402
 from torch_geometric.loader import NeighborLoader  # noqa: E402
 from torch_geometric.nn import MLP  # noqa: E402
 from torch_geometric.seed import seed_everything  # noqa: E402
@@ -89,6 +91,7 @@ DEFAULTS: Dict[str, Any] = dict(
     temporal_m=1,  # temporal continuity: links to the previous m records
     behavioral_threshold=0.9,  # behavioural similarity threshold
     inject_tables='',  # KNN/behavioural tables: '' (task's), 'all' or a list
+    lambda_template=0.0,  # --template-gates: weight of the template penalty
 )
 INJECTIONS = ('temporal', 'twohop', 'knn', 'behavioral')
 
@@ -100,7 +103,8 @@ RESULT_FIELDS = [
     'text_embedder', 'lambda_col',
     'lambda_table', 'gate_lr', 'gate_init', 'gate_temperature',
     'open_columns', 'open_tables', 'inject', 'knn_n', 'temporal_m',
-    'behavioral_threshold', 'inject_tables', 'injected_relations'
+    'behavioral_threshold', 'inject_tables', 'injected_relations',
+    'lambda_template', 'open_templates'
 ]
 
 
@@ -111,6 +115,8 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     for key, value in DEFAULTS.items():
         parser.add_argument(f'--{key.replace("_", "-")}', type=type(value),
                             default=None)
+    parser.add_argument('--template-gates', action='store_true',
+                        help='A switch per injected relation (step C).')
     parser.add_argument('--gates-open', action='store_true',
                         help='--model filter: keep every gate at 1 (a check '
                         'that the gated model then trains like Base).')
@@ -189,18 +195,26 @@ class Injection(torch.nn.Module):
         return [t.edge_type for t in [*self.knn, *self.behavioral,
                                       *self.two_hop]]
 
-    def forward(self, x_dict, batch, entity_table: str) -> Dict[Any, Tensor]:
+    def forward(self, x_dict, batch, entity_table: str,
+                only: Optional[set] = None) -> Dict[Any, Tensor]:
+        r"""The edges of every template, or of those in :obj:`only`."""
         seed_time = batch[entity_table].seed_time
         out = {}
         for template in self.knn:
+            if only is not None and template.edge_type not in only:
+                continue
             edge_type, edge_index = template(x_dict, batch.batch_dict,
                                              seed_time)
             out[edge_type] = edge_index
         for template in self.behavioral:
+            if only is not None and template.edge_type not in only:
+                continue
             edge_type, edge_index = template(x_dict, batch.edge_index_dict,
                                              batch.batch_dict, seed_time)
             out[edge_type] = edge_index
         for template in self.two_hop:
+            if only is not None and template.edge_type not in only:
+                continue
             edge_type, edge_index = template(batch.edge_index_dict,
                                              batch.num_nodes_dict)
             out[edge_type] = edge_index
@@ -374,6 +388,53 @@ class NaNSafeLinearEncoder(torch_frame.nn.LinearEncoder):
         return x.masked_fill(missing.unsqueeze(-1), 0.0)
 
 
+class GatedGraphSAGE(torch.nn.Module):
+    r"""RelBench's :class:`HeteroGraphSAGE` on :class:`GatedHeteroConv`.
+
+    Injected relations carry neighbour messages only (no root term or bias),
+    and with :obj:`template_gates` each has a switch, shared by all layers and
+    sampled once per forward pass. Without injected relations the modules,
+    their order and the output are RelBench's.
+    """
+    def __init__(self, node_types, edge_types, injected_edge_types,
+                 channels: int, aggr: str, num_layers: int,
+                 template_gates: bool = False, **gate_kwargs):
+        super().__init__()
+        gated = list(injected_edge_types) if template_gates else []
+        gate = (HardConcreteGate(len(gated), **gate_kwargs)
+                if gated else None)
+        self.convs = torch.nn.ModuleList()
+        for _ in range(num_layers):
+            convs = {
+                et: SAGEConv((channels, channels), channels, aggr=aggr)
+                for et in edge_types
+            }
+            for et in injected_edge_types:
+                convs[et] = SAGEConv((channels, channels), channels,
+                                     aggr=aggr, root_weight=False, bias=False)
+            self.convs.append(GatedHeteroConv(convs, gated, gate=gate))
+        self.norms = torch.nn.ModuleList()
+        for _ in range(num_layers):
+            self.norms.append(
+                torch.nn.ModuleDict({
+                    nt: LayerNorm(channels, mode='node')
+                    for nt in node_types
+                }))
+        self.gate = gate
+        self.gated_edge_types = gated
+
+    def sample_gates(self) -> Optional[Tensor]:
+        return None if self.gate is None else self.gate()
+
+    def forward(self, x_dict, edge_index_dict,
+                gate_values: Optional[Tensor] = None):
+        for conv, norm_dict in zip(self.convs, self.norms):
+            x_dict = conv(x_dict, edge_index_dict, gate_values)
+            x_dict = {key: norm_dict[key](x).relu() for key, x in
+                      x_dict.items()}
+        return x_dict
+
+
 class BaseModel(torch.nn.Module):
     r"""RelBench's relational GraphSAGE: encoder -> hetero GNN -> MLP head.
 
@@ -389,9 +450,13 @@ class BaseModel(torch.nn.Module):
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
                  num_layers: int, aggr: str, dedup_encoder: bool = False,
                  nan_safe_numerical: bool = False,
-                 injection: Optional[Injection] = None):
+                 injection: Optional[Injection] = None,
+                 template_gates: bool = False, lambda_template: float = 0.0,
+                 gate_init: float = 2.0,
+                 gate_temperature: float = 2. / 3.):
         super().__init__()
         self.dedup_encoder = dedup_encoder
+        self.lambda_template = lambda_template
         stype_encoders = dict(_DEFAULT_STYPE_ENCODER_CLS_KWARGS)
         if nan_safe_numerical:
             stype_encoders[torch_frame.numerical] = (NaNSafeLinearEncoder, {})
@@ -408,21 +473,18 @@ class BaseModel(torch.nn.Module):
             node_types=[nt for nt in data.node_types if 'time' in data[nt]],
             channels=channels,
         )
-        # Injected relations get their own convolution, like the schema's
-        # (temporal-continuity ones are already in data.edge_types):
-        injected = [] if injection is None else injection.edge_types
-        self.gnn = HeteroGraphSAGE(
-            node_types=data.node_types,
-            edge_types=data.edge_types + injected,
-            channels=channels,
-            aggr=aggr,
-            num_layers=num_layers,
-        )
+        # Injected relations: temporal ones (already in data.edge_types)
+        # and the per-batch ones; each gets its own convolution.
+        injected = [et for et in data.edge_types if et[1].startswith('next__')]
+        injected += [] if injection is None else injection.edge_types
+        self.gnn = GatedGraphSAGE(
+            data.node_types, schema_edge_types(data), injected, channels,
+            aggr, num_layers, template_gates=template_gates,
+            init_logit=gate_init, temperature=gate_temperature)
         self.head = MLP(channels, out_channels=out_channels, norm='batch_norm',
                         num_layers=1)
         self.injection = injection
-        self.num_injected_relations = len(injected) + sum(
-            et[1].startswith('next__') for et in data.edge_types)
+        self.num_injected_relations = len(injected)
 
     def encode_table(self, node_type: str, tf) -> Tensor:
         r"""Encodes the rows :obj:`tf` of one table into
@@ -460,15 +522,49 @@ class BaseModel(torch.nn.Module):
             x_dict[node_type] = x_dict[node_type] + rel_time
         return x_dict
 
+    def structural_loss(self) -> Tensor:
+        r"""The template penalty :math:`\lambda_k \sum_k
+        \mathbb{E}\|g_k\|_0` (0 without template gates)."""
+        if self.gnn.gate is None:
+            return torch.zeros(())
+        return self.lambda_template * self.gnn.gate.l0_penalty()
+
+    def template_summary(self) -> Optional[Dict[str, Any]]:
+        r"""Each template switch's open probability and evaluation-mode
+        state, or :obj:`None` without template gates."""
+        gate = self.gnn.gate
+        if gate is None:
+            return None
+        with torch.no_grad():
+            prob = gate.prob_open()
+            is_open = gate.logit.sigmoid() > gate.threshold
+        return {
+            '/'.join(et): dict(prob_open=round(float(p), 4), open=bool(o))
+            for et, p, o in zip(self.gnn.gated_edge_types, prob, is_open)
+        }
+
+    def gate_summary(self) -> Optional[Dict[str, Any]]:
+        r"""Every gate's state, or :obj:`None` without gates."""
+        templates = self.template_summary()
+        if templates is None:
+            return None
+        return dict(open_templates=sum(t['open']
+                                       for t in templates.values()),
+                    templates=templates)
+
     def forward(self, batch, entity_table: str) -> Tensor:
         x_dict = self.encode(batch, entity_table)
         edge_index_dict = batch.edge_index_dict
+        gates = self.gnn.sample_gates()  # One sample for every layer.
         if self.injection is not None:  # Built from h^(0), after any gates:
+            only = None if gates is None else {  # Closed ones: not built.
+                et for et, g in zip(self.gnn.gated_edge_types, gates) if g > 0
+            }
             edge_index_dict = {
                 **edge_index_dict,
-                **self.injection(x_dict, batch, entity_table)
+                **self.injection(x_dict, batch, entity_table, only)
             }
-        x_dict = self.gnn(x_dict, edge_index_dict)
+        x_dict = self.gnn(x_dict, edge_index_dict, gates)
         num_seeds = batch[entity_table].seed_time.size(0)
         return self.head(x_dict[entity_table][:num_seeds])
 
@@ -488,10 +584,12 @@ class FilterModel(BaseModel):
                  dedup_encoder: bool = False, gate_init: float = 2.0,
                  gate_temperature: float = 2. / 3., gates_open: bool = False,
                  nan_safe_numerical: bool = False,
-                 injection: Optional[Injection] = None):
+                 injection: Optional[Injection] = None,
+                 template_gates: bool = False, lambda_template: float = 0.0):
         super().__init__(data, col_stats_dict, channels, out_channels,
                          num_layers, aggr, dedup_encoder, nan_safe_numerical,
-                         injection)
+                         injection, template_gates, lambda_template,
+                         gate_init, gate_temperature)
         self.lambda_col = lambda_col
         self.lambda_table = lambda_table
         # Every gate fixed at 1: the gating is skipped (x * 1 == x exactly),
@@ -534,7 +632,7 @@ class FilterModel(BaseModel):
         \lambda_s \sum \mathbb{E}\|s\|_0` of the loss."""
         col_penalty, table_penalty = self.filter.l0_penalties()
         return (self.lambda_col * col_penalty +
-                self.lambda_table * table_penalty)
+                self.lambda_table * table_penalty + super().structural_loss())
 
     def gate_summary(self) -> Dict[str, Any]:
         r"""Each gate's open probability and evaluation-mode state."""
@@ -554,11 +652,13 @@ class FilterModel(BaseModel):
                 tables[node_type] = dict(
                     prob_open=round(float(gate.prob_open()[0]), 4),
                     open=bool(threshold(gate)[0]))
-        return dict(
+        out = dict(
             open_columns=sum(c['open'] for cols in columns.values()
                              for c in cols.values()),
             open_tables=sum(t['open'] for t in tables.values()),
             columns=columns, tables=tables)
+        out.update(super().gate_summary() or {})
+        return out
 
 
 def build_model(args, data, col_stats_dict, out_channels: int,
@@ -567,14 +667,17 @@ def build_model(args, data, col_stats_dict, out_channels: int,
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
                          args.num_layers, args.aggr, args.dedup_encoder,
-                         args.nan_safe_numerical, injection)
+                         args.nan_safe_numerical, injection,
+                         args.template_gates, args.lambda_template,
+                         args.gate_init, args.gate_temperature)
     if args.model == 'filter':
         return FilterModel(data, col_stats_dict, args.channels, out_channels,
                            args.num_layers, args.aggr, entity_table,
                            args.lambda_col, args.lambda_table,
                            args.dedup_encoder, args.gate_init,
                            args.gate_temperature, args.gates_open,
-                           args.nan_safe_numerical, injection)
+                           args.nan_safe_numerical, injection,
+                           args.template_gates, args.lambda_template)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -634,13 +737,18 @@ def make_optimizer(model, args) -> torch.optim.Optimizer:
     logits of :class:`FilterModel` get their own learning rate: Adam moves a
     logit by at most about the learning rate per step, so with few steps per
     epoch the gates could not close otherwise."""
-    if getattr(model, 'filter', None) is None or args.gate_lr <= 0:
+    gates = []
+    if getattr(model, 'filter', None) is not None:
+        gates += list(model.filter.parameters())
+    if getattr(getattr(model, 'gnn', None), 'gate', None) is not None:
+        gates += list(model.gnn.gate.parameters())
+    if not gates or args.gate_lr <= 0:
         return torch.optim.Adam(model.parameters(), lr=args.lr)
-    gate_ids = {id(p) for p in model.filter.parameters()}
+    gate_ids = {id(p) for p in gates}
     rest = [p for p in model.parameters() if id(p) not in gate_ids]
     return torch.optim.Adam([
         dict(params=rest),
-        dict(params=list(model.filter.parameters()), lr=args.gate_lr),
+        dict(params=gates, lr=args.gate_lr),
     ], lr=args.lr)
 
 
@@ -664,9 +772,10 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
         log(f'epoch {epoch:02d}  loss {loss:.4f}  ' +
             '  '.join(f'val {k} {v:.4f}' for k, v in val.items()) +
             ('' if gates is None else
-             f'  penalty {model.structural_loss().item():.4f}'
-             f'  open columns {gates["open_columns"]}'
-             f'  open tables {gates["open_tables"]}'))
+             f'  penalty {model.structural_loss().item():.4f}' +
+             ''.join(f'  {key.replace("_", " ")} {gates[key]}'
+                     for key in ['open_columns', 'open_tables',
+                                 'open_templates'] if key in gates)))
         if is_better(val[spec.tune_metric], best, spec.higher_is_better):
             best, best_epoch = val[spec.tune_metric], epoch
             best_state, best_val = copy.deepcopy(model.state_dict()), val
@@ -722,12 +831,17 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
     for split in ['val', 'test']:
         for name, value in out[split].items():
             row[f'{split}_{name}'] = value
-    if out['gates'] is not None:  # --model filter
+    gates = out['gates']
+    if gates is not None:  # Filter and/or template gates.
+        row.update(gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
+                   gate_temperature=round(args.gate_temperature, 4))
+    if gates is not None and 'open_columns' in gates:  # --model filter
         row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
-                   gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
-                   gate_temperature=round(args.gate_temperature, 4),
-                   open_columns=out['gates']['open_columns'],
-                   open_tables=out['gates']['open_tables'])
+                   open_columns=gates['open_columns'],
+                   open_tables=gates['open_tables'])
+    if gates is not None and 'open_templates' in gates:  # --template-gates
+        row.update(lambda_template=args.lambda_template,
+                   open_templates=gates['open_templates'])
     return row
 
 
