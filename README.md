@@ -30,24 +30,27 @@ pytest pytorch_geometric/test/contrib experiments/tests -q
 python experiments/train.py --task driver-top3 --smoke
 ```
 
-## Components (`torch_geometric/contrib/`)
+## Components (`torch_geometric/contrib/`, all merged)
 
-| Class | Step | File | Status |
-|---|---|---|---|
-| `HardConcreteGate` | A, C | `nn/models/hard_concrete.py` | merged |
-| `RelationalFilter` | A | `nn/models/relational_filter.py` | merged |
-| `KNNEdges`, `BehavioralEdges`, `TwoHopEdges` | B | `nn/models/edge_injection.py` | in review |
-| `TemporalContinuity` | B | `transforms/temporal_continuity.py` | in review |
-| `GatedHeteroConv` | C | `nn/conv/gated_hetero_conv.py` | in review |
-| `StructuralOptimizer` | A–D | `nn/models/structural_optimizer.py` | planned |
+| Class | Step | File |
+|---|---|---|
+| `HardConcreteGate` | A, C | `nn/models/hard_concrete.py` |
+| `RelationalFilter` | A | `nn/models/relational_filter.py` |
+| `VariationalBottleneck` | A | `nn/models/variational_bottleneck.py` |
+| `KNNEdges`, `BehavioralEdges`, `TwoHopEdges` | B | `nn/models/edge_injection.py` |
+| `TemporalContinuity` | B | `transforms/temporal_continuity.py` |
+| `GatedHeteroConv` | C | `nn/conv/gated_hetero_conv.py` |
+| `StructuralOptimizer` | A–D | `nn/models/structural_optimizer.py` |
+
+Example: `examples/contrib/structural_optimizer_relbench.py`.
 
 ## Rubric checklist
 
 PR (50)
-- [ ] Correctness: Test 1 (`E‖g‖₀` vs open rate) ✓; Test 2 (template edges, in review); Test 3 (gated sum, in review); Test 4 (all flags off = plain GNN); Test 5 (one rel-f1 epoch); `test/contrib` and flake8 clean
-- [ ] Documentation: PyG docstrings (math, `Args:`, shapes, `Example:`) for every public class
-- [ ] Integration: `HeteroData`, `NeighborLoader`, any convolution, CPU and CUDA; docs index; `CHANGELOG.md`
-- [ ] Ease of use: usage snippet; `examples/contrib/structural_optimizer_relbench.py`; every step behind a flag
+- [x] Correctness: Tests 1–5; `test/contrib` (87 pass) and flake8 clean
+- [x] Documentation: PyG docstrings (math, `Args:`, shapes, `Example:`) for every public class
+- [ ] Integration: `HeteroData`, `NeighborLoader` ✓; docs index ✓; `CHANGELOG.md` ✓; other convolutions (GAT, GraphConv) and CUDA not tested yet
+- [x] Ease of use: usage snippet; `examples/contrib/structural_optimizer_relbench.py`; every step behind a flag
 
 Blog (25) + Medium (5)
 - [ ] Motivation and method; implementation and deviations from the authors' code; code snippets; figures; published on Medium
