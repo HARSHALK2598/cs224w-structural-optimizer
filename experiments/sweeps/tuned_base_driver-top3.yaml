@@ -1,0 +1,25 @@
+# Tuning step 1 (Base): layers {1, 2} x sampling {uniform, last}, everything
+# else at the authors' repo defaults, on their protocol. The 2-layer uniform
+# cell is protocol_full_db_driver-top3 (same settings and seeds).
+name: tuned_base_driver-top3
+fixed:
+  dataset: rel-f1
+  task: driver-top3
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0, 1, 2]
+arms:
+  - model: base
+    fixed: {num_layers: 2, temporal_strategy: last}
+  - model: base
+    fixed: {num_layers: 1, temporal_strategy: uniform}
+  - model: base
+    fixed: {num_layers: 1, temporal_strategy: last}
