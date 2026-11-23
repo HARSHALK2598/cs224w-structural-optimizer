@@ -1,4 +1,4 @@
-r"""Structural injection in training (plans/04-structural-injection.md)."""
+r"""Structural injection in training (step B)."""
 import pytest
 import torch
 from conftest import requires_rel_f1
@@ -55,7 +55,7 @@ def test_temporal_relations(f1):
     out = train.prepare_graph(data, args_for('--inject', 'temporal'))
     added = [et for et in out.edge_types if et[1].startswith('next__')]
     # Records of the lasting entities (no time column): drivers,
-    # constructors, circuits (plans/04, section 3.1):
+    # constructors, circuits:
     assert {(et[0], et[1]) for et in added} == {
         ('races', 'next__f2p_circuitId'),
         ('qualifying', 'next__f2p_driverId'),

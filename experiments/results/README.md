@@ -14,6 +14,8 @@ have `summary.csv`, `env.json` (versions, device, commits) and per-run `logs/`.
 | `sweeps/stageA_base_driver-top3` | Base: lr {1e-4, 1e-3, 1e-2} × hidden {64, 128, 256} | 27 | 3 seeds, 30 epochs, CPU | best lr 1e-2, hidden 64: 0.7880 ± 0.0053 | – |
 | `sweeps/stageB_filter_driver-top3` | filter at stage A's best: λ × λ_s ∈ {1e-4, 1e-3, 1e-2}² | 27 | 3 seeds, 30 epochs, T4 | best λ = λ_s = 1e-4: 0.7932 ± 0.0154 | – |
 | `sweeps/stageC_final_driver-top3` | the two winners on fresh seeds 10–14 | 10 | 30 epochs, T4 | Base 0.7849 ± 0.0081 / filter 0.7901 ± 0.0142 (p = 0.50) | Base 0.7657 ± 0.0396 / filter 0.7719 ± 0.0411 |
+| `sweeps/probe_quick_knn_driver-top3` | Base / + KNN (n = 10), RelBench defaults (lr 5e-3, hidden 128); did not converge (best epoch = last) | 6 | seeds 0–2, 10 epochs, CPU | 0.7708 ± 0.0337 / 0.6932 ± 0.0619 | 0.7779 ± 0.0187 / 0.7718 ± 0.0438 |
+| `sweeps/probe_knn_stageC_driver-top3` | + KNN (n = 10) with stage C's settings; compare with stage C's Base | 5 | seeds 10–14, 30 epochs, CPU | 0.7522 ± 0.0134 (Base 0.7849 ± 0.0081, Welch p = 0.003) | 0.7842 ± 0.0216 |
 
 Paper (Table 1, test): Base 0.8148 ± 0.0106, filtering 0.8466 ± 0.0061.
 
