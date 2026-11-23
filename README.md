@@ -18,6 +18,7 @@ experiments/colab_*.ipynb  Colab notebooks (GPU runs)
 experiments/tests/         tests of the experiment code
 experiments/results/       one CSV row per run; index in experiments/results/README.md
 proposal/                  proposal.tex
+report/                    blog.md (the blog post, draft)
 scripts/                   setup_env.sh, download_data.py
 ```
 

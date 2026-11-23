@@ -16,6 +16,10 @@ have `summary.csv`, `env.json` (versions, device, commits) and per-run `logs/`.
 | `sweeps/stageC_final_driver-top3` | the two winners on fresh seeds 10–14 | 10 | 30 epochs, T4 | Base 0.7849 ± 0.0081 / filter 0.7901 ± 0.0142 (p = 0.50) | Base 0.7657 ± 0.0396 / filter 0.7719 ± 0.0411 |
 | `sweeps/probe_quick_knn_driver-top3` | Base / + KNN (n = 10), RelBench defaults (lr 5e-3, hidden 128); did not converge (best epoch = last) | 6 | seeds 0–2, 10 epochs, CPU | 0.7708 ± 0.0337 / 0.6932 ± 0.0619 | 0.7779 ± 0.0187 / 0.7718 ± 0.0438 |
 | `sweeps/probe_knn_stageC_driver-top3` | + KNN (n = 10) with stage C's settings; compare with stage C's Base | 5 | seeds 10–14, 30 epochs, CPU | 0.7522 ± 0.0134 (Base 0.7849 ± 0.0081, Welch p = 0.003) | 0.7842 ± 0.0216 |
+| `sweeps/protocol_driver-top3` | Base / full model, authors' default config, RelBench cutoff | 6 | seeds 0–2, 50 epochs, CPU | 0.8099 ± 0.0133 / 0.8197 ± 0.0048 | 0.7842 ± 0.0089 / 0.7511 ± 0.0262 |
+| `sweeps/protocol_full_db_driver-top3` | the same on the authors' protocol (`--full-db --strict-time`) | 6 | as above | 0.7960 ± 0.0057 / 0.8148 ± 0.0050 | 0.8248 ± 0.0575 / 0.8806 ± 0.0083 |
+| `sweeps/released_config_driver-top3` | Base / full model, the released checkpoint's config, threshold on validation, authors' protocol | 6 | seeds 0–2, 50 epochs, CPU | 0.8924 ± 0.0014 / 0.8948 ± 0.0056 | 0.9022 ± 0.0032 / 0.8990 ± 0.0099 |
+| `authors_protocol` | the authors' code (030b07c) trained here, Base and full model, scored on both protocols | 5 rows | seed 42, CPU | – | full model 0.8452 (theirs) / 0.7835 (cutoff) |
 
 Paper (Table 1, test): Base 0.8148 ± 0.0106, filtering 0.8466 ± 0.0061.
 
