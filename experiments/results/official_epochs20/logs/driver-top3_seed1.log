@@ -1,0 +1,83 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 24 files:   0%|          | 0/24 [00:00<?, ?it/s]Fetching 24 files: 100%|██████████| 24/24 [00:00<00:00, 1629.67it/s]
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/reference/relbench/relbench/modeling/graph.py:132: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+  pkey_index = torch.from_numpy(pkey_index[mask].astype(int).values)
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+/home/user/cs224w-structural-optimizer/.venv/lib/python3.12/site-packages/torch_frame/data/dataset.py:587: UserWarning: Weights only load failed. Please file an issue to make `torch.load(weights_only=True)` compatible in your case. Please use `torch.serialization.add_safe_globals([numpy._core.multiarray.scalar])` to allowlist this global.
+  self._tensor_frame, self._col_stats = torch_frame.load(
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:06<00:12,  6.00s/it] 67%|██████▋   | 2/3 [00:08<00:04,  4.11s/it]100%|██████████| 3/3 [00:10<00:00,  3.02s/it]100%|██████████| 3/3 [00:10<00:00,  3.51s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.21it/s]100%|██████████| 2/2 [00:00<00:00,  2.31it/s]100%|██████████| 2/2 [00:00<00:00,  2.03it/s]
+Epoch: 01, Train loss: 0.6126523587938071, Val metrics: {'roc_auc': 0.6194477791116446}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:07,  3.52s/it] 67%|██████▋   | 2/3 [00:07<00:03,  3.76s/it]100%|██████████| 3/3 [00:09<00:00,  2.80s/it]100%|██████████| 3/3 [00:09<00:00,  3.03s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.07it/s]100%|██████████| 2/2 [00:01<00:00,  2.12it/s]100%|██████████| 2/2 [00:01<00:00,  1.85it/s]
+Epoch: 02, Train loss: 0.4458606688956904, Val metrics: {'roc_auc': 0.6169930658830696}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:07,  3.76s/it] 67%|██████▋   | 2/3 [00:07<00:03,  3.46s/it]100%|██████████| 3/3 [00:08<00:00,  2.67s/it]100%|██████████| 3/3 [00:08<00:00,  2.92s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.24it/s]100%|██████████| 2/2 [00:00<00:00,  2.43it/s]100%|██████████| 2/2 [00:00<00:00,  2.13it/s]
+Epoch: 03, Train loss: 0.44046787647785124, Val metrics: {'roc_auc': 0.6153446453208149}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.49s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.34s/it]100%|██████████| 3/3 [00:08<00:00,  2.51s/it]100%|██████████| 3/3 [00:08<00:00,  2.75s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.36it/s]100%|██████████| 2/2 [00:00<00:00,  2.61it/s]100%|██████████| 2/2 [00:00<00:00,  2.29it/s]
+Epoch: 04, Train loss: 0.43617072399686374, Val metrics: {'roc_auc': 0.6363440898747559}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.11s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.05s/it]100%|██████████| 3/3 [00:07<00:00,  2.44s/it]100%|██████████| 3/3 [00:07<00:00,  2.61s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.28it/s]100%|██████████| 2/2 [00:00<00:00,  2.44it/s]100%|██████████| 2/2 [00:00<00:00,  2.15it/s]
+Epoch: 05, Train loss: 0.4325710384165545, Val metrics: {'roc_auc': 0.656447653688341}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.93s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.15s/it]100%|██████████| 3/3 [00:07<00:00,  2.50s/it]100%|██████████| 3/3 [00:07<00:00,  2.65s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.35it/s]100%|██████████| 2/2 [00:00<00:00,  2.58it/s]100%|██████████| 2/2 [00:00<00:00,  2.27it/s]
+Epoch: 06, Train loss: 0.4199631641242386, Val metrics: {'roc_auc': 0.7007489562989374}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.51s/it] 67%|██████▋   | 2/3 [00:05<00:03,  3.00s/it]100%|██████████| 3/3 [00:07<00:00,  2.35s/it]100%|██████████| 3/3 [00:07<00:00,  2.48s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.22it/s]100%|██████████| 2/2 [00:00<00:00,  2.41it/s]100%|██████████| 2/2 [00:00<00:00,  2.10it/s]
+Epoch: 07, Train loss: 0.3912835005073308, Val metrics: {'roc_auc': 0.7535790435577217}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.66s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.90s/it]100%|██████████| 3/3 [00:07<00:00,  2.33s/it]100%|██████████| 3/3 [00:07<00:00,  2.46s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.30it/s]100%|██████████| 2/2 [00:00<00:00,  2.54it/s]100%|██████████| 2/2 [00:00<00:00,  2.22it/s]
+Epoch: 08, Train loss: 0.345230247035171, Val metrics: {'roc_auc': 0.7737542778305352}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.54s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.78s/it]100%|██████████| 3/3 [00:07<00:00,  2.30s/it]100%|██████████| 3/3 [00:07<00:00,  2.40s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.35it/s]100%|██████████| 2/2 [00:00<00:00,  2.66it/s]100%|██████████| 2/2 [00:00<00:00,  2.32it/s]
+Epoch: 09, Train loss: 0.3134657098069864, Val metrics: {'roc_auc': 0.7844510938703839}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:04,  2.33s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.73s/it]100%|██████████| 3/3 [00:07<00:00,  2.37s/it]100%|██████████| 3/3 [00:07<00:00,  2.43s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.25it/s]100%|██████████| 2/2 [00:00<00:00,  2.46it/s]100%|██████████| 2/2 [00:00<00:00,  2.15it/s]
+Epoch: 10, Train loss: 0.29845083200394096, Val metrics: {'roc_auc': 0.781996380641809}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.37s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.10s/it]100%|██████████| 3/3 [00:07<00:00,  2.40s/it]100%|██████████| 3/3 [00:07<00:00,  2.62s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.27it/s]100%|██████████| 2/2 [00:00<00:00,  2.54it/s]100%|██████████| 2/2 [00:00<00:00,  2.21it/s]
+Epoch: 11, Train loss: 0.30799001975140566, Val metrics: {'roc_auc': 0.7949508161473545}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.05s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.93s/it]100%|██████████| 3/3 [00:07<00:00,  2.34s/it]100%|██████████| 3/3 [00:07<00:00,  2.51s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.13it/s]100%|██████████| 2/2 [00:01<00:00,  2.27it/s]100%|██████████| 2/2 [00:01<00:00,  1.97it/s]
+Epoch: 12, Train loss: 0.2868522583050633, Val metrics: {'roc_auc': 0.7945028757771766}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.13s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.89s/it]100%|██████████| 3/3 [00:07<00:00,  2.34s/it]100%|██████████| 3/3 [00:07<00:00,  2.51s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.32it/s]100%|██████████| 2/2 [00:00<00:00,  2.61it/s]100%|██████████| 2/2 [00:00<00:00,  2.28it/s]
+Epoch: 13, Train loss: 0.27576484707929605, Val metrics: {'roc_auc': 0.7864041138843597}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.03s/it] 67%|██████▋   | 2/3 [00:06<00:02,  2.99s/it]100%|██████████| 3/3 [00:07<00:00,  2.34s/it]100%|██████████| 3/3 [00:07<00:00,  2.52s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.25it/s]100%|██████████| 2/2 [00:00<00:00,  2.37it/s]100%|██████████| 2/2 [00:00<00:00,  2.09it/s]
+Epoch: 14, Train loss: 0.2747664465145631, Val metrics: {'roc_auc': 0.7914031284155454}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.89s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.96s/it]100%|██████████| 3/3 [00:07<00:00,  2.35s/it]100%|██████████| 3/3 [00:07<00:00,  2.51s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.26it/s]100%|██████████| 2/2 [00:00<00:00,  2.41it/s]100%|██████████| 2/2 [00:00<00:00,  2.12it/s]
+Epoch: 15, Train loss: 0.27350256461526234, Val metrics: {'roc_auc': 0.791815233556109}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.52s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.20s/it]100%|██████████| 3/3 [00:07<00:00,  2.47s/it]100%|██████████| 3/3 [00:07<00:00,  2.60s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.29it/s]100%|██████████| 2/2 [00:00<00:00,  2.55it/s]100%|██████████| 2/2 [00:00<00:00,  2.22it/s]
+Epoch: 16, Train loss: 0.2595750032886257, Val metrics: {'roc_auc': 0.7850782103886331}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.19s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.08s/it]100%|██████████| 3/3 [00:07<00:00,  2.36s/it]100%|██████████| 3/3 [00:07<00:00,  2.57s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.29it/s]100%|██████████| 2/2 [00:00<00:00,  2.42it/s]100%|██████████| 2/2 [00:00<00:00,  2.14it/s]
+Epoch: 17, Train loss: 0.2581008439449936, Val metrics: {'roc_auc': 0.783071437530236}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:03<00:06,  3.09s/it] 67%|██████▋   | 2/3 [00:06<00:03,  3.06s/it]100%|██████████| 3/3 [00:07<00:00,  2.35s/it]100%|██████████| 3/3 [00:07<00:00,  2.54s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.34it/s]100%|██████████| 2/2 [00:00<00:00,  2.65it/s]100%|██████████| 2/2 [00:00<00:00,  2.31it/s]
+Epoch: 18, Train loss: 0.25183971899135504, Val metrics: {'roc_auc': 0.7991435380122197}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.75s/it] 67%|██████▋   | 2/3 [00:05<00:02,  2.85s/it]100%|██████████| 3/3 [00:07<00:00,  2.29s/it]100%|██████████| 3/3 [00:07<00:00,  2.43s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.27it/s]100%|██████████| 2/2 [00:00<00:00,  2.55it/s]100%|██████████| 2/2 [00:00<00:00,  2.21it/s]
+Epoch: 19, Train loss: 0.2527510715980311, Val metrics: {'roc_auc': 0.8012398989446525}
+  0%|          | 0/3 [00:00<?, ?it/s] 33%|███▎      | 1/3 [00:02<00:05,  2.72s/it] 67%|██████▋   | 2/3 [00:05<00:03,  3.04s/it]100%|██████████| 3/3 [00:07<00:00,  2.39s/it]100%|██████████| 3/3 [00:07<00:00,  2.54s/it]
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.19it/s]100%|██████████| 2/2 [00:00<00:00,  2.36it/s]100%|██████████| 2/2 [00:00<00:00,  2.06it/s]
+Epoch: 20, Train loss: 0.2503240254968515, Val metrics: {'roc_auc': 0.7902026482234685}
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.26it/s]100%|██████████| 2/2 [00:00<00:00,  2.54it/s]100%|██████████| 2/2 [00:00<00:00,  2.20it/s]
+Best Val metrics: {'roc_auc': 0.8012040637150383}
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:00<00:00,  1.81it/s]100%|██████████| 2/2 [00:00<00:00,  2.77it/s]100%|██████████| 2/2 [00:00<00:00,  2.57it/s]
+Fetching 3 files:   0%|          | 0/3 [00:00<?, ?it/s]Fetching 3 files: 100%|██████████| 3/3 [00:00<00:00, 1278.88it/s]
+Best test metrics: {'roc_auc': 0.8217299853678929}
