@@ -49,3 +49,4 @@ epoch 47  loss 0.2825  val roc_auc 0.8048  threshold 0.5  penalty 0.1287  open c
 epoch 48  loss 0.2932  val roc_auc 0.8025  threshold 0.5  penalty 0.1289  open columns 45  open tables 8  open templates 78
 epoch 49  loss 0.2844  val roc_auc 0.8060  threshold 0.5  penalty 0.1287  open columns 45  open tables 8  open templates 78
 epoch 50  loss 0.3438  val roc_auc 0.8038  threshold 0.5  penalty 0.1291  open columns 45  open tables 8  open templates 78
+best epoch 36: val roc_auc 0.8123  test roc_auc 0.8717

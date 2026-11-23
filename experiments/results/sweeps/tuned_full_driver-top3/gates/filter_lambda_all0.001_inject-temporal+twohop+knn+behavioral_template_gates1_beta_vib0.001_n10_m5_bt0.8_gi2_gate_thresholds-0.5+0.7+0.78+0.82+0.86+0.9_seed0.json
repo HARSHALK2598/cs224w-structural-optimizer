@@ -1,0 +1,684 @@
+{
+  "open_columns": 45,
+  "open_tables": 8,
+  "columns": {
+    "races": {
+      "round": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "year": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "time": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      }
+    },
+    "qualifying": {
+      "number": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "position": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      }
+    },
+    "constructor_standings": {
+      "points": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "position": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "wins": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      }
+    },
+    "standings": {
+      "points": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "position": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "wins": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8569,
+        "open": true
+      }
+    },
+    "constructors": {
+      "constructorRef": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "nationality": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      }
+    },
+    "drivers": {
+      "dob": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "code": {
+        "prob_open": 0.9674,
+        "sigmoid": 0.8569,
+        "open": true
+      },
+      "driverRef": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8566,
+        "open": true
+      },
+      "forename": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "nationality": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "surname": {
+        "prob_open": 0.9674,
+        "sigmoid": 0.8571,
+        "open": true
+      }
+    },
+    "constructor_results": {
+      "points": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      }
+    },
+    "circuits": {
+      "alt": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "lat": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "lng": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "circuitRef": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "country": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "location": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      }
+    },
+    "results": {
+      "fastestLap": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "grid": {
+        "prob_open": 0.969,
+        "sigmoid": 0.8635,
+        "open": true
+      },
+      "laps": {
+        "prob_open": 0.9674,
+        "sigmoid": 0.857,
+        "open": true
+      },
+      "milliseconds": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "number": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8569,
+        "open": true
+      },
+      "points": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "position": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8567,
+        "open": true
+      },
+      "positionOrder": {
+        "prob_open": 0.9674,
+        "sigmoid": 0.8572,
+        "open": true
+      },
+      "rank": {
+        "prob_open": 0.9673,
+        "sigmoid": 0.8568,
+        "open": true
+      },
+      "statusId": {
+        "prob_open": 0.9674,
+        "sigmoid": 0.857,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9678,
+        "sigmoid": 0.8586,
+        "open": true
+      }
+    }
+  },
+  "tables": {
+    "races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying": {
+      "prob_open": 0.9678,
+      "sigmoid": 0.8585,
+      "open": true
+    },
+    "constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings": {
+      "prob_open": 0.9677,
+      "sigmoid": 0.8584,
+      "open": true
+    },
+    "constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "circuits": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results": {
+      "prob_open": 0.9717,
+      "sigmoid": 0.874,
+      "open": true
+    }
+  },
+  "open_templates": 78,
+  "templates": {
+    "races/next__f2p_circuitId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/next__f2p_driverId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/next__f2p_constructorId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/next__f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/next__f2p_driverId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/next__f2p_constructorId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/next__f2p_driverId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/next__f2p_constructorId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/knn/drivers": {
+      "prob_open": 0.9674,
+      "sigmoid": 0.8572,
+      "open": true
+    },
+    "drivers/behavioral__qualifying__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/behavioral__standings__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/behavioral__results__f2p_driverId/drivers": {
+      "prob_open": 0.9674,
+      "sigmoid": 0.8571,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__qualifying__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__qualifying__f2p_constructorId/constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_driverId__drivers__rev_f2p_driverId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_driverId__drivers__rev_f2p_driverId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__qualifying__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__qualifying__f2p_constructorId/constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "qualifying/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__qualifying__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__qualifying__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__constructor_standings__f2p_constructorId/constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__constructor_standings__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__standings__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_driverId__drivers__rev_f2p_driverId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "standings/2hop__f2p_driverId__drivers__rev_f2p_driverId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__standings__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__constructor_results__f2p_constructorId/constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__constructor_results__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__results__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__results__f2p_constructorId/constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_driverId__drivers__rev_f2p_driverId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_driverId__drivers__rev_f2p_driverId/standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__results__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__results__f2p_constructorId/constructors": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/qualifying": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_results": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__results__f2p_raceId/races": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__results__f2p_driverId/drivers": {
+      "prob_open": 0.9673,
+      "sigmoid": 0.8568,
+      "open": true
+    }
+  }
+}
