@@ -64,8 +64,9 @@ expected number of open switches, plus the bottleneck's KL term:
 At test time a switch is open if *sigmoid(logit) > threshold*. The paper's code tries six
 thresholds from 0.5 to 0.9 and keeps the one that scores best on validation.
 
-FIGURE 1: the rel-f1 graph around one driver, before and after the four additions:
-switched-off tables greyed out, added edges dashed.
+![Figure 1](figures/fig1_method.png)
+*Figure 1. Around one driver in rel-f1, before and after the four additions (illustration;
+which tables and columns switch off is learned per task).*
 
 Course connections:
 - two-hop shortcuts are close to RelGNN's atomic routes;
@@ -161,8 +162,9 @@ layers to 87.86 ± 0.83 with 1.
   the same one-hop signal. Our runs with checkpoint settings did this for one seed, and kept
   almost everything for the other two, with equal scores.
 
-FIGURE 3: switch probabilities over training for one run, with the six thresholds as
-horizontal lines.
+![Figure 3](figures/fig3_switches.png)
+*Figure 3. Every switch over one training run with the tuned settings (seed 0). The grey
+lines are the six test-time cut-offs the threshold search tries.*
 
 **Only driver-to-driver edges are active.**
 - With one layer, only edges that point into the driver can change its prediction.
@@ -202,8 +204,9 @@ Under the cutoff, the structural optimizer falls below the baseline. A plausible
 that its extra parameters fit recent-form signals that are up to three years stale under
 the cutoff. We did not test this.
 
-FIGURE 2: one driver's monthly test predictions on a timeline, shading the rows each one
-can see under the two setups.
+![Figure 2](figures/fig2_test_setups.png)
+*Figure 2. Three of one driver's 30 monthly test predictions, and the rows each may read
+under the two test setups.*
 
 ## 6. Differences from the paper's code
 
