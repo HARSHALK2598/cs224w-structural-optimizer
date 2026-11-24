@@ -26,3 +26,6 @@ runs/
 *.synctex.gz
 # ...but experiment logs are committed (they hold per-epoch scores)
 !experiments/results/**/logs/*.log
+
+# Model weights from --save-checkpoints (kept in Drive, not in git):
+experiments/results/**/checkpoints/

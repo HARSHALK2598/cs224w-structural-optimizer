@@ -14,7 +14,7 @@ arXiv:2606.08491), plus a blog post. Author: Harshal Kulkarni.
 ```
 experiments/train.py       single entry point (Base, --model filter, --inject ...)
 experiments/sweep.py       resumable grid runner (YAML configs in experiments/sweeps/)
-experiments/colab_*.ipynb  Colab notebooks (GPU runs)
+experiments/colab_*.ipynb  Colab notebooks (GPU runs); colab_dataset.ipynb runs any task
 experiments/tests/         tests of the experiment code
 experiments/results/       one CSV row per run; index in experiments/results/README.md
 proposal/                  proposal.tex

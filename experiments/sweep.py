@@ -136,7 +136,8 @@ def finished_runs(path: Path) -> set:
 
 def run_sweep(cfg: Dict[str, Any], out: Path,
               max_runs: Optional[int] = None,
-              epochs: Optional[int] = None) -> None:
+              epochs: Optional[int] = None,
+              save_checkpoints: bool = False) -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / 'logs').mkdir(exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -205,6 +206,14 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
         if result['gates'] is not None:
             train.save_gates(out / 'gates' / f"{run['run_id']}.json",
                              result['gates'])
+        if save_checkpoints:  # The best-validation weights fit() kept:
+            (out / 'checkpoints').mkdir(exist_ok=True)
+            torch.save(
+                dict(model=model.state_dict(), args=vars(args),
+                     gate_threshold=result.get('gate_threshold'),
+                     best_epoch=result['best_epoch'], val=result['val'],
+                     test=result['test']),
+                out / 'checkpoints' / f"{run['run_id']}.pt")
         elapsed = (time.time() - start) / 60
         eta = elapsed / i * (len(todo) - i)
         gates = '' if result['gates'] is None else '  open ' + ', '.join(
@@ -254,13 +263,16 @@ def main() -> None:
                         help='Stop after this many runs (for checks).')
     parser.add_argument('--epochs', type=int, default=None,
                         help='Override the epochs of every run (checks).')
+    parser.add_argument('--save-checkpoints', action='store_true',
+                        help='Save each run\'s best-validation weights to '
+                        '<out>/checkpoints/<run_id>.pt.')
     args = parser.parse_args()
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
     out = Path(args.out) if args.out else (train.ROOT / 'experiments' /
                                            'results' / 'sweeps' / cfg['name'])
-    run_sweep(cfg, out, args.max_runs, args.epochs)
+    run_sweep(cfg, out, args.max_runs, args.epochs, args.save_checkpoints)
     if (out / 'results.csv').exists():
         print(summarize(out).round(4).to_string(index=False), flush=True)
 
