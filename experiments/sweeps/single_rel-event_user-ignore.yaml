@@ -1,0 +1,36 @@
+# rel-event user-ignore: GraphSAGE baseline and structural optimizer, one seed each, with the
+# settings tuned on rel-f1 driver-top3, on the full-history test. Training is
+# capped at 20 epochs x 300 steps so both runs fit in one 12-hour Kaggle CPU
+# session (a deviation from the 50-epoch runs on rel-f1).
+name: single_rel-event_user-ignore
+fixed:
+  dataset: rel-event
+  task: user-ignore
+  epochs: 20
+  max_steps_per_epoch: 300
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 1
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: base
+  - model: filter
+    grid:
+      lambda_all: [0.0001]
+    fixed:
+      inject: temporal,twohop,knn,behavioral
+      template_gates: true
+      beta_vib: 0.001
+      knn_n: 10
+      temporal_m: 5
+      behavioral_threshold: 0.8
+      gate_init: 2.0
+      gate_thresholds: 0.5,0.7,0.78,0.82,0.86,0.9
