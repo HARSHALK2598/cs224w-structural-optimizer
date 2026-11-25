@@ -41,3 +41,12 @@ epoch 39  loss 0.2973  val roc_auc 0.7262
 epoch 40  loss 0.2990  val roc_auc 0.7312
 epoch 41  loss 0.2983  val roc_auc 0.7262
 epoch 42  loss 0.3018  val roc_auc 0.7180
+epoch 43  loss 0.3014  val roc_auc 0.7235
+epoch 44  loss 0.2967  val roc_auc 0.7207
+epoch 45  loss 0.3023  val roc_auc 0.7194
+epoch 46  loss 0.3011  val roc_auc 0.7260
+epoch 47  loss 0.2987  val roc_auc 0.7336
+epoch 48  loss 0.2964  val roc_auc 0.7225
+epoch 49  loss 0.2994  val roc_auc 0.7257
+epoch 50  loss 0.2971  val roc_auc 0.7261
+best epoch 20: val roc_auc 0.7367  test roc_auc 0.7945
