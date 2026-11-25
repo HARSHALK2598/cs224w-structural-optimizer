@@ -222,20 +222,50 @@ under the two test setups.*
 Per-column switches can say which database columns matter. Per-channel switches cannot,
 because each embedding channel mixes all of a table's columns.
 
-## 7. Other databases
+## 7. A second task: rel-f1 driver-dnf
 
-TODO: the 8 other released models. So far, rel-f1 driver-dnf: released model 80.41
-(full-history test) vs 72.02 (RelBench cutoff test).
+The task: will a driver fail to finish (DNF) a race in the next month? We used the tuned
+settings from driver-top3 unchanged, with the full-history test and 3 seeds.
+
+| Test ROC-AUC | Seed 0 | Seed 1 | Seed 2 | Mean ± std |
+|---|---|---|---|---|
+| GraphSAGE baseline | 78.93 | 79.45 | 79.44 | **79.27 ± 0.30** |
+| Structural optimizer | 79.45 | 79.46 | 79.47 | **79.46 ± 0.01** |
+| Paper, structural optimizer | | | | 78.21 |
+| Released model (checkpoint settings) | | | | 80.41 |
+
+- Both models beat the paper's number. The structural optimizer is level with the baseline:
+  0.2 points higher on test, 1.4 points lower on validation (71.79 vs 73.23).
+- **No switch closed, again.** driver-dnf has 11,411 training rows, so a run is 2,250
+  optimizer steps instead of 300, and the switches did move further: down to 0.59–0.83,
+  against 0.85–0.88 on driver-top3. But validation chose the 0.5 cut-off in every run, so
+  every table, column and added edge type stayed on. The released model also uses 0.5 here
+  and keeps everything. On this task, neither implementation prunes anything.
+- **The gap to the released model is not like-for-like yet.** Our runs used the tuned
+  settings; the released model used the checkpoint settings, as on driver-top3, where
+  matching them closed the gap. TODO: rerun with the checkpoint settings.
+- **One open question:** the structural optimizer's three test scores are almost identical,
+  although its runs stopped at epochs 25, 50 and 15. We have not checked why.
+- Under the RelBench cutoff test, the released model drops from 80.41 to 72.02, the same
+  kind of drop as on driver-top3.
+
+**Other databases.** rel-trial study-outcome ran out of memory on our 15 GB machine while
+building its graph with text features over the whole database (the process reached 14 GB).
+It needs a larger machine, or a run without text features. TODO: rel-trial and the
+remaining tasks with released models (rel-avito, rel-event, rel-stack, rel-amazon, rel-hm).
 
 ## 8. Takeaways
 
 1. Our PyG implementation reproduces the released model on driver-top3, given the same
-   settings and test setup.
+   settings and test setup, and beats the paper's number on driver-dnf with the tuned
+   settings.
 2. On this task, the gains come from the training settings, mainly using one GNN layer, and
    from the full-history test. The four additions add little over a tuned baseline.
 3. The switches cannot learn to prune in 300 training steps. Their pruning comes from a
-   threshold search over nearly equal values, so it changes from seed to seed.
-4. TODO after Section 7: whether this holds on other databases.
+   threshold search over nearly equal values, so it changes from seed to seed. With
+   2,250 steps (driver-dnf) they move further but still all stay on.
+4. On both rel-f1 tasks, the structural optimizer is level with a tuned baseline.
+   TODO: whether this holds on other databases.
 
 ## References
 
