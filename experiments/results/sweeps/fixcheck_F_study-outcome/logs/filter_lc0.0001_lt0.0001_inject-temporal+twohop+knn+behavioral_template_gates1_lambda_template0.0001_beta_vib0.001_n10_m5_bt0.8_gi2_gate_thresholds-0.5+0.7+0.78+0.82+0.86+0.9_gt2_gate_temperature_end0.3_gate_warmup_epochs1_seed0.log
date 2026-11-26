@@ -1,0 +1,12 @@
+run filter_lc0.0001_lt0.0001_inject-temporal+twohop+knn+behavioral_template_gates1_lambda_template0.0001_beta_vib0.001_n10_m5_bt0.8_gi2_gate_thresholds-0.5+0.7+0.78+0.82+0.86+0.9_gt2_gate_temperature_end0.3_gate_warmup_epochs1_seed0: --dataset rel-trial --task study-outcome --model filter --seed 0 --epochs 10 --lr 0.001 --batch-size 256 --channels 128 --num-layers 1 --num-neighbors 64 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.0001 --lambda-table 0.0001 --gate-lr 0.0 --gate-init 2.0 --gate-temperature 2.0 --gate-temperature-end 0.3 --gate-warmup-epochs 1 --inject temporal,twohop,knn,behavioral --knn-n 10 --temporal-m 5 --behavioral-threshold 0.8 --inject-tables  --lambda-template 0.0001 --beta-vib 0.001 --weight-decay 0.005 --gate-thresholds 0.5,0.7,0.78,0.82,0.86,0.9 --temporal-strategy uniform --full-db --strict-time --template-gates --dedup-encoder --nan-safe-numerical --results /tmp/proj/experiments/results/results.csv
+epoch 01  loss 0.6622  val roc_auc 0.5307  threshold 0.5  penalty 0.4511  open columns 102  open tables 14  open templates 117
+epoch 02  loss 0.6523  val roc_auc 0.5407  threshold 0.5  penalty 0.4321  open columns 102  open tables 14  open templates 117
+epoch 03  loss 0.6522  val roc_auc 0.5504  threshold 0.5  penalty 0.4184  open columns 102  open tables 14  open templates 117
+epoch 04  loss 0.6533  val roc_auc 0.5366  threshold 0.5  penalty 0.4030  open columns 102  open tables 14  open templates 117
+epoch 05  loss 0.6503  val roc_auc 0.5765  threshold 0.5  penalty 0.3874  open columns 102  open tables 14  open templates 117
+epoch 06  loss 0.6499  val roc_auc 0.5766  threshold 0.5  penalty 0.3725  open columns 102  open tables 14  open templates 117
+epoch 07  loss 0.6490  val roc_auc 0.5522  threshold 0.5  penalty 0.3618  open columns 102  open tables 14  open templates 117
+epoch 08  loss 0.6508  val roc_auc 0.5573  threshold 0.5  penalty 0.3450  open columns 102  open tables 14  open templates 117
+epoch 09  loss 0.6490  val roc_auc 0.5529  threshold 0.9  penalty 0.3307  open columns 0  open tables 0  open templates 0
+epoch 10  loss 0.6498  val roc_auc 0.5561  threshold 0.5  penalty 0.3177  open columns 102  open tables 14  open templates 117
+best epoch 6: val roc_auc 0.5766  test roc_auc 0.5975
