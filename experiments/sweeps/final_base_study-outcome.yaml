@@ -1,0 +1,22 @@
+# study-outcome final round after all fixes: GraphSAGE baseline. 2 layers, 50 epochs,
+# seed 0, the paper's penalties (column/table 1e-3, edge types 1e-2),
+# bottleneck off, switch temperature 2.0 -> 0.3 after 5 epochs.
+name: final_base_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 2
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: base

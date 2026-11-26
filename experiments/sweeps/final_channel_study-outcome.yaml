@@ -1,0 +1,23 @@
+# study-outcome final round after all fixes: structural optimizer, one switch per embedding channel. 2 layers, 50 epochs,
+# seed 0, the paper's penalties (column/table 1e-3, edge types 1e-2),
+# bottleneck off, switch temperature 2.0 -> 0.3 after 5 epochs.
+name: final_channel_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 2
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: filter
+    fixed: {lambda_col: 0.001, lambda_table: 0.001, inject: "temporal,twohop,knn,behavioral", template_gates: true, lambda_template: 0.01, beta_vib: 0.0, knn_n: 10, temporal_m: 5, behavioral_threshold: 0.8, gate_init: 2.0, gate_thresholds: "0.5,0.7,0.78,0.82,0.86,0.9", gate_temperature: 2.0, gate_temperature_end: 0.3, gate_warmup_epochs: 5, column_switches: channel}
