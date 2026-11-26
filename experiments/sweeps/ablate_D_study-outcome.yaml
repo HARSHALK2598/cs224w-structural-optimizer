@@ -1,0 +1,22 @@
+# study-outcome ablation D (everything except the bottleneck): which part of the structural optimizer
+# keeps training loss from falling? 1 layer, 10 epochs, seed 0.
+name: ablate_D_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 10
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 1
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: filter
+    fixed: {lambda_col: 0.0001, lambda_table: 0.0001, inject: "temporal,twohop,knn,behavioral", template_gates: true, lambda_template: 0.0001, knn_n: 10, temporal_m: 5, behavioral_threshold: 0.8, gate_init: 2.0, gate_thresholds: "0.5,0.7,0.78,0.82,0.86,0.9"}

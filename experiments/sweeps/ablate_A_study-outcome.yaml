@@ -1,0 +1,22 @@
+# study-outcome ablation A (baseline + bottleneck): which part of the structural optimizer
+# keeps training loss from falling? 1 layer, 10 epochs, seed 0.
+name: ablate_A_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 10
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 1
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: base
+    fixed: {beta_vib: 0.001}
