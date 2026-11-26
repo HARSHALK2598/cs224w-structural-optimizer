@@ -1,0 +1,2 @@
+setting,seeds,val_mean,val_std,test_mean,test_std,best_epoch,minutes,open_columns,open_tables
+filter_lc0.0001_lt0.0001_gi2_gate_thresholds-0.5+0.7+0.78+0.82+0.86+0.9,1,0.6076,,0.5889,,5.0,4.4,102.0,14.0
