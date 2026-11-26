@@ -46,3 +46,15 @@ def test_thresholds_and_strategy_parse():
     assert args.gate_thresholds == '0.5,0.86'
     assert args.temporal_strategy == 'last'
     assert train.parse_args([]).gate_thresholds == ''
+
+
+def test_gate_temperature_schedule():
+    fixed = train.parse_args(['--gate-temperature', '0.5'])
+    assert train.gate_temperature(fixed, 7) == 0.5
+    args = train.parse_args(['--epochs', '50', '--gate-temperature', '2.0',
+                             '--gate-temperature-end', '0.3',
+                             '--gate-warmup-epochs', '5'])
+    assert train.gate_temperature(args, 1) == 2.0
+    assert train.gate_temperature(args, 5) == 2.0
+    assert abs(train.gate_temperature(args, 50) - 0.3) < 1e-9
+    assert 0.3 < train.gate_temperature(args, 27) < 2.0

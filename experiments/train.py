@@ -86,6 +86,10 @@ DEFAULTS: Dict[str, Any] = dict(
     gate_lr=0.0,  # --model filter: learning rate of the gates (0: --lr)
     gate_init=2.0,  # --model filter: initial gate logit
     gate_temperature=2. / 3.,  # --model filter: Hard-Concrete temperature
+    # > 0: lower the temperature geometrically from gate_temperature to this
+    # value after gate_warmup_epochs (the authors' schedule); 0 keeps it fixed
+    gate_temperature_end=0.0,
+    gate_warmup_epochs=0,
     # Structural injection (step B):
     inject='',  # comma-separated subset of INJECTIONS; '' for none
     knn_n=10,  # KNN neighbours n per node (also the behavioural cap)
@@ -113,7 +117,8 @@ RESULT_FIELDS = [
     'behavioral_threshold', 'inject_tables', 'injected_relations',
     'lambda_template', 'open_templates', 'beta_vib', 'weight_decay',
     'full_db', 'strict_time', 'num_layers', 'num_neighbors',
-    'temporal_strategy', 'gate_thresholds', 'gate_threshold'
+    'temporal_strategy', 'gate_thresholds', 'gate_threshold',
+    'gate_temperature_end', 'gate_warmup_epochs'
 ]
 
 
@@ -801,6 +806,18 @@ def gates_of(model) -> List[HardConcreteGate]:
     return [m for m in model.modules() if isinstance(m, HardConcreteGate)]
 
 
+def gate_temperature(args, epoch: int) -> float:
+    r"""The switch temperature for :obj:`epoch` (1-based): fixed at
+    :obj:`args.gate_temperature`, or, with :obj:`args.gate_temperature_end >
+    0`, lowered geometrically to it after :obj:`args.gate_warmup_epochs`."""
+    start, end = args.gate_temperature, args.gate_temperature_end
+    if end <= 0:
+        return start
+    warmup = args.gate_warmup_epochs
+    fraction = max(0., (epoch - warmup) / max(1, args.epochs - warmup))
+    return start * (end / start)**fraction
+
+
 def set_gate_threshold(model, threshold: float) -> None:
     for gate in gates_of(model):
         gate.threshold = threshold
@@ -848,6 +865,8 @@ def fit(model, loaders, task, spec: TaskSpec, args, device: torch.device,
     text = getattr(args, 'gate_thresholds', '')
     thresholds = sorted({float(t) for t in text.split(',')}) if text else []
     for epoch in range(1, args.epochs + 1):
+        for gate in gates_of(model):
+            gate.temperature = gate_temperature(args, epoch)
         loss = train_epoch(model, loaders['train'], optimizer, spec,
                            entity_table, device, args.max_steps_per_epoch)
         threshold = None
@@ -940,7 +959,9 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
     gates = out['gates']
     if gates is not None:  # Filter and/or template gates.
         row.update(gate_lr=args.gate_lr or args.lr, gate_init=args.gate_init,
-                   gate_temperature=round(args.gate_temperature, 4))
+                   gate_temperature=round(args.gate_temperature, 4),
+                   gate_temperature_end=args.gate_temperature_end,
+                   gate_warmup_epochs=args.gate_warmup_epochs)
     if gates is not None and 'open_columns' in gates:  # --model filter
         row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
                    open_columns=gates['open_columns'],
