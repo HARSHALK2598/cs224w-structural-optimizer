@@ -1,0 +1,1206 @@
+{
+  "open_columns": 102,
+  "open_tables": 14,
+  "columns": {
+    "conditions_studies": {
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "interventions": {
+      "mesh_term": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "drop_withdrawals": {
+      "count": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "period": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "reason": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "outcome_analyses": {
+      "ci_lower_limit": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "ci_percent": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "ci_upper_limit": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "dispersion_value": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "p_value": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "param_value": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "ci_n_sides": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "dispersion_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "p_value_modifier": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "estimate_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "groups_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "method": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "method_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "non_inferiority_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "non_inferiority_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "other_analysis_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "p_value_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "param_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "sponsors_studies": {
+      "lead_or_collaborator": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "facilities_studies": {
+      "date": {
+        "prob_open": 0.9392,
+        "sigmoid": 0.8376,
+        "open": true
+      }
+    },
+    "eligibilities": {
+      "adult": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "child": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "gender": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "gender_based": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "healthy_volunteers": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "older_adult": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "sampling_method": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "criteria": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "gender_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "maximum_age": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "minimum_age": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "population": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "interventions_studies": {
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "outcomes": {
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "dispersion_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "outcome_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "param_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "population": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "time_frame": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "title": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "units": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "units_analyzed": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "facilities": {
+      "city": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "country": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "state": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "zip": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "reported_event_totals": {
+      "subjects_affected": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "subjects_at_risk": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "classification": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "event_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "sponsors": {
+      "agency_class": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "studies": {
+      "enrollment": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "number_of_arms": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "enrollment_type": {
+        "prob_open": 0.9392,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "has_dmc": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "is_fda_regulated_device": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "is_fda_regulated_drug": {
+        "prob_open": 0.9392,
+        "sigmoid": 0.8376,
+        "open": true
+      },
+      "is_unapproved_device": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "is_us_export": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "number_of_groups": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "phase": {
+        "prob_open": 0.9398,
+        "sigmoid": 0.839,
+        "open": true
+      },
+      "plan_to_share_ipd": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "study_type": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8374,
+        "open": true
+      },
+      "start_date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "acronym": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "baseline_population": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "biospec_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "biospec_retention": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "brief_summaries": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "brief_title": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "detailed_descriptions": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "official_title": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "source": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "source_class": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "target_duration": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "conditions": {
+      "mesh_term": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    },
+    "designs": {
+      "allocation": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "caregiver_masked": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "intervention_model": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "investigator_masked": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "masking": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "outcomes_assessor_masked": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "subject_masked": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "time_perspective": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "intervention_model_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "masking_description": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "observational_model": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      },
+      "primary_purpose": {
+        "prob_open": 0.9391,
+        "sigmoid": 0.8375,
+        "open": true
+      }
+    }
+  },
+  "tables": {
+    "conditions_studies": {
+      "prob_open": 0.9392,
+      "sigmoid": 0.8376,
+      "open": true
+    },
+    "interventions": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies": {
+      "prob_open": 0.9392,
+      "sigmoid": 0.8376,
+      "open": true
+    },
+    "facilities_studies": {
+      "prob_open": 0.9394,
+      "sigmoid": 0.8382,
+      "open": true
+    },
+    "eligibilities": {
+      "prob_open": 0.9392,
+      "sigmoid": 0.8376,
+      "open": true
+    },
+    "interventions_studies": {
+      "prob_open": 0.9392,
+      "sigmoid": 0.8376,
+      "open": true
+    },
+    "outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8374,
+      "open": true
+    }
+  },
+  "open_templates": 117,
+  "templates": {
+    "conditions_studies/next__f2p_condition_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/next__f2p_sponsor_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/next__f2p_facility_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/next__f2p_intervention_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/knn/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__conditions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__drop_withdrawals__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__outcome_analyses__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__sponsors_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__facilities_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__eligibilities__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__interventions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__outcomes__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__reported_event_totals__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/behavioral__designs__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__conditions_studies__f2p_condition_id/conditions": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "conditions/2hop__rev_f2p_condition_id__conditions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__outcome_analyses__f2p_outcome_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_outcome_id__outcomes__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__rev_f2p_outcome_id__outcome_analyses__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__sponsors_studies__f2p_sponsor_id/sponsors": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "sponsors/2hop__rev_f2p_sponsor_id__sponsors_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__facilities_studies__f2p_facility_id/facilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "facilities/2hop__rev_f2p_facility_id__facilities_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__interventions_studies__f2p_intervention_id/interventions": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "interventions/2hop__rev_f2p_intervention_id__interventions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__outcomes__rev_f2p_outcome_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9391,
+      "sigmoid": 0.8375,
+      "open": true
+    }
+  }
+}
