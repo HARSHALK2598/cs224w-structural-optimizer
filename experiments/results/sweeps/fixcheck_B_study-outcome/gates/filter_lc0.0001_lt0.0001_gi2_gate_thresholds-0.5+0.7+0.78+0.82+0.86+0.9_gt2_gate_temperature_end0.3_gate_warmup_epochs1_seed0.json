@@ -1,0 +1,618 @@
+{
+  "open_columns": 102,
+  "open_tables": 14,
+  "columns": {
+    "conditions_studies": {
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "interventions": {
+      "mesh_term": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "drop_withdrawals": {
+      "count": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "period": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "reason": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "outcome_analyses": {
+      "ci_lower_limit": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "ci_percent": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "ci_upper_limit": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "dispersion_value": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "p_value": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "param_value": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "ci_n_sides": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "dispersion_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "p_value_modifier": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "estimate_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "groups_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "method": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "method_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "non_inferiority_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "non_inferiority_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "other_analysis_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "p_value_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "param_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "sponsors_studies": {
+      "lead_or_collaborator": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "facilities_studies": {
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "eligibilities": {
+      "adult": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "child": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "gender": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "gender_based": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "healthy_volunteers": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "older_adult": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "sampling_method": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "criteria": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "gender_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "maximum_age": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "minimum_age": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "population": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "interventions_studies": {
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "outcomes": {
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "dispersion_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "outcome_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "param_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "population": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "time_frame": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "title": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "units": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "units_analyzed": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "facilities": {
+      "city": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "country": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "state": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "zip": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "reported_event_totals": {
+      "subjects_affected": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "subjects_at_risk": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "classification": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "event_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "sponsors": {
+      "agency_class": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "name": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "studies": {
+      "enrollment": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "number_of_arms": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "enrollment_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "has_dmc": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "is_fda_regulated_device": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "is_fda_regulated_drug": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "is_unapproved_device": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "is_us_export": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "number_of_groups": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "phase": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8655,
+        "open": true
+      },
+      "plan_to_share_ipd": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "study_type": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "start_date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "acronym": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "baseline_population": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "biospec_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "biospec_retention": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "brief_summaries": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "brief_title": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "detailed_descriptions": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "official_title": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "source": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "source_class": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "target_duration": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "conditions": {
+      "mesh_term": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    },
+    "designs": {
+      "allocation": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "caregiver_masked": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "intervention_model": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "investigator_masked": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "masking": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "outcomes_assessor_masked": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "subject_masked": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "time_perspective": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "date": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "intervention_model_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "masking_description": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "observational_model": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      },
+      "primary_purpose": {
+        "prob_open": 0.9934,
+        "sigmoid": 0.8654,
+        "open": true
+      }
+    }
+  },
+  "tables": {
+    "conditions_studies": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "interventions": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "drop_withdrawals": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "outcome_analyses": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "sponsors_studies": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "facilities_studies": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8657,
+      "open": true
+    },
+    "eligibilities": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "interventions_studies": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "outcomes": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "facilities": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "reported_event_totals": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "sponsors": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "conditions": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8654,
+      "open": true
+    },
+    "designs": {
+      "prob_open": 0.9934,
+      "sigmoid": 0.8656,
+      "open": true
+    }
+  }
+}
