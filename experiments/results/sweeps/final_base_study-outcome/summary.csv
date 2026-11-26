@@ -1,0 +1,2 @@
+setting,seeds,val_mean,val_std,test_mean,test_std,best_epoch,minutes
+base,1,0.6587,,0.6829,,47.0,134.48
