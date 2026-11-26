@@ -1,0 +1,12 @@
+run base_beta_vib0.001_seed0: --dataset rel-trial --task study-outcome --model base --seed 0 --epochs 10 --lr 0.001 --batch-size 256 --channels 128 --num-layers 1 --num-neighbors 64 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.0 --lambda-table 0.0 --gate-lr 0.0 --gate-init 2.0 --gate-temperature 0.6666666666666666 --gate-temperature-end 0.0 --gate-warmup-epochs 0 --inject  --knn-n 10 --temporal-m 1 --behavioral-threshold 0.9 --inject-tables  --lambda-template 0.0 --beta-vib 0.001 --weight-decay 0.005 --gate-thresholds  --temporal-strategy uniform --full-db --strict-time --dedup-encoder --nan-safe-numerical --results /tmp/proj/experiments/results/results.csv
+epoch 01  loss 0.6606  val roc_auc 0.5648
+epoch 02  loss 0.6585  val roc_auc 0.5638
+epoch 03  loss 0.6501  val roc_auc 0.5838
+epoch 04  loss 0.6496  val roc_auc 0.5606
+epoch 05  loss 0.6475  val roc_auc 0.5660
+epoch 06  loss 0.6457  val roc_auc 0.5706
+epoch 07  loss 0.6472  val roc_auc 0.5766
+epoch 08  loss 0.6459  val roc_auc 0.5798
+epoch 09  loss 0.6460  val roc_auc 0.5649
+epoch 10  loss 0.6482  val roc_auc 0.5526
+best epoch 3: val roc_auc 0.5838  test roc_auc 0.5667
