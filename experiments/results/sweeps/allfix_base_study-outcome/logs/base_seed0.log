@@ -1,0 +1,12 @@
+run base_seed0: --dataset rel-trial --task study-outcome --model base --seed 0 --epochs 10 --lr 0.001 --batch-size 256 --channels 128 --num-layers 1 --num-neighbors 64 --aggr sum --max-steps-per-epoch 2000 --text-embedder glove --num-workers 0 --lambda-col 0.0 --lambda-table 0.0 --gate-lr 0.0 --gate-init 2.0 --gate-temperature 0.6666666666666666 --gate-temperature-end 0.0 --gate-warmup-epochs 0 --inject  --knn-n 10 --temporal-m 1 --behavioral-threshold 0.9 --inject-tables  --lambda-template 0.0 --beta-vib 0.0 --weight-decay 0.005 --gate-thresholds  --temporal-strategy uniform --full-db --strict-time --dedup-encoder --nan-safe-numerical --results /tmp/proj/experiments/results/results.csv
+epoch 01  loss 0.6518  val roc_auc 0.5918
+epoch 02  loss 0.6384  val roc_auc 0.5927
+epoch 03  loss 0.6360  val roc_auc 0.5801
+epoch 04  loss 0.6368  val roc_auc 0.5920
+epoch 05  loss 0.6335  val roc_auc 0.5959
+epoch 06  loss 0.6328  val roc_auc 0.6147
+epoch 07  loss 0.6303  val roc_auc 0.5610
+epoch 08  loss 0.6329  val roc_auc 0.6137
+epoch 09  loss 0.6303  val roc_auc 0.5769
+epoch 10  loss 0.6286  val roc_auc 0.6095
+best epoch 6: val roc_auc 0.6147  test roc_auc 0.6188
