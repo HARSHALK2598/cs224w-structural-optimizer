@@ -1,0 +1,2 @@
+setting,seeds,val_mean,val_std,test_mean,test_std,best_epoch,minutes
+base_beta_vib0.001,1,0.5912,,0.6023,,8.0,3.74

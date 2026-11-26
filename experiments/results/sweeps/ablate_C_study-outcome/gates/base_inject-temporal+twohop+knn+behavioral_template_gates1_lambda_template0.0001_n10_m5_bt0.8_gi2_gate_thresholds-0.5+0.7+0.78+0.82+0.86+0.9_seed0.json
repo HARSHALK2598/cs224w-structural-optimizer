@@ -1,0 +1,590 @@
+{
+  "open_templates": 117,
+  "templates": {
+    "conditions_studies/next__f2p_condition_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/next__f2p_sponsor_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/next__f2p_facility_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/next__f2p_intervention_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/knn/studies": {
+      "prob_open": 0.9685,
+      "sigmoid": 0.8615,
+      "open": true
+    },
+    "studies/behavioral__conditions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9682,
+      "sigmoid": 0.8601,
+      "open": true
+    },
+    "studies/behavioral__drop_withdrawals__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/behavioral__outcome_analyses__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/behavioral__sponsors_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.8601,
+      "open": true
+    },
+    "studies/behavioral__facilities_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9683,
+      "sigmoid": 0.8605,
+      "open": true
+    },
+    "studies/behavioral__eligibilities__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/behavioral__interventions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.8599,
+      "open": true
+    },
+    "studies/behavioral__outcomes__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/behavioral__reported_event_totals__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/behavioral__designs__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__conditions_studies__f2p_condition_id/conditions": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "conditions/2hop__rev_f2p_condition_id__conditions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "drop_withdrawals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__outcome_analyses__f2p_outcome_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcome_analyses/2hop__f2p_outcome_id__outcomes__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__rev_f2p_outcome_id__outcome_analyses__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__sponsors_studies__f2p_sponsor_id/sponsors": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "sponsors/2hop__rev_f2p_sponsor_id__sponsors_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__facilities_studies__f2p_facility_id/facilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "facilities/2hop__rev_f2p_facility_id__facilities_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "eligibilities/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions_studies/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__interventions_studies__f2p_intervention_id/interventions": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "interventions/2hop__rev_f2p_intervention_id__interventions_studies__f2p_nct_id/studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "outcomes/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "studies/2hop__rev_f2p_nct_id__outcomes__rev_f2p_outcome_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "reported_event_totals/2hop__f2p_nct_id__studies__rev_f2p_nct_id/designs": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/conditions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/drop_withdrawals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcome_analyses": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/sponsors_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/facilities_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/eligibilities": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/interventions_studies": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/outcomes": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    },
+    "designs/2hop__f2p_nct_id__studies__rev_f2p_nct_id/reported_event_totals": {
+      "prob_open": 0.9681,
+      "sigmoid": 0.86,
+      "open": true
+    }
+  }
+}
