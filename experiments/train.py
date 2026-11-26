@@ -118,7 +118,8 @@ RESULT_FIELDS = [
     'lambda_template', 'open_templates', 'beta_vib', 'weight_decay',
     'full_db', 'strict_time', 'num_layers', 'num_neighbors',
     'temporal_strategy', 'gate_thresholds', 'gate_threshold',
-    'gate_temperature_end', 'gate_warmup_epochs'
+    'gate_temperature_end', 'gate_warmup_epochs', 'cross_subgraph_edges',
+    'all_rows_col_stats'
 ]
 
 
@@ -138,6 +139,14 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         help='Sample only rows strictly older than the seed '
                         "(the authors' code; RelBench includes the seed's "
                         'own timestamp).')
+    parser.add_argument('--cross-subgraph-edges', action='store_true',
+                        help='KNN and behavioural edges may link nodes of '
+                        'different subgraphs (not newer); the default links '
+                        "only within a subgraph, as in the authors' code.")
+    parser.add_argument('--all-rows-col-stats', action='store_true',
+                        help='With --full-db, compute feature statistics '
+                        'from every row; the default uses rows before the '
+                        "first training date, as in the authors' code.")
     parser.add_argument('--template-gates', action='store_true',
                         help='A switch per injected relation (step C).')
     parser.add_argument('--gates-open', action='store_true',
@@ -200,14 +209,17 @@ class Injection(torch.nn.Module):
     every pair of relations :math:`A \to B \to C` with :math:`A \neq C`.
     Edges never reach a node from a subgraph with a later seed time."""
     def __init__(self, names: List[str], edge_types, tables: List[str],
-                 knn_n: int, behavioral_threshold: float):
+                 knn_n: int, behavioral_threshold: float,
+                 same_subgraph: bool = True):
         super().__init__()
         self.knn = torch.nn.ModuleList([
-            KNNEdges(table, k=knn_n) for table in tables
+            KNNEdges(table, k=knn_n, same_subgraph=same_subgraph)
+            for table in tables
         ] if 'knn' in names else [])
         self.behavioral = torch.nn.ModuleList([
             BehavioralEdges(table, via=et, threshold=behavioral_threshold,
-                            max_neighbors=knn_n) for table in tables
+                            max_neighbors=knn_n, same_subgraph=same_subgraph)
+            for table in tables
             for et in edge_types if et[2] == table and et[0] != table
         ] if 'behavioral' in names else [])
         self.two_hop = torch.nn.ModuleList(
@@ -257,7 +269,8 @@ def make_injection(args, data, entity_table: str) -> Optional[Injection]:
     else:
         tables = [entity_table]
     return Injection(names, schema_edge_types(data), tables, args.knn_n,
-                     args.behavioral_threshold)
+                     args.behavioral_threshold,
+                     not getattr(args, 'cross_subgraph_edges', False))
 
 
 class GloveTextEmbedding:
@@ -298,10 +311,12 @@ def text_embedder_cfg(name: str, device: torch.device):
 
 
 def load_graph(dataset, task, text_embedder: str, device: torch.device,
-               full_db: bool = False):
+               full_db: bool = False, early_col_stats: bool = True):
     r"""Builds the database graph, without the columns that leak the task's
     label (:meth:`task.hidden_columns`). With :obj:`full_db`, from the whole
-    database instead of RelBench's cut at the test timestamp."""
+    database instead of RelBench's cut at the test timestamp; the feature
+    statistics then come from rows before the first training date
+    (:obj:`early_col_stats`, see :meth:`statistics_before`)."""
     db = dataset.get_db(upto_test_timestamp=not full_db)
     col_to_stype_dict = get_stype_proposal(db)
     if text_embedder == 'none':  # Drop text columns (quick CPU runs).
@@ -317,13 +332,45 @@ def load_graph(dataset, task, text_embedder: str, device: torch.device,
     name = Path(str(dataset.name_or_path)).name
     cache_dir = ROOT / 'data' / 'materialized' / name / (
         text_embedder + ('_full_db' if full_db else ''))
-    return make_pkey_fkey_graph(
+    data, col_stats_dict = make_pkey_fkey_graph(
         db,
         col_to_stype_dict=col_to_stype_dict,
         text_embedder_cfg=text_embedder_cfg(text_embedder, device),
         cache_dir=str(cache_dir),
         remove_columns=task.hidden_columns(),
     )
+    if full_db and early_col_stats:
+        train_table = task.get_table('train')
+        cutoff = train_table.df[train_table.time_col].min()
+        col_stats_dict = statistics_before(db, data, col_stats_dict, cutoff)
+    return data, col_stats_dict
+
+
+def statistics_before(db, data, col_stats_dict, cutoff):
+    r"""Recomputes the numerical and timestamp column statistics (mean,
+    standard deviation, quantiles, year range), which scale the features,
+    from the rows before :obj:`cutoff` (tables without a time column: all
+    rows), as in the authors' code. Category lists are kept, since they only
+    index the values. Tables with no rows before :obj:`cutoff` keep their
+    statistics."""
+    from torch_frame.data.stats import compute_col_stats
+    kinds = (torch_frame.numerical, torch_frame.timestamp)
+    out = {}
+    for name, stats in col_stats_dict.items():
+        table = db.table_dict[name]
+        df = table.df
+        if table.time_col is not None:
+            df = df[df[table.time_col] < cutoff]
+        stats = dict(stats)
+        if len(df) > 0:
+            for kind, cols in data[name].tf.col_names_dict.items():
+                if kind not in kinds:
+                    continue
+                for col in cols:
+                    if col in df.columns:
+                        stats[col] = compute_col_stats(df[col], kind)
+        out[name] = stats
+    return out
 
 
 def mae(true: np.ndarray, pred: np.ndarray) -> float:
@@ -942,6 +989,8 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
         row.update(beta_vib=args.beta_vib)
     row.update(weight_decay=args.weight_decay, full_db=args.full_db,
                strict_time=args.strict_time, num_layers=args.num_layers,
+               cross_subgraph_edges=args.cross_subgraph_edges,
+               all_rows_col_stats=args.all_rows_col_stats,
                num_neighbors=args.num_neighbors,
                temporal_strategy=args.temporal_strategy)
     if out.get('gate_threshold') is not None:
@@ -986,7 +1035,8 @@ def main() -> None:
     dataset = load_dataset(args.dataset)
     task = dataset.load_task(args.task)
     data, col_stats_dict = load_graph(dataset, task, args.text_embedder,
-                                      device, args.full_db)
+                                      device, args.full_db,
+                                      not args.all_rows_col_stats)
     data = prepare_graph(data, args)  # + temporal relations (--inject)
     spec = task_spec(task)
     loaders = make_loaders(data, task, args)

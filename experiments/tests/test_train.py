@@ -120,3 +120,31 @@ def test_write_result_rejects_other_columns(tmp_path):
     path.write_text('dataset,task\nrel-f1,driver-top3\n')
     with pytest.raises(ValueError, match='different columns'):
         train.write_result(str(path), dict(dataset='rel-f1'))
+
+
+def test_statistics_before_uses_early_rows_only():
+    import pandas as pd
+    import torch_frame
+    from torch_frame.data.stats import StatType
+    df = pd.DataFrame({
+        'time': pd.to_datetime(['2000-01-01', '2001-01-01', '2010-01-01']),
+        'value': [1.0, 3.0, 100.0],
+    })
+    static = pd.DataFrame({'size': [2.0, 4.0]})
+    db = SimpleNamespace(table_dict={
+        'events': SimpleNamespace(df=df, time_col='time'),
+        'things': SimpleNamespace(df=static, time_col=None),
+    })
+    tf_events = SimpleNamespace(
+        col_names_dict={torch_frame.numerical: ['value']})
+    tf_things = SimpleNamespace(
+        col_names_dict={torch_frame.numerical: ['size']})
+    data = {'events': SimpleNamespace(tf=tf_events),
+            'things': SimpleNamespace(tf=tf_things)}
+    stats = {'events': {'value': {StatType.MEAN: 34.67}},
+             'things': {'size': {StatType.MEAN: 0.0}}}
+    out = train.statistics_before(db, data, stats,
+                                  pd.Timestamp('2005-01-01'))
+    assert out['events']['value'][StatType.MEAN] == 2.0  # 2010 row left out
+    assert out['things']['size'][StatType.MEAN] == 3.0  # no time: all rows
+    assert stats['events']['value'][StatType.MEAN] == 34.67  # not modified

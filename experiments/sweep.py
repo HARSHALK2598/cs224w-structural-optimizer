@@ -166,7 +166,8 @@ def run_sweep(cfg: Dict[str, Any], out: Path,
     task = dataset.load_task(probe.task)
     data, col_stats_dict = train.load_graph(dataset, task,
                                             probe.text_embedder, device,
-                                            probe.full_db)
+                                            probe.full_db,
+                                            not probe.all_rows_col_stats)
     spec = train.task_spec(task)
 
     start = time.time()

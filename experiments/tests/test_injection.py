@@ -94,7 +94,10 @@ def test_instance_counts(f1):
                                     'behavioral'])
 def test_injected_edges_reach_message_passing(f1, inject):
     task, data, col_stats = f1
-    args = args_for('--inject', inject, '--behavioral-threshold', '0.5')
+    # A rel-f1 driver subgraph holds one driver, so driver-to-driver KNN and
+    # behavioural edges need --cross-subgraph-edges to exist at all:
+    args = args_for('--inject', inject, '--behavioral-threshold', '0.5',
+                    '--cross-subgraph-edges')
     run_data = train.prepare_graph(data, args)
     torch.manual_seed(0)
     model = train.build_model(args, run_data, col_stats, 1, 'drivers')
@@ -156,3 +159,14 @@ def test_sweep_run_names_with_text_values():
     assert sweep.to_argv(runs[1]['overrides'])[:4] == [
         '--model', 'base', '--inject', 'knn'
     ]
+
+
+@requires_rel_f1
+def test_same_subgraph_edges_by_default(f1):
+    task, data, _ = f1
+    args = args_for('--inject', 'knn')
+    model = train.build_model(args, data, f1[2], 1, 'drivers')
+    assert all(knn.same_subgraph for knn in model.injection.knn)
+    cross = args_for('--inject', 'knn', '--cross-subgraph-edges')
+    model = train.build_model(cross, data, f1[2], 1, 'drivers')
+    assert not any(knn.same_subgraph for knn in model.injection.knn)

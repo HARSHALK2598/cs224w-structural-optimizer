@@ -44,7 +44,8 @@ def main():
     dataset = train.load_dataset(args.dataset)
     task = dataset.load_task(args.task)
     data, col_stats = train.load_graph(dataset, task, args.text_embedder,
-                                       device, args.full_db)
+                                       device, args.full_db,
+                                       not args.all_rows_col_stats)
     data = train.prepare_graph(data, args)
     spec = train.task_spec(task)
     loaders = train.make_loaders(data, task, args)
