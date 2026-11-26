@@ -119,7 +119,7 @@ RESULT_FIELDS = [
     'full_db', 'strict_time', 'num_layers', 'num_neighbors',
     'temporal_strategy', 'gate_thresholds', 'gate_threshold',
     'gate_temperature_end', 'gate_warmup_epochs', 'cross_subgraph_edges',
-    'all_rows_col_stats'
+    'all_rows_col_stats', 'column_switches'
 ]
 
 
@@ -147,6 +147,11 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         help='With --full-db, compute feature statistics '
                         'from every row; the default uses rows before the '
                         "first training date, as in the authors' code.")
+    parser.add_argument('--column-switches', choices=['column', 'channel'],
+                        default='column',
+                        help='--model filter: one switch per database column '
+                        '(inside the encoder) or per embedding channel '
+                        "(after it, as in the authors' code).")
     parser.add_argument('--template-gates', action='store_true',
                         help='A switch per injected relation (step C).')
     parser.add_argument('--gates-open', action='store_true',
@@ -662,11 +667,14 @@ class BaseModel(torch.nn.Module):
 class FilterModel(BaseModel):
     r"""Base with column and table gates.
 
-    Each table's row encoder runs in two halves, with the column gates in
-    between: the column encoders give :obj:`[N, C, channels]`, the gates
-    scale each column, then the ResNet mixes the columns. The table gates
-    scale :math:`h^{(0)}` (after the time encoding) of every table except
-    :obj:`entity_table`. With every gate open, the model is Base.
+    With :obj:`column_switches='column'`, each table's row encoder runs in
+    two halves, with the column gates in between: the column encoders give
+    :obj:`[N, C, channels]`, the gates scale each column, then the ResNet
+    mixes the columns. With :obj:`'channel'` (the authors' code), the encoder
+    runs whole and one gate per embedding channel scales :math:`h^{(0)}`
+    (after the time encoding) of every table. The table gates scale
+    :math:`h^{(0)}` of every table except :obj:`entity_table`. With every
+    gate open, the model is Base.
     """
     def __init__(self, data, col_stats_dict, channels: int, out_channels: int,
                  num_layers: int, aggr: str, entity_table: str,
@@ -676,7 +684,10 @@ class FilterModel(BaseModel):
                  nan_safe_numerical: bool = False,
                  injection: Optional[Injection] = None,
                  template_gates: bool = False, lambda_template: float = 0.0,
-                 beta_vib: float = 0.0):
+                 beta_vib: float = 0.0, column_switches: str = 'column'):
+        if column_switches not in ('column', 'channel'):
+            raise ValueError(f"'column_switches' must be 'column' or "
+                             f"'channel' (got '{column_switches}')")
         super().__init__(data, col_stats_dict, channels, out_channels,
                          num_layers, aggr, dedup_encoder, nan_safe_numerical,
                          injection, template_gates, lambda_template,
@@ -695,6 +706,12 @@ class FilterModel(BaseModel):
             ]
             for node_type in data.node_types
         }
+        self.column_switches = column_switches
+        if column_switches == 'channel':  # Switch c gates channel c:
+            self.col_names = {
+                node_type: [f'channel_{c}' for c in range(channels)]
+                for node_type in data.node_types
+            }
         self.filter = RelationalFilter(
             num_columns={
                 node_type: len(cols)
@@ -706,6 +723,8 @@ class FilterModel(BaseModel):
         )
 
     def encode_table(self, node_type: str, tf) -> Tensor:
+        if self.column_switches == 'channel':
+            return super().encode_table(node_type, tf)
         resnet = self.encoder.encoders[node_type]
         x, _ = resnet.encoder(tf)  # [N, C, channels]
         if not self.gates_open:
@@ -716,7 +735,14 @@ class FilterModel(BaseModel):
 
     def encode(self, batch, entity_table: str) -> Dict[str, Tensor]:
         x_dict = super().encode(batch, entity_table)
-        return x_dict if self.gates_open else self.filter.gate_tables(x_dict)
+        if self.gates_open:
+            return x_dict
+        if self.column_switches == 'channel':  # g_T * h0, as h0 * column:
+            x_dict = {
+                node_type: self.filter.gate_columns(node_type, x)
+                for node_type, x in x_dict.items()
+            }
+        return self.filter.gate_tables(x_dict)
 
     def structural_loss(self) -> Tensor:
         r"""The penalty term :math:`\lambda \sum \mathbb{E}\|g\|_0 +
@@ -773,7 +799,8 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                            args.gate_temperature, args.gates_open,
                            args.nan_safe_numerical, injection,
                            args.template_gates, args.lambda_template,
-                           beta_vib=args.beta_vib)
+                           beta_vib=args.beta_vib,
+                           column_switches=args.column_switches)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -1013,6 +1040,7 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
                    gate_warmup_epochs=args.gate_warmup_epochs)
     if gates is not None and 'open_columns' in gates:  # --model filter
         row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
+                   column_switches=args.column_switches,
                    open_columns=gates['open_columns'],
                    open_tables=gates['open_tables'])
     if gates is not None and 'open_templates' in gates:  # --template-gates

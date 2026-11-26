@@ -292,3 +292,30 @@ def test_filter_model_nan_safe_numerical(setup):
                       task.entity_table, torch.device('cpu'), max_steps=1)
     for name, param in model.named_parameters():
         assert not torch.isnan(param).any(), name
+
+
+@requires_rel_f1
+def test_channel_switches(setup):
+    task, data, col_stats, batch = setup
+    model = make(setup, column_switches='channel', lambda_col=0.001)
+    # One switch per channel (128), for every table:
+    assert all(g.num_gates == 128 for g in model.filter.column_gates.values())
+    assert set(model.filter.column_gates.keys()) == set(data.node_types)
+    assert model.gate_summary()['open_columns'] == 128 * len(data.node_types)
+
+    # Every switch open in evaluation: the model is Base (same weights):
+    base = make(setup, gates_open=True)
+    weights = {k: v for k, v in base.state_dict().items()
+               if not k.startswith('filter.')}
+    missing, unexpected = model.load_state_dict(weights, strict=False)
+    assert unexpected == [] and all(k.startswith('filter.') for k in missing)
+    model.eval(), base.eval()
+    with torch.no_grad():
+        assert torch.allclose(model(batch, task.entity_table),
+                              base(batch, task.entity_table), atol=1e-6)
+        # A closed channel changes the output:
+        model.filter.column_gates['results'].logit[0] = -10.0
+        assert not torch.allclose(model(batch, task.entity_table),
+                                  base(batch, task.entity_table), atol=1e-6)
+    with pytest.raises(ValueError, match="'column' or 'channel'"):
+        make(setup, column_switches='rows')
