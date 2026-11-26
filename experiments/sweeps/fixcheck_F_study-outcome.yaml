@@ -1,0 +1,22 @@
+# study-outcome check after the noise fixes (bottleneck noise starts at 0.37;
+# switch temperature 2.0 -> 0.3): full structural optimizer. 1 layer, 10 epochs, seed 0.
+name: fixcheck_F_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 10
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 1
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: filter
+    fixed: {lambda_col: 0.0001, lambda_table: 0.0001, inject: "temporal,twohop,knn,behavioral", template_gates: true, lambda_template: 0.0001, beta_vib: 0.001, knn_n: 10, temporal_m: 5, behavioral_threshold: 0.8, gate_init: 2.0, gate_thresholds: "0.5,0.7,0.78,0.82,0.86,0.9", gate_temperature: 2.0, gate_temperature_end: 0.3, gate_warmup_epochs: 1}

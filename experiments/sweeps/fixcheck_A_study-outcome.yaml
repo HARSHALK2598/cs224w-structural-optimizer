@@ -1,0 +1,22 @@
+# study-outcome check after the noise fixes (bottleneck noise starts at 0.37;
+# switch temperature 2.0 -> 0.3): baseline + bottleneck. 1 layer, 10 epochs, seed 0.
+name: fixcheck_A_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 10
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 1
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: base
+    fixed: {beta_vib: 0.001}
