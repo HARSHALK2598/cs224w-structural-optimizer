@@ -1,0 +1,22 @@
+# rel-trial study-outcome with 2 GNN layers (the tuned settings used 1, which
+# only reaches the link tables, not conditions, interventions, sponsors or
+# facilities). One seed. Full-history test.
+name: layers2_base_study-outcome
+fixed:
+  dataset: rel-trial
+  task: study-outcome
+  epochs: 50
+  lr: 0.001
+  weight_decay: 0.005
+  batch_size: 256
+  num_neighbors: 64
+  channels: 128
+  num_layers: 2
+  temporal_strategy: uniform
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+seeds: [0]
+arms:
+  - model: base
