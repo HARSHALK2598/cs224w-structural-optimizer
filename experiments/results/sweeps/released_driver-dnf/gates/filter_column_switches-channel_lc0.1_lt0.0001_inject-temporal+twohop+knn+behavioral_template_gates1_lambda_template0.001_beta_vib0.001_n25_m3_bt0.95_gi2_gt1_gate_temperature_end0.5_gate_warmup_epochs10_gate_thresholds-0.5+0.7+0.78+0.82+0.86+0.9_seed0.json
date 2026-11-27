@@ -1,0 +1,3339 @@
+{
+  "open_columns": 576,
+  "open_tables": 8,
+  "columns": {
+    "races": {
+      "channel_0": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      }
+    },
+    "qualifying": {
+      "channel_0": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5397,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5407,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5419,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5393,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5403,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5406,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.9278,
+        "sigmoid": 0.5389,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5411,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.541,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5414,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5407,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.542,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.539,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5415,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.9278,
+        "sigmoid": 0.5389,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5415,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.541,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5397,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5393,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.9289,
+        "sigmoid": 0.5429,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5407,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5412,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5406,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5411,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5411,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.5423,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.542,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5417,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5433,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5412,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5393,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5403,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5413,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5431,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5434,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5404,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5409,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5409,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5392,
+        "open": true
+      }
+    },
+    "constructor_standings": {
+      "channel_0": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      }
+    },
+    "standings": {
+      "channel_0": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5416,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5407,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.9359,
+        "sigmoid": 0.5704,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.9303,
+        "sigmoid": 0.5484,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.9385,
+        "sigmoid": 0.581,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5414,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5405,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5435,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.9298,
+        "sigmoid": 0.5462,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.9314,
+        "sigmoid": 0.5522,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5406,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.9422,
+        "sigmoid": 0.597,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.9316,
+        "sigmoid": 0.5534,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.9315,
+        "sigmoid": 0.5529,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.9298,
+        "sigmoid": 0.5462,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.9288,
+        "sigmoid": 0.5426,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.5422,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.9288,
+        "sigmoid": 0.5426,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.9292,
+        "sigmoid": 0.544,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5417,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5413,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5437,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.9295,
+        "sigmoid": 0.5452,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5417,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.9319,
+        "sigmoid": 0.5544,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5404,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5432,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.9288,
+        "sigmoid": 0.5426,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.9293,
+        "sigmoid": 0.5442,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5437,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.9322,
+        "sigmoid": 0.5554,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.9299,
+        "sigmoid": 0.5468,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.9304,
+        "sigmoid": 0.5485,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5403,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.9309,
+        "sigmoid": 0.5506,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.9306,
+        "sigmoid": 0.5495,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5406,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5393,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.9294,
+        "sigmoid": 0.5448,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.9319,
+        "sigmoid": 0.5544,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.9295,
+        "sigmoid": 0.5451,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5438,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.9292,
+        "sigmoid": 0.5439,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5405,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.9297,
+        "sigmoid": 0.546,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5433,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5433,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.9304,
+        "sigmoid": 0.5486,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.931,
+        "sigmoid": 0.551,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.9307,
+        "sigmoid": 0.5498,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.9289,
+        "sigmoid": 0.5428,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.9294,
+        "sigmoid": 0.5447,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.9314,
+        "sigmoid": 0.5523,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.542,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.9298,
+        "sigmoid": 0.5462,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.9326,
+        "sigmoid": 0.5571,
+        "open": true
+      }
+    },
+    "constructors": {
+      "channel_0": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      }
+    },
+    "drivers": {
+      "channel_0": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5419,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.9278,
+        "sigmoid": 0.5387,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.5422,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.9278,
+        "sigmoid": 0.5386,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5436,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5404,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5392,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.9278,
+        "sigmoid": 0.5389,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5392,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5405,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5412,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5391,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5399,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5411,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5404,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5418,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5431,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5409,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5403,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5393,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5392,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5399,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5418,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5432,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5408,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5434,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5403,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5403,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5393,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5409,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5418,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.54,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5397,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5402,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5418,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5405,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5398,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.9276,
+        "sigmoid": 0.5379,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5419,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.9286,
+        "sigmoid": 0.5417,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5406,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.9279,
+        "sigmoid": 0.5391,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5399,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5396,
+        "open": true
+      }
+    },
+    "constructor_results": {
+      "channel_0": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      }
+    },
+    "circuits": {
+      "channel_0": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5394,
+        "open": true
+      }
+    },
+    "results": {
+      "channel_0": {
+        "prob_open": 0.9354,
+        "sigmoid": 0.5682,
+        "open": true
+      },
+      "channel_1": {
+        "prob_open": 0.931,
+        "sigmoid": 0.551,
+        "open": true
+      },
+      "channel_2": {
+        "prob_open": 0.9396,
+        "sigmoid": 0.5857,
+        "open": true
+      },
+      "channel_3": {
+        "prob_open": 0.9299,
+        "sigmoid": 0.5467,
+        "open": true
+      },
+      "channel_4": {
+        "prob_open": 0.9326,
+        "sigmoid": 0.5571,
+        "open": true
+      },
+      "channel_5": {
+        "prob_open": 0.9301,
+        "sigmoid": 0.5473,
+        "open": true
+      },
+      "channel_6": {
+        "prob_open": 0.9294,
+        "sigmoid": 0.5446,
+        "open": true
+      },
+      "channel_7": {
+        "prob_open": 0.9333,
+        "sigmoid": 0.56,
+        "open": true
+      },
+      "channel_8": {
+        "prob_open": 0.928,
+        "sigmoid": 0.5395,
+        "open": true
+      },
+      "channel_9": {
+        "prob_open": 0.9296,
+        "sigmoid": 0.5456,
+        "open": true
+      },
+      "channel_10": {
+        "prob_open": 0.9303,
+        "sigmoid": 0.548,
+        "open": true
+      },
+      "channel_11": {
+        "prob_open": 0.9301,
+        "sigmoid": 0.5475,
+        "open": true
+      },
+      "channel_12": {
+        "prob_open": 0.9288,
+        "sigmoid": 0.5426,
+        "open": true
+      },
+      "channel_13": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.541,
+        "open": true
+      },
+      "channel_14": {
+        "prob_open": 0.9294,
+        "sigmoid": 0.5449,
+        "open": true
+      },
+      "channel_15": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5435,
+        "open": true
+      },
+      "channel_16": {
+        "prob_open": 0.9305,
+        "sigmoid": 0.5488,
+        "open": true
+      },
+      "channel_17": {
+        "prob_open": 0.934,
+        "sigmoid": 0.5625,
+        "open": true
+      },
+      "channel_18": {
+        "prob_open": 0.9311,
+        "sigmoid": 0.5511,
+        "open": true
+      },
+      "channel_19": {
+        "prob_open": 0.9308,
+        "sigmoid": 0.5503,
+        "open": true
+      },
+      "channel_20": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5437,
+        "open": true
+      },
+      "channel_21": {
+        "prob_open": 0.9299,
+        "sigmoid": 0.5465,
+        "open": true
+      },
+      "channel_22": {
+        "prob_open": 0.9298,
+        "sigmoid": 0.5463,
+        "open": true
+      },
+      "channel_23": {
+        "prob_open": 0.9423,
+        "sigmoid": 0.5976,
+        "open": true
+      },
+      "channel_24": {
+        "prob_open": 0.9282,
+        "sigmoid": 0.5404,
+        "open": true
+      },
+      "channel_25": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5412,
+        "open": true
+      },
+      "channel_26": {
+        "prob_open": 0.9292,
+        "sigmoid": 0.5439,
+        "open": true
+      },
+      "channel_27": {
+        "prob_open": 0.9306,
+        "sigmoid": 0.5493,
+        "open": true
+      },
+      "channel_28": {
+        "prob_open": 0.9312,
+        "sigmoid": 0.5515,
+        "open": true
+      },
+      "channel_29": {
+        "prob_open": 0.931,
+        "sigmoid": 0.5508,
+        "open": true
+      },
+      "channel_30": {
+        "prob_open": 0.9299,
+        "sigmoid": 0.5467,
+        "open": true
+      },
+      "channel_31": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5409,
+        "open": true
+      },
+      "channel_32": {
+        "prob_open": 0.945,
+        "sigmoid": 0.6097,
+        "open": true
+      },
+      "channel_33": {
+        "prob_open": 0.9339,
+        "sigmoid": 0.5622,
+        "open": true
+      },
+      "channel_34": {
+        "prob_open": 0.9287,
+        "sigmoid": 0.542,
+        "open": true
+      },
+      "channel_35": {
+        "prob_open": 0.9301,
+        "sigmoid": 0.5474,
+        "open": true
+      },
+      "channel_36": {
+        "prob_open": 0.9288,
+        "sigmoid": 0.5423,
+        "open": true
+      },
+      "channel_37": {
+        "prob_open": 0.9303,
+        "sigmoid": 0.5484,
+        "open": true
+      },
+      "channel_38": {
+        "prob_open": 0.9367,
+        "sigmoid": 0.5735,
+        "open": true
+      },
+      "channel_39": {
+        "prob_open": 0.9382,
+        "sigmoid": 0.5797,
+        "open": true
+      },
+      "channel_40": {
+        "prob_open": 0.9278,
+        "sigmoid": 0.5388,
+        "open": true
+      },
+      "channel_41": {
+        "prob_open": 0.9296,
+        "sigmoid": 0.5456,
+        "open": true
+      },
+      "channel_42": {
+        "prob_open": 0.9316,
+        "sigmoid": 0.5531,
+        "open": true
+      },
+      "channel_43": {
+        "prob_open": 0.9283,
+        "sigmoid": 0.5405,
+        "open": true
+      },
+      "channel_44": {
+        "prob_open": 0.9299,
+        "sigmoid": 0.5468,
+        "open": true
+      },
+      "channel_45": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5416,
+        "open": true
+      },
+      "channel_46": {
+        "prob_open": 0.9302,
+        "sigmoid": 0.5477,
+        "open": true
+      },
+      "channel_47": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.5411,
+        "open": true
+      },
+      "channel_48": {
+        "prob_open": 0.9384,
+        "sigmoid": 0.5806,
+        "open": true
+      },
+      "channel_49": {
+        "prob_open": 0.9294,
+        "sigmoid": 0.545,
+        "open": true
+      },
+      "channel_50": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5413,
+        "open": true
+      },
+      "channel_51": {
+        "prob_open": 0.9306,
+        "sigmoid": 0.5493,
+        "open": true
+      },
+      "channel_52": {
+        "prob_open": 0.9297,
+        "sigmoid": 0.5458,
+        "open": true
+      },
+      "channel_53": {
+        "prob_open": 0.9322,
+        "sigmoid": 0.5554,
+        "open": true
+      },
+      "channel_54": {
+        "prob_open": 0.9291,
+        "sigmoid": 0.5436,
+        "open": true
+      },
+      "channel_55": {
+        "prob_open": 0.9303,
+        "sigmoid": 0.5483,
+        "open": true
+      },
+      "channel_56": {
+        "prob_open": 0.9285,
+        "sigmoid": 0.5414,
+        "open": true
+      },
+      "channel_57": {
+        "prob_open": 0.9369,
+        "sigmoid": 0.5743,
+        "open": true
+      },
+      "channel_58": {
+        "prob_open": 0.929,
+        "sigmoid": 0.5433,
+        "open": true
+      },
+      "channel_59": {
+        "prob_open": 0.9281,
+        "sigmoid": 0.5401,
+        "open": true
+      },
+      "channel_60": {
+        "prob_open": 0.9273,
+        "sigmoid": 0.537,
+        "open": true
+      },
+      "channel_61": {
+        "prob_open": 0.9288,
+        "sigmoid": 0.5424,
+        "open": true
+      },
+      "channel_62": {
+        "prob_open": 0.9284,
+        "sigmoid": 0.541,
+        "open": true
+      },
+      "channel_63": {
+        "prob_open": 0.9298,
+        "sigmoid": 0.5463,
+        "open": true
+      }
+    }
+  },
+  "tables": {
+    "races": {
+      "prob_open": 0.9288,
+      "sigmoid": 0.5426,
+      "open": true
+    },
+    "qualifying": {
+      "prob_open": 0.9927,
+      "sigmoid": 0.925,
+      "open": true
+    },
+    "constructor_standings": {
+      "prob_open": 0.9288,
+      "sigmoid": 0.5426,
+      "open": true
+    },
+    "standings": {
+      "prob_open": 0.9926,
+      "sigmoid": 0.924,
+      "open": true
+    },
+    "constructors": {
+      "prob_open": 0.9288,
+      "sigmoid": 0.5426,
+      "open": true
+    },
+    "constructor_results": {
+      "prob_open": 0.9288,
+      "sigmoid": 0.5426,
+      "open": true
+    },
+    "circuits": {
+      "prob_open": 0.9288,
+      "sigmoid": 0.5426,
+      "open": true
+    },
+    "results": {
+      "prob_open": 0.9921,
+      "sigmoid": 0.9196,
+      "open": true
+    }
+  },
+  "open_templates": 78,
+  "templates": {
+    "races/next__f2p_circuitId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/next__f2p_driverId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/next__f2p_constructorId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/next__f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/next__f2p_driverId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/next__f2p_constructorId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/next__f2p_driverId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/next__f2p_constructorId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/knn/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/behavioral__qualifying__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/behavioral__standings__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/behavioral__results__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "circuits/2hop__rev_f2p_circuitId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__qualifying__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__qualifying__f2p_constructorId/constructors": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_driverId__drivers__rev_f2p_driverId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_driverId__drivers__rev_f2p_driverId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__qualifying__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__qualifying__f2p_constructorId/constructors": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "qualifying/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__qualifying__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__qualifying__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__constructor_standings__f2p_constructorId/constructors": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_standings/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__constructor_standings__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__standings__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_driverId__drivers__rev_f2p_driverId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "standings/2hop__f2p_driverId__drivers__rev_f2p_driverId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__standings__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_raceId__races__rev_f2p_raceId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__constructor_results__f2p_constructorId/constructors": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructor_results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__constructor_results__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__f2p_circuitId/circuits": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_raceId__races__rev_f2p_raceId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__results__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "races/2hop__rev_f2p_raceId__results__f2p_constructorId/constructors": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_driverId__drivers__rev_f2p_driverId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_driverId__drivers__rev_f2p_driverId/standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__results__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "drivers/2hop__rev_f2p_driverId__results__f2p_constructorId/constructors": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/qualifying": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_standings": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "results/2hop__f2p_constructorId__constructors__rev_f2p_constructorId/constructor_results": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__results__f2p_raceId/races": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    },
+    "constructors/2hop__rev_f2p_constructorId__results__f2p_driverId/drivers": {
+      "prob_open": 0.9281,
+      "sigmoid": 0.5398,
+      "open": true
+    }
+  }
+}
