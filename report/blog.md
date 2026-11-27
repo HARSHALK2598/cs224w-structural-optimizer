@@ -43,9 +43,10 @@ The GraphSAGE baseline has three steps: encode each row's columns into a vector,
 message passing over the database graph, and predict with an MLP. The structural
 optimizer keeps all three and inserts four additions.
 
-1. **Table and column switches**, between the encoder and the GNN. Each table *T* gets one
-   switch *s_T*, and each of its columns gets a switch *g_T*. A row's vector becomes
-   *s_T · (g_T ⊙ h)*.
+1. **Table and channel switches**, between the encoder and the GNN. Each table *T* gets one
+   switch *s_T*, and each channel of its embedding gets a switch *g_T*. A row's vector
+   becomes *s_T · (g_T ⊙ h)*. The paper calls these column-level switches; its code, and our
+   default, put them on embedding channels (Section 7).
 2. **Added edges**, built for each batch from four templates:
    - *temporal*: each record links to the same entity's previous *m* records;
    - *two-hop shortcut*: A → B → C becomes a direct A → C edge;
@@ -114,20 +115,22 @@ loss = task_loss(pred, y) + model.structural_loss()
 ```
 
 Design choices:
-- **Added edges respect time.** They are built per batch, and an edge can only bring in
-  rows from the same or an earlier prediction date.
+- **Added edges respect time.** They are built per batch, inside each prediction's own
+  sampled subgraph, so they only connect rows from before that prediction's date.
 - **Closed means skipped.** A switched-off edge type is not computed at all, so pruning
   saves compute.
 - **Off means baseline.** With every flag off, `StructuralOptimizer` is exactly the
   GraphSAGE baseline, and a test checks this.
 
-Tests: `test/contrib` 87 passed, 11 skipped; experiment tests 56 passed.
+Tests: `test/contrib` 89 passed, 11 skipped; experiment tests 60 passed.
 TODO: CUDA, and GAT/GraphConv as the convolution.
 
 ## 4. Results on rel-f1 driver-top3, and why
 
 The task: will a driver finish in the top 3 in the next month? Test ROC-AUC, mean ± std
-over 3 seeds unless marked. We trained with three sets of settings:
+over 3 seeds unless marked. These rel-f1 runs predate the fixes of Section 7 (they used
+per-column switches, a fixed switch temperature and cross-subgraph KNN edges). We trained
+with three sets of settings:
 - **repo settings**: the paper's code's defaults, 2 GNN layers;
 - **checkpoint settings**: the settings saved inside the released model, 1 layer, learning
   rate 3e-3;
@@ -175,7 +178,8 @@ lines are the six test-time cut-offs the threshold search tries.*
   behavioural driver-to-driver edge.
 - These edges bring in other drivers' columns, such as nationality, which say little about
   next month's result. So with every switch open, the structural optimizer is essentially
-  the baseline.
+  the baseline. With the paper's same-subgraph rule (Section 7), these edges disappear
+  entirely on rel-f1, since each prediction's subgraph holds only one driver.
 
 The last 2 points between our tuned baseline (87.86) and the checkpoint settings (90.22)
 come from settings we did not tune: learning rate, hidden size, neighbour count and
@@ -208,21 +212,7 @@ the cutoff. We did not test this.
 *Figure 2. Three of one driver's 30 monthly test predictions, and the rows each may read
 under the two test setups.*
 
-## 6. Differences from the paper's code
-
-| | Paper's text | Paper's code | Our implementation |
-|---|---|---|---|
-| Column switch | one per "feature dimension" | one per embedding channel | one per database column |
-| Switch temperature | one value | lowered during training | fixed at 2/3 |
-| Two-hop round trips A → B → A | not stated | included | excluded |
-| KNN and behavioural edges | not stated | within one prediction's subgraph | also from other predictions at the same or an earlier date |
-| Column statistics (full-history test) | not stated | rows before the first training date | all rows |
-| Time per epoch (CPU, repo settings) | – | about 2 min | about 25 s |
-
-Per-column switches can say which database columns matter. Per-channel switches cannot,
-because each embedding channel mixes all of a table's columns.
-
-## 7. A second task: rel-f1 driver-dnf
+## 6. A second task: rel-f1 driver-dnf
 
 The task: will a driver fail to finish (DNF) a race in the next month? We used the tuned
 settings from driver-top3 unchanged, with the full-history test and 3 seeds.
@@ -234,38 +224,78 @@ settings from driver-top3 unchanged, with the full-history test and 3 seeds.
 | Paper, structural optimizer | | | | 78.21 |
 | Released model (checkpoint settings) | | | | 80.41 |
 
-- Both models beat the paper's number. The structural optimizer is level with the baseline:
-  0.2 points higher on test, 1.4 points lower on validation (71.79 vs 73.23).
-- **No switch closed, again.** driver-dnf has 11,411 training rows, so a run is 2,250
-  optimizer steps instead of 300, and the switches did move further: down to 0.59–0.83,
-  against 0.85–0.88 on driver-top3. But validation chose the 0.5 cut-off in every run, so
-  every table, column and added edge type stayed on. The released model also uses 0.5 here
-  and keeps everything. On this task, neither implementation prunes anything.
-- **The gap to the released model is not like-for-like yet.** Our runs used the tuned
-  settings; the released model used the checkpoint settings, as on driver-top3, where
-  matching them closed the gap. TODO: rerun with the checkpoint settings.
-- **One open question:** the structural optimizer's three test scores are almost identical,
-  although its runs stopped at epochs 25, 50 and 15. We have not checked why.
-- Under the RelBench cutoff test, the released model drops from 80.41 to 72.02, the same
-  kind of drop as on driver-top3.
+- Both models beat the paper's number, and are level with each other.
+- No switch closed: with 2,250 training steps the switches moved further (to 0.59–0.83) but
+  validation chose the 0.5 cut-off every time. The released model also keeps everything.
+- The gap to the released model is not like-for-like: it used its own checkpoint settings.
+- Under the RelBench cutoff test, the released model drops from 80.41 to 72.02.
 
-**Other databases.** rel-trial study-outcome ran out of memory on our 15 GB machine while
-building its graph with text features over the whole database (the process reached 14 GB).
-It needs a larger machine, or a run without text features. TODO: rel-trial and the
-remaining tasks with released models (rel-avito, rel-event, rel-stack, rel-amazon, rel-hm).
+## 7. rel-trial study-outcome: a failure, and what fixed it
+
+The task: will a clinical trial succeed? Paper: baseline 69.44 ± 0.53, structural optimizer
+72.35. No released model exists. The run needs 14+ GB of memory, so it ran on Kaggle CPUs.
+
+**The first result was a clear failure.** With the settings from driver-top3, the
+structural optimizer scored 59.13 ± 2.30 on test against the baseline's 66.57 ± 1.39, and
+its training loss stayed near 0.65 for all 50 epochs: it learned almost nothing. A second
+layer did not help (57.13); for the baseline it did (68.59), since a trial's conditions,
+drugs and sponsors sit two hops away, behind link tables.
+
+**Ablations found no single broken part.** Turning on one addition at a time (10 epochs),
+each of the bottleneck, the switches and the added edges slowed training on its own
+(training loss 0.639–0.644 against the baseline's 0.630). What they share is noise during
+training, which a strong signal (rel-f1) survives and a weak one (rel-trial) does not.
+
+**Comparing with the paper's code found five differences**, none fixed by the paper's text:
+
+| | Paper's code | Our first version | Now |
+|---|---|---|---|
+| Bottleneck noise at the start | spread 0.37 for every row | spread ≈ 1.0, row-dependent | **as theirs** |
+| Switch temperature | 2.0, lowered during training | fixed at 2/3 | **schedule as theirs** (option) |
+| KNN and behavioural edges | within a prediction's own subgraph | also across subgraphs (never later ones) | **as theirs** (default) |
+| Feature statistics (full-history test) | rows before the first training date | all rows | **as theirs** (default) |
+| Column switches | per embedding channel | per database column | **per channel** (default) |
+| Two-hop round trips A → B → A | included | excluded | excluded: through one foreign key they mostly return to the same row |
+
+The bottleneck still hurt after its fix, even at weight 1e-4: its KL penalty is summed over
+128 channels and 15 tables and outweighed the task loss. We turned it off for this task, as
+the authors did for 5 of their 9 released models.
+
+**Final round** (2 layers, 50 epochs, seed 0, the paper's penalties: column/table 1e-3,
+edge types 1e-2):
+
+| study-outcome | Validation | Test |
+|---|---|---|
+| GraphSAGE baseline | 65.87 | **68.29** |
+| Structural optimizer, per-channel switches | 66.65 | **68.15** |
+| Structural optimizer, per-column switches | 63.27 | 65.85 |
+| Paper: baseline / structural optimizer | – | 69.44 / 72.35 |
+
+- After the fixes, the structural optimizer trains normally and is level with the baseline.
+- Per-channel switches act like a learned dropout on the embedding; per-column switches
+  rescale the encoder's inputs every batch and train worse. Per-channel is now our default,
+  at the cost of no longer saying which database columns matter.
+- Nothing was pruned: every switch stayed on at the 0.5 cut-off, though the penalties were
+  still falling at epoch 50.
+- We remain about 1 point below the paper's baseline and 4 below its structural optimizer,
+  with one seed and settings not tuned for this task.
+
+**Other databases.** TODO: the tasks with released models (rel-event, rel-hm, rel-stack,
+rel-amazon), with the fixed implementation and each model's own settings. The last three
+need a GPU.
 
 ## 8. Takeaways
 
 1. Our PyG implementation reproduces the released model on driver-top3, given the same
-   settings and test setup, and beats the paper's number on driver-dnf with the tuned
-   settings.
-2. On this task, the gains come from the training settings, mainly using one GNN layer, and
-   from the full-history test. The four additions add little over a tuned baseline.
-3. The switches cannot learn to prune in 300 training steps. Their pruning comes from a
-   threshold search over nearly equal values, so it changes from seed to seed. With
-   2,250 steps (driver-dnf) they move further but still all stay on.
-4. On both rel-f1 tasks, the structural optimizer is level with a tuned baseline.
-   TODO: whether this holds on other databases.
+   settings and test setup, and beats the paper's number on driver-dnf.
+2. Details the paper leaves open matter: on rel-trial, five differences from the authors'
+   code (noise scale, temperature schedule, edge scope, feature statistics, switch
+   granularity) decided whether the method learned at all.
+3. On all three tasks, the full structural optimizer is level with a tuned GraphSAGE
+   baseline. Most of the gains we see come from settings (the number of layers) and from
+   the full-history test.
+4. The switches rarely prune: they move slowly, and pruning comes from a cut-off search over
+   nearly equal values, which changes from seed to seed.
 
 ## References
 
