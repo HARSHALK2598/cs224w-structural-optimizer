@@ -2,6 +2,7 @@
 # switch temperature 2.0 -> 0.3): full structural optimizer. 1 layer, 10 epochs, seed 0.
 name: fixcheck_F_study-outcome
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-trial
   task: study-outcome
   epochs: 10

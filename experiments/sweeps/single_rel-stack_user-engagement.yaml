@@ -4,6 +4,7 @@
 # session (a deviation from the 50-epoch runs on rel-f1).
 name: single_rel-stack_user-engagement
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-stack
   task: user-engagement
   epochs: 20

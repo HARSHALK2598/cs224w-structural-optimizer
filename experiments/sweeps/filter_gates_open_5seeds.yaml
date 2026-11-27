@@ -3,6 +3,7 @@
 # are not bit-for-bit repeatable here, so the check is statistical.
 name: filter_gates_open_5seeds
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-f1
   task: driver-top3
   epochs: 20

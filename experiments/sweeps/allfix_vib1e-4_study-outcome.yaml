@@ -3,6 +3,7 @@
 # full structural optimizer, bottleneck weight 1e-4. 1 layer, 10 epochs, seed 0.
 name: allfix_vib1e-4_study-outcome
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-trial
   task: study-outcome
   epochs: 10

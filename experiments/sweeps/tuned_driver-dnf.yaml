@@ -3,6 +3,7 @@
 # full-history test (the paper's setup).
 name: tuned_rel-f1_driver-dnf
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-f1
   task: driver-dnf
   epochs: 50

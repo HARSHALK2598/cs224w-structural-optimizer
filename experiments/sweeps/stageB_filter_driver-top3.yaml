@@ -8,6 +8,7 @@
 # temperature 2/3). Same as stage A: 30 epochs, dedup, NaN-safe encoder.
 name: stageB_filter_driver-top3
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-f1
   task: driver-top3
   epochs: 30

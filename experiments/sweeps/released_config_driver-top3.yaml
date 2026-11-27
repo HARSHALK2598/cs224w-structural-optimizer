@@ -5,6 +5,7 @@
 # values, on their protocol (--full-db --strict-time).
 name: released_config_driver-top3
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-f1
   task: driver-top3
   epochs: 50

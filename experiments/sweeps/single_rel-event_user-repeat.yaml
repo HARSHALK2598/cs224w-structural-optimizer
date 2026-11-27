@@ -4,6 +4,7 @@
 # session (a deviation from the 50-epoch runs on rel-f1).
 name: single_rel-event_user-repeat
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-event
   task: user-repeat
   epochs: 20

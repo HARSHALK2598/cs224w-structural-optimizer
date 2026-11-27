@@ -3,6 +3,7 @@
 # facilities). One seed. Full-history test.
 name: layers2_optimizer_study-outcome
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-trial
   task: study-outcome
   epochs: 50

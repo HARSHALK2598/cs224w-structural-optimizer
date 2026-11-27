@@ -18,6 +18,7 @@ def setup(rel_f1):
 
 def make(setup, **kwargs):
     task, data, col_stats, _ = setup
+    kwargs.setdefault('column_switches', 'column')  # Tests per column.
     torch.manual_seed(0)
     return train.FilterModel(data, col_stats, 128, 1, 2, 'sum',
                              task.entity_table, **kwargs)

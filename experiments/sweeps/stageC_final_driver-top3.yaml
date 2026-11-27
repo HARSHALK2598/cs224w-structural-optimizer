@@ -7,6 +7,7 @@
 # temperature 2/3 (Base ignores the gate settings).
 name: stageC_final_driver-top3
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-f1
   task: driver-top3
   epochs: 30

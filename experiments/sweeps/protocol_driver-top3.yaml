@@ -5,6 +5,7 @@
 # (--full-db --strict-time; run this file with those flags in `fixed`).
 name: protocol_driver-top3
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-f1
   task: driver-top3
   epochs: 50

@@ -148,10 +148,11 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         'from every row; the default uses rows before the '
                         "first training date, as in the authors' code.")
     parser.add_argument('--column-switches', choices=['column', 'channel'],
-                        default='column',
-                        help='--model filter: one switch per database column '
-                        '(inside the encoder) or per embedding channel '
-                        "(after it, as in the authors' code).")
+                        default='channel',
+                        help='--model filter: one switch per embedding '
+                        "channel (after the encoder, as in the authors' "
+                        'code; the default) or per database column (inside '
+                        'the encoder; trains worse on rel-trial).')
     parser.add_argument('--template-gates', action='store_true',
                         help='A switch per injected relation (step C).')
     parser.add_argument('--gates-open', action='store_true',
@@ -684,7 +685,7 @@ class FilterModel(BaseModel):
                  nan_safe_numerical: bool = False,
                  injection: Optional[Injection] = None,
                  template_gates: bool = False, lambda_template: float = 0.0,
-                 beta_vib: float = 0.0, column_switches: str = 'column'):
+                 beta_vib: float = 0.0, column_switches: str = 'channel'):
         if column_switches not in ('column', 'channel'):
             raise ValueError(f"'column_switches' must be 'column' or "
                              f"'channel' (got '{column_switches}')")

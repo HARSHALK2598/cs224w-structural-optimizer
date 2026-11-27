@@ -3,6 +3,7 @@
 # full-history test (the paper's setup).
 name: tuned_rel-trial_study-outcome
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-trial
   task: study-outcome
   epochs: 50

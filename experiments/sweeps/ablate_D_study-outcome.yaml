@@ -2,6 +2,7 @@
 # keeps training loss from falling? 1 layer, 10 epochs, seed 0.
 name: ablate_D_study-outcome
 fixed:
+  column_switches: column  # as run (the default is now channel)
   dataset: rel-trial
   task: study-outcome
   epochs: 10
