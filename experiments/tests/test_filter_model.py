@@ -318,5 +318,29 @@ def test_channel_switches(setup):
         model.filter.column_gates['results'].logit[0] = -10.0
         assert not torch.allclose(model(batch, task.entity_table),
                                   base(batch, task.entity_table), atol=1e-6)
-    with pytest.raises(ValueError, match="'column' or 'channel'"):
+    with pytest.raises(ValueError, match="'channel' or 'none'"):
         make(setup, column_switches='rows')
+
+
+@requires_rel_f1
+def test_switch_off_options_and_dropout(setup):
+    task, data, _, batch = setup
+    tables_only = make(setup, column_switches='none')
+    assert len(tables_only.filter.column_gates) == 0
+    assert len(tables_only.filter.table_gates) == len(data.node_types) - 1
+    channels_only = make(setup, column_switches='channel',
+                         table_switches=False)
+    assert len(channels_only.filter.table_gates) == 0
+    assert len(channels_only.filter.column_gates) == len(data.node_types)
+
+    base = make(setup, gates_open=True)
+    base.embedding_dropout = 0.5
+    base.train()
+    torch.manual_seed(0)
+    a = base.encode(batch, task.entity_table)
+    torch.manual_seed(1)
+    b = base.encode(batch, task.entity_table)
+    assert not torch.equal(a['drivers'], b['drivers'])  # Random in training.
+    base.eval()
+    assert torch.equal(base.encode(batch, task.entity_table)['drivers'],
+                       base.encode(batch, task.entity_table)['drivers'])

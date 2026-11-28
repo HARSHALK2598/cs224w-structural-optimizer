@@ -1,0 +1,40 @@
+# Where does the structural optimizer's gain on rel-f1 driver-dnf come from?
+# Released-model settings, fixed implementation, one addition at a time,
+# plus standard embedding dropout (p = 0.08: the same relative spread of
+# random scaling, 0.30, as the channel switches at the start of training).
+name: attribution_driver-dnf
+fixed:
+  dataset: rel-f1
+  task: driver-dnf
+  epochs: 50
+  lr: 0.003
+  weight_decay: 0.0
+  batch_size: 256
+  num_layers: 1
+  num_neighbors: 16
+  channels: 64
+  temporal_strategy: last
+  dedup_encoder: true
+  nan_safe_numerical: true
+  full_db: true
+  strict_time: true
+  gate_init: 2.0
+  gate_temperature: 1.0
+  gate_temperature_end: 0.5
+  gate_warmup_epochs: 10
+  gate_thresholds: 0.5,0.7,0.78,0.82,0.86,0.9
+seeds: [0, 1, 2]
+arms:
+  - model: base
+  - model: base
+    fixed: {embedding_dropout: 0.08}
+  - model: filter
+    fixed: {column_switches: channel, no_table_switches: true, lambda_col: 0.1}
+  - model: filter
+    fixed: {column_switches: none, lambda_table: 0.0001}
+  - model: base
+    fixed: {beta_vib: 0.001}
+  - model: base
+    fixed: {inject: "temporal,twohop,knn,behavioral", template_gates: true, lambda_template: 0.001, knn_n: 25, temporal_m: 3, behavioral_threshold: 0.95}
+  - model: filter
+    fixed: {column_switches: channel, lambda_col: 0.1, lambda_table: 0.0001, inject: "temporal,twohop,knn,behavioral", template_gates: true, lambda_template: 0.001, beta_vib: 0.001, knn_n: 25, temporal_m: 3, behavioral_threshold: 0.95}

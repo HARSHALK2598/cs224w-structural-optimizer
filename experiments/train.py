@@ -31,6 +31,7 @@ from typing import Any, Callable, Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,6 +100,7 @@ DEFAULTS: Dict[str, Any] = dict(
     lambda_template=0.0,  # --template-gates: weight of the template penalty
     beta_vib=0.0,  # > 0: the variational bottleneck with this KL weight
     weight_decay=0.0,  # Adam weight decay
+    embedding_dropout=0.0,  # dropout on every embedding h0 (a control)
     # Evaluation-mode gate thresholds tried on validation each epoch
     # (comma-separated, as in the authors' code); '' keeps 0.5:
     gate_thresholds='',
@@ -119,7 +121,8 @@ RESULT_FIELDS = [
     'full_db', 'strict_time', 'num_layers', 'num_neighbors',
     'temporal_strategy', 'gate_thresholds', 'gate_threshold',
     'gate_temperature_end', 'gate_warmup_epochs', 'cross_subgraph_edges',
-    'all_rows_col_stats', 'column_switches'
+    'all_rows_col_stats', 'column_switches', 'no_table_switches',
+    'embedding_dropout'
 ]
 
 
@@ -147,7 +150,10 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
                         help='With --full-db, compute feature statistics '
                         'from every row; the default uses rows before the '
                         "first training date, as in the authors' code.")
-    parser.add_argument('--column-switches', choices=['column', 'channel'],
+    parser.add_argument('--no-table-switches', action='store_true',
+                        help='--model filter: no table switches.')
+    parser.add_argument('--column-switches',
+                        choices=['column', 'channel', 'none'],
                         default='channel',
                         help='--model filter: one switch per embedding '
                         "channel (after the encoder, as in the authors' "
@@ -607,6 +613,9 @@ class BaseModel(torch.nn.Module):
                                               batch.batch_dict)
         for node_type, rel_time in rel_time_dict.items():
             x_dict[node_type] = x_dict[node_type] + rel_time
+        p = getattr(self, 'embedding_dropout', 0.0)
+        if p > 0 and self.training:  # Standard dropout, as a control:
+            x_dict = {k: F.dropout(x, p) for k, x in x_dict.items()}
         return x_dict
 
     def structural_loss(self) -> Tensor:
@@ -685,10 +694,11 @@ class FilterModel(BaseModel):
                  nan_safe_numerical: bool = False,
                  injection: Optional[Injection] = None,
                  template_gates: bool = False, lambda_template: float = 0.0,
-                 beta_vib: float = 0.0, column_switches: str = 'channel'):
-        if column_switches not in ('column', 'channel'):
-            raise ValueError(f"'column_switches' must be 'column' or "
-                             f"'channel' (got '{column_switches}')")
+                 beta_vib: float = 0.0, column_switches: str = 'channel',
+                 table_switches: bool = True):
+        if column_switches not in ('column', 'channel', 'none'):
+            raise ValueError(f"'column_switches' must be 'column', "
+                             f"'channel' or 'none' (got '{column_switches}')")
         super().__init__(data, col_stats_dict, channels, out_channels,
                          num_layers, aggr, dedup_encoder, nan_safe_numerical,
                          injection, template_gates, lambda_template,
@@ -713,18 +723,21 @@ class FilterModel(BaseModel):
                 node_type: [f'channel_{c}' for c in range(channels)]
                 for node_type in data.node_types
             }
+        elif column_switches == 'none':  # Table switches only:
+            self.col_names = {node_type: [] for node_type in data.node_types}
         self.filter = RelationalFilter(
             num_columns={
                 node_type: len(cols)
                 for node_type, cols in self.col_names.items()
             },
-            table_types=[nt for nt in data.node_types if nt != entity_table],
+            table_types=[] if not table_switches else
+            [nt for nt in data.node_types if nt != entity_table],
             init_logit=gate_init,
             temperature=gate_temperature,
         )
 
     def encode_table(self, node_type: str, tf) -> Tensor:
-        if self.column_switches == 'channel':
+        if self.column_switches in ('channel', 'none'):
             return super().encode_table(node_type, tf)
         resnet = self.encoder.encoders[node_type]
         x, _ = resnet.encoder(tf)  # [N, C, channels]
@@ -784,6 +797,14 @@ class FilterModel(BaseModel):
 
 def build_model(args, data, col_stats_dict, out_channels: int,
                 entity_table: Optional[str] = None):
+    model = _build_model(args, data, col_stats_dict, out_channels,
+                         entity_table)
+    model.embedding_dropout = getattr(args, 'embedding_dropout', 0.0)
+    return model
+
+
+def _build_model(args, data, col_stats_dict, out_channels: int,
+                 entity_table: Optional[str] = None):
     injection = make_injection(args, data, entity_table)
     if args.model == 'base':
         return BaseModel(data, col_stats_dict, args.channels, out_channels,
@@ -801,7 +822,8 @@ def build_model(args, data, col_stats_dict, out_channels: int,
                            args.nan_safe_numerical, injection,
                            args.template_gates, args.lambda_template,
                            beta_vib=args.beta_vib,
-                           column_switches=args.column_switches)
+                           column_switches=args.column_switches,
+                           table_switches=not args.no_table_switches)
     raise NotImplementedError(f"Model '{args.model}' is not implemented yet")
 
 
@@ -1019,6 +1041,7 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
                strict_time=args.strict_time, num_layers=args.num_layers,
                cross_subgraph_edges=args.cross_subgraph_edges,
                all_rows_col_stats=args.all_rows_col_stats,
+               embedding_dropout=args.embedding_dropout,
                num_neighbors=args.num_neighbors,
                temporal_strategy=args.temporal_strategy)
     if out.get('gate_threshold') is not None:
@@ -1042,6 +1065,7 @@ def result_row(args, spec: TaskSpec, out: Dict[str, Any],
     if gates is not None and 'open_columns' in gates:  # --model filter
         row.update(lambda_col=args.lambda_col, lambda_table=args.lambda_table,
                    column_switches=args.column_switches,
+                   no_table_switches=args.no_table_switches,
                    open_columns=gates['open_columns'],
                    open_tables=gates['open_tables'])
     if gates is not None and 'open_templates' in gates:  # --template-gates
