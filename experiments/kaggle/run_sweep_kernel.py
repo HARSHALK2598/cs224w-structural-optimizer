@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 CONFIG = '__CONFIG__'
+COMMAND = '__COMMAND__'  # If set, runs this script instead of the sweep.
 PROJECT = ('https://github.com/HARSHALK2598/cs224w-structural-optimizer',
            '__PROJECT_BRANCH__')
 PYG = ('https://github.com/HARSHALK2598/pytorch_geometric',
@@ -50,6 +51,9 @@ sh(f'{pip} relbench==3.1.0 pytorch-frame==0.3.0 '
 sh('git log --oneline -1', cwd=ROOT)
 sh('git log --oneline -1', cwd=ROOT / 'pytorch_geometric')
 OUT.mkdir(parents=True, exist_ok=True)
-sh(f'{sys.executable} experiments/sweep.py {CONFIG} --out {OUT} '
-   f'--save-checkpoints', cwd=ROOT)
+if COMMAND:
+    sh(f'{sys.executable} {COMMAND}', cwd=ROOT)
+else:
+    sh(f'{sys.executable} experiments/sweep.py {CONFIG} --out {OUT} '
+       f'--save-checkpoints', cwd=ROOT)
 print('DONE', flush=True)
